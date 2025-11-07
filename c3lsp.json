@@ -1,0 +1,11 @@
+{
+    "C3": {
+        "version": "0.7.7",
+        "path": "c3c",
+        "stdlib-path": "c:/Work/space/bin/c3/lib/std"
+    },
+    "Diagnostics": {
+        "enabled": true,
+        "delay": 2000
+    }
+}
