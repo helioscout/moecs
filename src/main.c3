@@ -70,6 +70,15 @@ fn void main() {
 
 	World* world = new();
 
+	io::printn("---------");
+	io::printn(Lifetime.QUICK);
+	io::printn(Lifetime.DYNAMIC);
+	io::printn(Lifetime.STATIC);
+	io::printn(Lifetime.QUICK | Lifetime.STATIC);
+	io::printn(world.size(Lifetime.QUICK | Lifetime.STATIC));
+	io::printn("---------");
+	io::printn(world.size_of(Lifetime.QUICK, Lifetime.DYNAMIC));
+
 	// register(Position);
 	// register(Center);
 
