@@ -35,6 +35,12 @@ alias Worlds = List { World };
 <* Registered components collection for each world. *>
 alias Components = HashMap { typeid, Component };
 
+<* Registered tags collection for each world. *>
+alias Tags = HashMap { typeid, Tag };
+
+<* Registered resources collection for each world. *>
+alias Resources = HashMap { typeid, Resource };
+
 <* Entities/blocks lifetime. *>
 enum Lifetime : const inline char {
    <* Entities that exist for a very short period of time (a few dozen frames).
@@ -49,3 +55,19 @@ enum Lifetime : const inline char {
       Such blocks are simply created when necessary, since entities cannot be despawn. *>
    STATIC  = 0b00000100
 }
+
+<* Kinds of elements that the world can consist of. *>
+enum Element {
+   <* Component element type (Position, Mass, Velocity).
+      Must be defined as a struct or typedef custom typs. *>
+   COMPONENT,
+   <* Tag element type for marking entities with some kind of characteristic.
+      Must be defined as a typedef with a simple fundamental underlying type (typedef Tag = int). *>
+   TAG,
+   <* Resource element type for storing data in the world that has only one instance, singleton.
+      Must be defined as a struct or typedef custom typs. *>
+   RESOURCE
+}
+
+<* Predicate function for match blocks using their intefraces. *>
+alias BlockGeneMatch = fn bool (BlockGene block);

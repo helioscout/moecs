@@ -6,4 +6,6 @@ interface BlockGene {
 	fn bool has_free_rows();
 	fn bool full();
 	fn bool free();
+	fn Entity* insert();
+	fn void absorb();
 }

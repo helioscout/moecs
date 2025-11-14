@@ -2,8 +2,9 @@ module moecs;
 
 <* Entity type. *>
 struct Entity {
-	<* The index of the block that contains the collection with the entity. *>
-	usz block_idx;
-	<* The index of the component in the collection. *>
+	<* Reference to the parent block interface.
+	   If null than entity is in the quick lifetime buffer, not a real block. *>
+	BlockGene block;
+	<* The index of the entity in the collection (chunk index for its components). *>
 	usz chunk_idx;
 }

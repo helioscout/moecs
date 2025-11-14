@@ -13,14 +13,31 @@ import std::collections::map;
 // }
 
 struct Position (Printable) {
-	inline Component _c;
 	double x, y;
 }
 
 struct Center (Printable) {
-	inline Component _c;
 	int cx, cy;
 }
+
+struct Resource1 {
+	bool enabled;
+}
+
+struct Resource2 {
+	bool enabled;
+	int count;
+}
+
+typedef VecType = float[<2>];
+
+typedef Tag1 = int;
+typedef Tag2 = int;
+
+Entity[QUICK_CHUNK_SIZE] entities;
+Position[QUICK_CHUNK_SIZE] positions;
+Center[QUICK_CHUNK_SIZE] centers;
+VecType[QUICK_CHUNK_SIZE] vectors;
 
 // Chunks chunks;
 
@@ -29,11 +46,11 @@ struct Center (Printable) {
 // }
  
 fn usz? Position.to_format(&self, Formatter* f) @dynamic {
-	return f.printf("x: %f, y: %f, %s", self.x, self.y, self._c);
+	return f.printf("x: %f, y: %f", self.x, self.y);
 }
  
 fn usz? Center.to_format(&self, Formatter* f) @dynamic {
-	return f.printf("cx: %d, cy: %d, %s", self.cx, self.cy, self._c);
+	return f.printf("cx: %d, cy: %d", self.cx, self.cy);
 }
 /*
 macro void register($Type) {
@@ -68,7 +85,7 @@ fn void adding() {
 fn void main() {
 	init();
 
-	World* world = new();
+	World* world = new(&entities);
 
 	io::printn("---------");
 	io::printn(Lifetime.QUICK);
@@ -78,10 +95,29 @@ fn void main() {
 	io::printn(world.size(Lifetime.QUICK | Lifetime.STATIC));
 	io::printn("---------");
 	io::printn(world.size_of(Lifetime.QUICK, Lifetime.DYNAMIC));
+	// io::printn(Tag1.typeid == Tag1.typeid);
 
-	// register(Position);
-	// register(Center);
+	world.register(COMPONENT, Position, &positions)
+		 .register(COMPONENT, Center, &centers)
+		 .register(COMPONENT, VecType, &vectors)
+		 .register(RESOURCE, Resource1)
+		 .register(RESOURCE, Resource2)
+		 .register(TAG, Tag1)
+		 .register(TAG, Tag2)
+		 .run();
 
+	world.run();
+
+	io::printn(world.use_quicks);
+
+	world.spawn(QUICK);
+	world.spawn(DYNAMIC);
+	world.spawn(STATIC);
+	world.spawn(QUICK);
+	world.spawn(DYNAMIC);
+	world.spawn(STATIC);
+
+	// io::printn(positions);
 	// adding();
 
 	// io::printn(get(Position, 0));
