@@ -34,21 +34,44 @@ struct Block (BlockGene) {
 	usz idx;
 }
 
-<* Initializes the block. *>
+<* Initializes the block.
+   @require !self.chunks.is_initialized() : "Block was already initialized."
+*>
 fn void Block.init(&self) @dynamic @private {
 	self.entities = mem::alloc(Entities);
 	self.chunks.init(mem);
 
-	// foreach (typeid type : self.world.components.key_iter()) {
-	// 	self.chunks.set(type, mem::alloc());
-	// }
-	
-	io::printfn("Initializing: %s", self.lifetime);
-	io::printfn("Size of entities: %d", $sizeof(*self.entities));
+	self.world.components.@each_ref(; typeid type, Component* c) {
+		/* Allocate memory for components chunks.					 */
+		/* It should be later casted to corresponding array pointer. */
+		self.chunks.set(type, malloc(c.size * CHUNK_SIZE));
+	};
+}
+
+<* Gets world reference the block belongs to.
+   @return "Reference to the world."
+*>
+fn World* Block.get_world(&self) @inline @dynamic @private {
+	return self.world;
+}
+
+<* Gets the block's lifetime.
+   @return "Block lifetime." *>
+fn Lifetime Block.get_lifetime(&self) @inline @dynamic @private {
+	return self.lifetime;
+}
+
+<* Gets component chunk of specified type.
+   @param type : "Component type id."
+   @return "Pointer to the component chunk."
+*>
+fn char*? Block.get_chunk(&self, typeid type) @inline @dynamic @private {
+	return self.chunks.get(type);
 }
 
 <* Checks for existence of free rows (places to insert new entities/components).
-   For quick lifetime blocks it equals to totally free block (self.free()). *>
+   For quick lifetime blocks it equals to totally free block (self.free()).
+*>
 fn bool Block.has_free_rows(&self) @inline @dynamic @private {
 	switch (self.lifetime) {
 		case QUICK:   return self.occupied.cardinality() == 0;
@@ -83,7 +106,8 @@ fn bool Block.free(&self) @inline @dynamic @private {
 
 <* Inserts entity into the block.
    @require self.lifetime != QUICK : "You can't insert into quick lifetime block, it's frozen after mem::copy."
-   @return "Pointer to inserted entity." *>
+   @return "Pointer to inserted entity."
+*>
 fn Entity* Block.insert(&self) @dynamic @private {
 	usz idx = self.pop_free_index();
 

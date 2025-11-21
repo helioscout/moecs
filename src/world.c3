@@ -1,7 +1,7 @@
 module moecs;
 
 import moecs::block;
-import std::io;
+// import std::io;
 
 <* World type, main container of the sapce. The world is built of blocks. *>
 struct World {
@@ -79,7 +79,8 @@ fn void World.init(&self) @private {
 macro World* World.register(&self, Element element, $Type, any buffer = null) {
 	switch (element) {
 		case COMPONENT:
-			self.components.set($Type.typeid, { .type = $Type.typeid, .buffer = buffer });
+			self.components.set($Type.typeid, { .type = $Type.typeid, .size = $Type.sizeof, .buffer = buffer,
+				.idx = self.components.len() });
 			/* We must disbale quick lifetime for this world when no buffer provided. */
 			if (buffer == null) self.use_quicks = false;
 		case TAG:
@@ -120,8 +121,9 @@ fn Entity* World.spawn(&self, Lifetime lifetime = DYNAMIC) {
 				self.idx = 0;
 			}
 
-			/* .block == null is a sign that entity is in the quick lifetime buffer, not a real block.			  */
-			(*self.buffer)[self.idx] = { .chunk_idx = self.idx }; /* But .chunk_idx will not change when flushed. */
+			/* .state has BUFFERED is a sign that entity is in the quick lifetime buffer, not a real block.		  */
+			/* But .chunk_idx will not change when flushed. We need assign world reference for access the buffer. */
+			(*self.buffer)[self.idx] = { .state = BUFFERED, .world = self, .chunk_idx = self.idx };	/*            */
 			entity = &(*self.buffer)[self.idx++];				  /* Here we increase inserting index.			  */
 		}
 		

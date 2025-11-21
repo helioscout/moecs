@@ -1,16 +1,6 @@
 module moecs;
 
 import std::io;
-import std::collections::map;
-
-// const int CHUNK_LENGTH = 100;
-// int count = 0;
-
-// alias Chunks = HashMap{typeid, any};
-
-// struct Component (Printable) {
-	// int idx;
-// }
 
 struct Position (Printable) {
 	double x, y;
@@ -39,49 +29,14 @@ Position[QUICK_CHUNK_SIZE] positions;
 Center[QUICK_CHUNK_SIZE] centers;
 VecType[QUICK_CHUNK_SIZE] vectors;
 
-// Chunks chunks;
-
-// fn usz? Component.to_format(&self, Formatter* f) @dynamic {
-// 	return f.printf("index: %d", self.idx);
-// }
- 
 fn usz? Position.to_format(&self, Formatter* f) @dynamic {
-	return f.printf("x: %f, y: %f", self.x, self.y);
+	return f.printf("{ x: %f, y: %f }", self.x, self.y);
 }
  
 fn usz? Center.to_format(&self, Formatter* f) @dynamic {
-	return f.printf("cx: %d, cy: %d", self.cx, self.cy);
-}
-/*
-macro void register($Type) {
-	chunks.set($Type.typeid, mem::alloc($Type[CHUNK_SIZE]));
+	return f.printf("{ cx: %d, cy: %d }", self.cx, self.cy);
 }
 
-macro void add($component) {
-	$typeof($component)[CHUNK_SIZE]*? chunk = ($typeof($component)[CHUNK_SIZE]*)chunks.get($typeof($component).typeid);
-
-	if (try chunk) {
-		(*chunk)[count] = $component;
-	}
-}
-
-macro get($Type, index) {
-	$Type[CHUNK_SIZE]*? chunk = ($Type[CHUNK_SIZE]*)chunks.get($Type.typeid);
-
-	if (try chunk) {
-		return (*chunk)[index];
-	}
-
-	return ($Type){};
-}
-
-fn void adding() {
-	add((Position){ .x = 1.0, .y = 2.0 });
-	add((Center){ .cx = 3, .cy = 4 });
-
-	count++;
-}
-*/
 fn void main() {
 	init();
 
@@ -110,12 +65,127 @@ fn void main() {
 
 	io::printn(world.use_quicks);
 
+	// world.spawn(QUICK)
+	// 	.add((Position){ .x = 1, .y = 1 })
+	// 	.add((Center){ .cx = 1, .cy = 1 });
+	
+	// world.spawn(DYNAMIC)
+	// 	.add((Position){ .x = 1, .y = 1 })
+	// 	.add((Center){ .cx = 1, .cy = 1 });
+		
+	// world.spawn(STATIC)
+	// 	.add((Position){ .x = 1, .y = 1 })
+	// 	.add((Center){ .cx = 1, .cy = 1 });
+		
+	Entity* e = world.spawn(QUICK);
+		// .@add(Position, { .x = 1, .y = 1 })
+		// .@add(Center, { .cx = 1, .cy = 1 });
+	
+	Entity* ed = world.spawn(DYNAMIC)
+		.@add(Position, { .x = 2, .y = 2 })
+		.@add(Center, { .cx = 2, .cy = 2 });
+		
+	Entity* es = world.spawn(STATIC)
+		.@add(Position, { .x = 3, .y = 3 })
+		.@add(Center, { .cx = 3, .cy = 3 });
+		
 	world.spawn(QUICK);
 	world.spawn(DYNAMIC);
 	world.spawn(STATIC);
-	world.spawn(QUICK);
-	world.spawn(DYNAMIC);
-	world.spawn(STATIC);
+
+	io::printn("---------");
+	io::printn(e.has(Position));
+	io::printn(e.has(Center));
+	io::printn(e.has(VecType));
+	io::printn("---------");
+
+	if (try Position* p = e.get(Position) && try Center* c = e.get(Center)) {
+		io::printn(p);
+		io::printn(c);
+	} else {
+		io::printn("Not found");
+	}
+
+	if (try Position* p = ed.get(Position) && try Center* c = ed.get(Center)) {
+		io::printn(p);
+		io::printn(c);
+	} else {
+		io::printn("Not found");
+	}
+
+	if (try Position* p = es.get(Position) && try Center* c = es.get(Center) && try VecType* v = es.get(VecType)) {
+		io::printn(p);
+		io::printn(c);
+	} else {
+		io::printn("Not found");
+	}
+
+	io::printn("---------");
+
+	@pool() {
+		foreach (component : e.tget_all(Position, Center, VecType, int)) {
+			switch (component.type) {
+				case Position:
+					io::print("Position: ");
+					io::printn(component);
+				case Center:
+					io::print("Center: ");
+					io::printn(component);
+			}
+		}
+	};
+
+	io::printn("---- all -----");
+
+	@pool() {
+		foreach (component : ed.tall()) {
+			switch (component.type) {
+				case Position:
+					io::print("Position: ");
+					io::printn(component);
+				case Center:
+					io::print("Center: ");
+					io::printn(component);
+			}
+		}
+	};
+
+	io::printn("---- @each -----");
+
+	es.@each(; typeid type, void* c) {
+		switch (type) {
+			case Position:
+				io::print("Position: ");
+				io::printn((Position*)c);
+			case Center:
+				io::print("Center: ");
+				io::printn((Center*)c);
+		}
+	};
+
+	// es.remove_all(Position, Center);
+
+	// es.@each(; typeid type, void* c) {
+	// 	switch (type) {
+	// 		case Position:
+	// 			io::print("Position: ");
+	// 			io::printn((Position*)c);
+	// 		case Center:
+	// 			io::print("Center: ");
+	// 			io::printn((Center*)c);
+	// 	}
+	// };
+
+	ed.tag(Tag1);
+
+	io::printfn("Tagged with Tag1: %s", ed.tagged(Tag1));
+	io::printfn("Tagged with Tag2: %s", ed.tagged(Tag2));
+
+	es.tag_all(Tag1, Tag2);
+	io::printn(es.tagged_all(Tag1, Tag2));
+	
+	es.untag_all(Tag2, Tag1);
+	io::printn(es.tagged_all(Tag1, Tag2));
 
 	// io::printn(positions);
 	// adding();

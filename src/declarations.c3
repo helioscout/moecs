@@ -2,6 +2,8 @@ module moecs;
 
 import std::collections::map;
 import std::collections::list;
+import std::collections::bitset;
+import std::collections::elastic_array;
 
 /* Size (items count) of the one components chunk or entities collection for each block. */
 <* Quick lifetime chunk size. *>
@@ -10,6 +12,11 @@ const usz QUICK_CHUNK_SIZE   = 100;
 const usz DYNAMIC_CHUNK_SIZE = 500;
 <* Static lifetime chunk size. *>
 const usz STATIC_CHUNK_SIZE  = 300;
+
+<* Maximum components count available for adding to entity. *>
+const usz MAX_COMPONENTS_COUNT = 128;
+<* Maximum tags count available for adding to entity. *>
+const usz MAX_TAGS_COUNT = 128;
 
 <* Quick (lifetime) block. *>
 alias QuickBlock = Block { QUICK_CHUNK_SIZE };
@@ -26,8 +33,9 @@ alias DynamicBlocks = List { DynamicBlock };
 alias StaticBlocks = List { StaticBlock };
 
 <* Component chunks collection for each block, key by component struct type.
-   Chunk is represented as an array of component struct values ($Type[(QUICK|DYNAMIC|STATIC)_CHUNK_SIZE]). *>
-alias Chunks = HashMap { typeid, any };
+   Chunk is represented as an array of component struct values ($Type[(QUICK|DYNAMIC|STATIC)_CHUNK_SIZE]).
+   But is created as a pointer to allocated memory block. *>
+alias Chunks = HashMap { typeid, char* };
 
 <* Worlds collection in the space. *>
 alias Worlds = List { World };
@@ -40,6 +48,14 @@ alias Tags = HashMap { typeid, Tag };
 
 <* Registered resources collection for each world. *>
 alias Resources = HashMap { typeid, Resource };
+
+<* Marker of added/existed components for the entity. *>
+alias ComponentsMarker = BitSet { MAX_COMPONENTS_COUNT };
+<* Marker of added/existed tags for the entity. *>
+alias TagsMarker = BitSet { MAX_TAGS_COUNT };
+
+<* Pointers to component values when retrieving/getting all. *>
+alias ComponentPointers = ElasticArray { any, MAX_COMPONENTS_COUNT };
 
 <* Entities/blocks lifetime. *>
 enum Lifetime : const inline char {
@@ -67,6 +83,14 @@ enum Element {
    <* Resource element type for storing data in the world that has only one instance, singleton.
       Must be defined as a struct or typedef custom typs. *>
    RESOURCE
+}
+
+<* The state flags for an entity. *>
+enum ElementState : const inline char {
+   <* Entity is stored in quick lifetime buffer. *>
+   BUFFERED = 0b00000001,
+   <* Entity has been deleted. *>
+   DELETED  = 0b00000010
 }
 
 <* Predicate function for match blocks using their intefraces. *>
