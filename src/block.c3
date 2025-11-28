@@ -116,11 +116,41 @@ fn Entity* Block.insert(&self) @dynamic @private {
 	return &(*self.entities)[idx];
 }
 
+<* Deletes entity from the block.
+   @param idx : "Entity index."
+   @require idx < CHUNK_SIZE : "Entity index must be less than chunk size."
+*>
+fn void Block.delete(&self, usz idx) @inline @dynamic @private {
+	self.deleted.push(idx);
+}
+
 <* Flush all chunks from the buffers into this block.
    @require self.lifetime == QUICK : "Only quick lifetime block can absorb chunks from the buffer."
 *>
 fn void Block.absorb(&self) @dynamic @private {
+	/* self.world.idx - count of buffered entities.      */
+	/* Copy buffered entities to the block's collection. */
+	mem::copy(self.entities, self.world.buffer, Entity.sizeof * self.world.idx);
+
+	/* Copy components from buffers to block chunks. */
+	self.world.components.@each_ref(; typeid type, Component* c) {
+		mem::copy(self.chunks.get(type)!!, c.buffer.ptr, c.size * self.world.idx);
+	};
+
+	/* Step through all copied entities. */
+	for (usz i = 0; i < self.world.idx; i++) {
+		(*self.entities)[i].state &= ~ElementState.BUFFERED;	/* Unset entity BUFFERED state.          */
+		self.occupied.set(i);									/* Set occupied marker for entity index. */
+	}
+
+	/* If buffer is not full, we need unset occupied marker for its rest. */
+	if (self.world.idx < CHUNK_SIZE) {
+		for (usz i = self.world.idx; i < CHUNK_SIZE; i++) {
+			self.occupied.unset(i);
+		}
+	}
 	
+	self.idx = self.world.idx;
 }
 
 <* Returns index of the first free to insert (last deleted) row in the block.
@@ -139,4 +169,20 @@ fn usz Block.pop_free_index(&self) @inline @local {
 	}
 
 	return idx;
+}
+
+module moecs::block::interfaces;
+
+<* Base interface for blocks. *>
+interface BlockGene {
+	fn void 	init();
+	fn bool 	has_free_rows();
+	fn bool 	full();
+	fn bool		free();
+	fn Entity*	insert();
+	fn void 	absorb();
+	fn World*	get_world();
+	fn Lifetime get_lifetime();
+	fn char*?	get_chunk(typeid type);
+	fn void		delete(usz idx);
 }

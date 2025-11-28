@@ -1,7 +1,5 @@
 module moecs;
 
-import std::io;
-
 <* Entity type. *>
 struct Entity {
 	<* Entity state. *>
@@ -343,6 +341,16 @@ fn bool Entity.tagged_all(&self, typeid... types) {
 	}
 
 	return tagged;
+}
+
+<* Despawns entity. *>
+fn void Entity.despawn(&self) {
+	if (self.state & ElementState.BUFFERED) {
+		self.world.despawn(self);
+	} else {
+		self.block.delete(self.chunk_idx);
+		self.state |= ElementState.DELETED;
+	}
 }
 
 <* Gets parent world reference.

@@ -1,7 +1,11 @@
 module moecs;
 
+import std::collections::elastic_array;
 import moecs::block;
-// import std::io;
+import std::io;
+
+<* Indexes type for deleted rows in buffered chunks. *>
+alias BufferedIndexes = ElasticArray { usz, QUICK_CHUNK_SIZE };
 
 <* World type, main container of the sapce. The world is built of blocks. *>
 struct World {
@@ -23,6 +27,8 @@ struct World {
 	bool use_quicks;
 	<* Buffer for quick life time entities, must be provided from the main app. *>
 	Entity[QUICK_CHUNK_SIZE]* buffer;
+	<* Deleted (freed) rows in the quick lifetime buffer. *>
+	BufferedIndexes deleted;
 	<* Current inserting index in the quick lifetime buffer (last inserted index + 1). *>
 	usz idx;
 }
@@ -114,17 +120,19 @@ fn Entity* World.spawn(&self, Lifetime lifetime = DYNAMIC) {
 
 	switch (lifetime) {
 		case QUICK: {
-			if (self.idx == QUICK_CHUNK_SIZE) {
+			if (self.deleted.is_empty() && self.idx == QUICK_CHUNK_SIZE) {
 			    /* If buffers are full we must flush them to free quick block. */
 				self.get_free_block(QUICK).absorb();
 				/* And reset current inserting index. */
 				self.idx = 0;
 			}
 
+			usz idx = self.pop_free_index();	/* Here we increase inserting index. */
+			
 			/* .state has BUFFERED is a sign that entity is in the quick lifetime buffer, not a real block.		  */
 			/* But .chunk_idx will not change when flushed. We need assign world reference for access the buffer. */
-			(*self.buffer)[self.idx] = { .state = BUFFERED, .world = self, .chunk_idx = self.idx };	/*            */
-			entity = &(*self.buffer)[self.idx++];				  /* Here we increase inserting index.			  */
+			(*self.buffer)[idx] = { .state = BUFFERED, .world = self, .chunk_idx = idx };
+			entity = &(*self.buffer)[idx];
 		}
 		
 		case DYNAMIC:
@@ -132,6 +140,18 @@ fn Entity* World.spawn(&self, Lifetime lifetime = DYNAMIC) {
 	}
 
 	return entity;
+}
+
+<* Despawns entity from the world.
+   @param entity : "Reference to the entity."
+*>
+fn void World.despawn(&self, Entity* entity) {
+	if (entity.state & ElementState.BUFFERED) {
+		self.deleted.push(entity.chunk_idx);
+	} else {
+		entity.block.delete(entity.chunk_idx);
+		entity.state |= ElementState.DELETED;
+	}
 }
 
 <* Creates new empty block in the world.
@@ -156,6 +176,11 @@ fn BlockGene World.new(&self, Lifetime lifetime) @local {
 	block.init();
 
 	return block;
+}
+
+<* Progress one step of the world life.
+   Runs all mounted systems. *>
+fn void World.progress(&self) {
 }
 
 <* Gets the reference to block interface that is available to insert new entities,
@@ -193,4 +218,13 @@ fn BlockGene? World.find_block(&self, Lifetime lifetime, BlockGeneMatch match) @
 	}
 
 	return NOT_FOUND?;
+}
+
+<* Returns index of the first free to insert (last deleted) row in the quick lifetime buffer.
+   @require !(self.deleted.is_empty() && self.idx == QUICK_CHUNK_SIZE) : "The buffer is already full."
+   @ensure return >= 0 && return < QUICK_CHUNK_SIZE : "Index can't be less then 0 and grater then QUICK_CHUNK_SIZE."
+   @return "Index of the row to insert."
+*>
+fn usz World.pop_free_index(&self) @inline @local {
+	return self.deleted.is_empty() ? self.idx++ : self.deleted.pop()!!;
 }

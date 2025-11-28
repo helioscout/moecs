@@ -1,6 +1,7 @@
 module moecs;
 
 import std::io;
+import std::time;
 
 struct Position (Printable) {
 	double x, y;
@@ -36,6 +37,9 @@ fn usz? Position.to_format(&self, Formatter* f) @dynamic {
 fn usz? Center.to_format(&self, Formatter* f) @dynamic {
 	return f.printf("{ cx: %d, cy: %d }", self.cx, self.cy);
 }
+
+Clock clock @noinit;
+NanoDuration duration @noinit;
 
 fn void main() {
 	init();
@@ -186,6 +190,16 @@ fn void main() {
 	
 	es.untag_all(Tag2, Tag1);
 	io::printn(es.tagged_all(Tag1, Tag2));
+
+	io::printfn("-- spawning ( %d ) --", DYNAMIC_CHUNK_SIZE * 1000 + 3);
+	clock = clock::now();
+	
+	for (usz i = 0; i < DYNAMIC_CHUNK_SIZE * 1000 + 3; i++) {
+		world.spawn(QUICK);
+	}
+
+	duration = clock.mark();
+	io::printfn("\nEllapsed: %s", duration);
 
 	// io::printn(positions);
 	// adding();
