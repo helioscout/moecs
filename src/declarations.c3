@@ -46,7 +46,7 @@ alias Components = HashMap { typeid, Component };
 <* Registered tags collection for each world. *>
 alias Tags = HashMap { typeid, Tag };
 
-<* Registered resources collection for each world. *>
+<* Registered resources collection (with values) for each world. *>
 alias Resources = HashMap { typeid, Resource };
 
 <* Marker of added/existed components for the entity. *>

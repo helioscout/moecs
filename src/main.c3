@@ -38,6 +38,14 @@ fn usz? Center.to_format(&self, Formatter* f) @dynamic {
 	return f.printf("{ cx: %d, cy: %d }", self.cx, self.cy);
 }
 
+fn usz? Resource1.to_format(&self, Formatter* f) @dynamic {
+	return f.printf("{ enabled: %s }", self.enabled);
+}
+
+fn usz? Resource2.to_format(&self, Formatter* f) @dynamic {
+	return f.printf("{ enabled: %s, count: %d }", self.enabled, self.count);
+}
+
 Clock clock @noinit;
 NanoDuration duration @noinit;
 
@@ -191,19 +199,36 @@ fn void main() {
 	es.untag_all(Tag2, Tag1);
 	io::printn(es.tagged_all(Tag1, Tag2));
 
-	io::printfn("-- spawning ( %d ) --", DYNAMIC_CHUNK_SIZE * 1000 + 3);
-	clock = clock::now();
+	// io::printfn("-- spawning ( %d ) --", DYNAMIC_CHUNK_SIZE * 1000 + 3);
+	// clock = clock::now();
 	
-	for (usz i = 0; i < DYNAMIC_CHUNK_SIZE * 1000 + 3; i++) {
-		world.spawn(QUICK);
+	// for (usz i = 0; i < DYNAMIC_CHUNK_SIZE * 1000 + 3; i++) {
+	// 	world.spawn(QUICK);
+	// }
+
+	// duration = clock.mark();
+	// io::printfn("\nEllapsed: %s", duration);
+
+	if (try Resource1* r = world.get(Resource1)) {
+		io::printn(r);
+		r.enabled = true;
+	}
+	if (try Resource1* r = world.get(Resource1)) {
+		io::printn(r);
 	}
 
-	duration = clock.mark();
-	io::printfn("\nEllapsed: %s", duration);
+	world.@set(Resource1, { .enabled = false });
+	if (try Resource1* r = world.get(Resource1)) {
+		io::printn(r);
+	}
 
-	// io::printn(positions);
-	// adding();
+	io::printn("--- Resource2 ---");
+	if (try Resource2* r = world.get(Resource2)) {
+		io::printn(r);
+	}
 
-	// io::printn(get(Position, 0));
-	// io::printn(get(Center, 0));
+	world.set((Resource2) { .enabled = true, .count = 7 });
+	if (try Resource2* r = world.get(Resource2)) {
+		io::printn(r);
+	}
 }

@@ -13,7 +13,8 @@ struct World {
 	Components components;
 	<* Registered tag types. *>
 	Tags tags;
-	<* Registered resource types. *>
+	<* Registered resource types with its instances (values).
+	   Collection of all world resources. *>
 	Resources resources;
 	<* Blocks for entities with quick lifetime. *>
 	QuickBlocks quicks;
@@ -92,7 +93,7 @@ macro World* World.register(&self, Element element, $Type, any buffer = null) {
 		case TAG:
 			self.tags.set($Type.typeid, { .type = $Type.typeid, .idx = self.tags.len() });
 		case RESOURCE:
-			self.resources.set($Type.typeid, { .type = $Type.typeid });
+			self.resources.set($Type.typeid, { .type = $Type.typeid, .value = mem::new($Type, {}) });
 	}
 
 	return self;
@@ -101,6 +102,7 @@ macro World* World.register(&self, Element element, $Type, any buffer = null) {
 <* Runs the world, but at first constructs all neccessary data from registered elements.
    World must has at least one registered component, but can has no tags, resources.
    @require !self.components.is_empty() : "The world has no registered components."
+   @return "Pointer to the world for chain calls."
 *>
 fn World* World.run(&self) {
 	// self.new(QUICK);
@@ -176,6 +178,46 @@ fn BlockGene World.new(&self, Lifetime lifetime) @local {
 	block.init();
 
 	return block;
+}
+
+<* Gets reference to the resource value by its type.
+   @param $Type : "Resource type."
+   @return "Pointer to the resource."
+   @return? NOT_FOUND : "Resource was not found (registered)."
+*>
+macro void*? World.get(&self, $Type) {
+	if (try resource = self.resources.get_ref($Type.typeid)) {
+		return resource.value.ptr;
+	}
+
+	return NOT_FOUND?;
+}
+
+<* Sets resource value by its type and initializer.
+   @param $Type : "Resource type."
+   @param #init : "Resource initialization block."
+   @return "Pointer to the world for chain calls."
+*>
+macro World* World.@set(&self, $Type, #init) {
+	if (try resource = self.resources.get_ref($Type.typeid) &&
+		try $Type* value = anycast(resource.value, $Type)) {
+		*value = #init;
+	}
+
+	return self;
+}
+
+<* Sets resource value by its instance.
+   @param $resource : "Resource instance."
+   @return "Pointer to the world for chain calls."
+*>
+macro World* World.set(&self, $resource) {
+	if (try resource = self.resources.get_ref($typeof($resource).typeid) &&
+		try $typeof($resource)* value = anycast(resource.value, $typeof($resource))) {
+		*value = $resource;
+	}
+
+	return self;
 }
 
 <* Progress one step of the world life.

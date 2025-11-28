@@ -4,4 +4,6 @@ module moecs;
 struct Resource {
 	<* Type id of the resource type. *>
 	typeid type;
+	<* Pointer to the resource instance. *>
+	any value;
 }
