@@ -119,9 +119,13 @@ fn Entity* Block.insert(&self) @dynamic @private {
 <* Deletes entity from the block.
    @param idx : "Entity index."
    @require idx < CHUNK_SIZE : "Entity index must be less than chunk size."
+   @require self.lifetime != STATIC : "Static entities can't be deleted."
 *>
 fn void Block.delete(&self, usz idx) @inline @dynamic @private {
-	self.deleted.push(idx);
+	switch (self.lifetime) {
+		case QUICK: self.occupied.unset(idx);
+		case DYNAMIC: self.deleted.push(idx);
+	}
 }
 
 <* Flush all chunks from the buffers into this block.
@@ -151,6 +155,34 @@ fn void Block.absorb(&self) @dynamic @private {
 	}
 	
 	self.idx = self.world.idx;
+}
+
+<* Creates iterator of entities.
+   @return "Entities iterator."
+*>
+fn EntitiesIterator Block.iter(&self) @inline @dynamic @private => { .entity = null };
+
+<* Iterate to the next alive (not deleted) entity in the block.
+   @param iter : "Entities iterator."
+   @return "True if next entity found, otherwise - false."
+*>
+fn bool Block.next(&self, EntitiesIterator* iter) @dynamic @private {
+	/* Start from next possible entity index. */
+	usz idx = iter.entity == null ? 0 : iter.idx + 1;
+
+	while (idx < self.idx) {
+		if (self.lifetime == QUICK   && !self.occupied[idx] ||
+			self.lifetime == DYNAMIC && self.deleted.contains(idx)) {
+			idx++;
+		} else {
+			iter.entity = &(*self.entities)[idx];
+			iter.idx = idx;
+
+			return true;
+		}
+	}
+
+	return false;
 }
 
 <* Returns index of the first free to insert (last deleted) row in the block.
@@ -185,4 +217,6 @@ interface BlockGene {
 	fn Lifetime get_lifetime();
 	fn char*?	get_chunk(typeid type);
 	fn void		delete(usz idx);
+	fn EntitiesIterator iter();
+	fn bool		next(EntitiesIterator* iter);
 }

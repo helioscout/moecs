@@ -95,3 +95,11 @@ enum ElementState : const inline char {
 
 <* Predicate function for match blocks using their intefraces. *>
 alias BlockGeneMatch = fn bool (BlockGene block);
+
+<* Entities iterator. *>
+struct EntitiesIterator {
+	<* Current entity index. *>
+	usz idx;
+	<* Current entity pointer. *>
+	Entity* entity;
+}

@@ -199,15 +199,35 @@ fn void main() {
 	es.untag_all(Tag2, Tag1);
 	io::printn(es.tagged_all(Tag1, Tag2));
 
-	// io::printfn("-- spawning ( %d ) --", DYNAMIC_CHUNK_SIZE * 1000 + 3);
-	// clock = clock::now();
+	io::printfn("-- spawning dynamics ( %d ) --", DYNAMIC_CHUNK_SIZE * 1000 + 3);
+	clock = clock::now();
 	
-	// for (usz i = 0; i < DYNAMIC_CHUNK_SIZE * 1000 + 3; i++) {
-	// 	world.spawn(QUICK);
-	// }
+	for (usz i = 0; i < DYNAMIC_CHUNK_SIZE * 1000 + 3; i++) {
+		world.spawn(DYNAMIC);
+	}
 
-	// duration = clock.mark();
-	// io::printfn("\nEllapsed: %s", duration);
+	duration = clock.mark();
+	io::printfn("\nEllapsed: %s", duration);
+
+	io::printfn("-- spawning quicks ( %d ) --", QUICK_CHUNK_SIZE * 1000 + 3);
+	clock = clock::now();
+	
+	for (usz i = 0; i < QUICK_CHUNK_SIZE * 1000 + 3; i++) {
+		world.spawn(QUICK);
+	}
+
+	duration = clock.mark();
+	io::printfn("\nEllapsed: %s", duration);
+
+	io::printfn("-- spawning statics ( %d ) --", STATIC_CHUNK_SIZE * 1000 + 3);
+	clock = clock::now();
+	
+	for (usz i = 0; i < STATIC_CHUNK_SIZE * 1000 + 3; i++) {
+		world.spawn(STATIC);
+	}
+
+	duration = clock.mark();
+	io::printfn("\nEllapsed: %s", duration);
 
 	if (try Resource1* r = world.get(Resource1)) {
 		io::printn(r);
@@ -231,4 +251,52 @@ fn void main() {
 	if (try Resource2* r = world.get(Resource2)) {
 		io::printn(r);
 	}
+
+	io::printfn("-- iterating dynamics ( %d ) --", DYNAMIC_CHUNK_SIZE * 1000 + 3);
+	clock = clock::now();
+
+	world.@each(Lifetime.DYNAMIC; Entity* entity) {
+		if (try Position* p = e.get(Position) && try Center* c = e.get(Center)) {
+			// some actions...
+		}
+	};
+	
+	duration = clock.mark();
+	io::printfn("\nEllapsed: %s", duration);
+
+	io::printfn("-- iterating quicks ( %d ) --", QUICK_CHUNK_SIZE * 1000 + 3);
+	clock = clock::now();
+
+	world.@each(Lifetime.QUICK; Entity* entity) {
+		if (try Position* p = e.get(Position) && try Center* c = e.get(Center)) {
+			// some actions...
+		}
+	};
+	
+	duration = clock.mark();
+	io::printfn("\nEllapsed: %s", duration);
+
+	io::printfn("-- iterating statics ( %d ) --", STATIC_CHUNK_SIZE * 1000 + 3);
+	clock = clock::now();
+
+	world.@each(Lifetime.STATIC; Entity* entity) {
+		if (try Position* p = e.get(Position) && try Center* c = e.get(Center)) {
+			// some actions...
+		}
+	};
+	
+	duration = clock.mark();
+	io::printfn("\nEllapsed: %s", duration);
+
+	io::printn("-- iterating all --");
+	clock = clock::now();
+
+	world.@each(; Entity* entity) {
+		if (try Position* p = e.get(Position) && try Center* c = e.get(Center)) {
+			// some actions...
+		}
+	};
+	
+	duration = clock.mark();
+	io::printf("\nEllapsed: %s", duration);
 }

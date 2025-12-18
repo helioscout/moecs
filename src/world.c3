@@ -220,6 +220,48 @@ macro World* World.set(&self, $resource) {
 	return self;
 }
 
+<* Step through each entity reference in the world.
+   @param lifetime : "Entities lifetime flag."
+*>
+macro World.@each(&self, char lifetime = 0b00000111; @body(entity)) {
+	if (lifetime & Lifetime.QUICK && self.use_quicks) {
+		/* Iterate entities in the buffer. */
+		for (usz idx = 0; idx < self.idx; idx++) {
+			if (self.deleted.contains(idx)) {	/* Omit deleted entities. */
+				@body(&(*self.buffer)[idx]);
+			}
+		}
+
+		foreach (&block : self.quicks) {
+			EntitiesIterator iter = block.iter();
+
+			while (block.next(&iter)) {
+				@body(iter.entity);
+			}
+		}
+	}
+
+	if (lifetime & Lifetime.DYNAMIC) {
+		foreach (&block : self.dynamics) {
+			EntitiesIterator iter = block.iter();
+
+			while (block.next(&iter)) {
+				@body(iter.entity);
+			}
+		}
+	}
+
+	if (lifetime & Lifetime.STATIC) {
+		foreach (&block : self.statics) {
+			EntitiesIterator iter = block.iter();
+
+			while (block.next(&iter)) {
+				@body(iter.entity);
+			}
+		}
+	}
+}
+
 <* Progress one step of the world life.
    Runs all mounted systems. *>
 fn void World.progress(&self) {
