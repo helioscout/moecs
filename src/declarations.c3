@@ -57,6 +57,12 @@ alias TagsMarker = BitSet { MAX_TAGS_COUNT };
 <* Pointers to component values when retrieving/getting all. *>
 alias ComponentPointers = ElasticArray { any, MAX_COMPONENTS_COUNT };
 
+<* List of entities for system query result. *>
+alias Entities = List { Entity* };
+
+<* Systems collection in the world. *>
+alias Systems = List { System };
+
 <* Entities/blocks lifetime. *>
 enum Lifetime : const inline char {
    <* Entities that exist for a very short period of time (a few dozen frames).
@@ -82,19 +88,30 @@ enum Element {
    TAG,
    <* Resource element type for storing data in the world that has only one instance, singleton.
       Must be defined as a struct or typedef custom typs. *>
-   RESOURCE
+   RESOURCE,
+   <* System element type for running actions at each step of the world progress. *>
+   SYSTEM
 }
 
-<* The state flags for an entity. *>
+<* The state flags for an element (entity or system). *>
 enum ElementState : const inline char {
    <* Entity is stored in quick lifetime buffer. *>
-   BUFFERED = 0b00000001,
+   BUFFERED       = 0b00000001,
    <* Entity has been deleted. *>
-   DELETED  = 0b00000010
+   DELETED        = 0b00000010,
+   <* System is enabled. *>
+   ENABLED        = 0b00000100,
+   <* System has tags in the match query. *>
+   HAS_TAGS       = 0b00001000,
+   <* System has components in the match query. *>
+   HAS_COMPONENTS = 0b00010000
 }
 
 <* Predicate function for match blocks using their intefraces. *>
 alias BlockGeneMatch = fn bool (BlockGene block);
+
+<* Callback function for the system. *>
+alias SystemCallback = fn void (Entities entities);
 
 <* Entities iterator. *>
 struct EntitiesIterator {

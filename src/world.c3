@@ -16,6 +16,8 @@ struct World {
 	<* Registered resource types with its instances (values).
 	   Collection of all world resources. *>
 	Resources resources;
+	<* Mounted systems. *>
+	Systems systems;
 	<* Blocks for entities with quick lifetime. *>
 	QuickBlocks quicks;
 	<* Blocks for entities with dynamic lifetime. *>
@@ -32,6 +34,8 @@ struct World {
 	BufferedIndexes deleted;
 	<* Current inserting index in the quick lifetime buffer (last inserted index + 1). *>
 	usz idx;
+	<* Indicates that the world is running. *>
+	bool running;
 }
 
 <* Gets world blocks count for specific (default: all) lifetimes.
@@ -65,6 +69,7 @@ fn void World.init(&self) @private {
 	self.components.init(mem);
 	self.tags.init(mem);
 	self.resources.init(mem);
+	self.systems.init(mem);
 
 	self.quicks.init(mem);
 	self.dynamics.init(mem);
@@ -76,11 +81,13 @@ fn void World.init(&self) @private {
    @param $Type : "Element (component/tag/resource) type."
    @param buffer : "Pointer to buffer for quick lifetime chunk. Ensure that you don't use same buffers for different worlds."
    @require $Type.kindof == TypeKind.STRUCT || $Type.kindof == TypeKind.DISTINCT : "Element type is not valid."
+   @require element != SYSTEM : "Systems should be registered with mount method."
    @require !(element == COMPONENT && self.components.has_key($Type.typeid)) : "Component already registered."
    @require !(element == TAG && self.tags.has_key($Type.typeid)) : "Tag already registered."
    @require !(element == RESOURCE && self.resources.has_key($Type.typeid)) : "Resource already registered."
    @require !(element != COMPONENT && buffer != null) : "You do not need a bufer for different from component element type."
    @require !(buffer != null && buffer.type != $Type[QUICK_CHUNK_SIZE].typeid) : "Buffer must have a type of array $Type[QUICK_CHUNK_SIZE]."
+   @require !self.running : "You can't change already running world."
    @return "Pointer to the world for chain calls."
 *>
 macro World* World.register(&self, Element element, $Type, any buffer = null) {
@@ -94,20 +101,71 @@ macro World* World.register(&self, Element element, $Type, any buffer = null) {
 			self.tags.set($Type.typeid, { .type = $Type.typeid, .idx = self.tags.len() });
 		case RESOURCE:
 			self.resources.set($Type.typeid, { .type = $Type.typeid, .value = mem::new($Type, {}) });
+		case SYSTEM: break;
 	}
 
+	return self;
+}
+
+<* Mounts new system to the world.
+   @param definition : "System definition."
+   @require !(definition.name && self.has_system(definition.name)) : "System with such name has already been mounted."
+   @require !(definition.components.len == 0 && definition.tags.len == 0) : "Components or tags must be specified."
+   @require definition.callback != null : "Callback must be provided."
+   @require !self.running : "You can't change already running world."
+   @return "Pointer to the world for chain calls."
+*>
+fn World* World.mount(&self, SystemDefinition definition) {
+	System system = { .name = definition.name, .callback = definition.callback,
+					  .lifetime = definition.lifetime == 0 ? 0b00000111 : definition.lifetime };
+
+	if (definition.components.len > 0) {
+		foreach (type : definition.components) {
+			if (try component = self.components.get_ref(type)) {
+				system.components.set(component.idx);
+			}
+		}
+
+		system.state |= ElementState.HAS_COMPONENTS;
+	}
+
+	if (definition.tags.len > 0) {
+		foreach (type : definition.tags) {
+			if (try tag = self.tags.get_ref(type)) {
+				system.tags.set(tag.idx);
+			}
+		}
+
+		system.state |= ElementState.HAS_TAGS;
+	}
+
+	system.entities.init(mem);
+	self.systems.push(system);
+	
+	return self;
+}
+
+<* Unmounts the system from the world.
+   @param name : "System name."
+   @require name != "" : "Name can't be empty."
+   @return "Pointer to the world for chain calls."
+*>
+fn World* World.unmount(&self, String name) {
+	if (try system = self.get_system(name)) {
+		self.systems.remove_item(*system);
+	}
+	
 	return self;
 }
 
 <* Runs the world, but at first constructs all neccessary data from registered elements.
    World must has at least one registered component, but can has no tags, resources.
    @require !self.components.is_empty() : "The world has no registered components."
+   @require !self.running : "The world is already running."
    @return "Pointer to the world for chain calls."
 *>
 fn World* World.run(&self) {
-	// self.new(QUICK);
-	// self.new(DYNAMIC);
-	// self.new(STATIC);
+	self.running = true;
 
 	return self;
 }
@@ -152,8 +210,9 @@ fn void World.despawn(&self, Entity* entity) {
 		self.deleted.push(entity.chunk_idx);
 	} else {
 		entity.block.delete(entity.chunk_idx);
-		entity.state |= ElementState.DELETED;
 	}
+
+	entity.state |= ElementState.DELETED;
 }
 
 <* Creates new empty block in the world.
@@ -223,12 +282,12 @@ macro World* World.set(&self, $resource) {
 <* Step through each entity reference in the world.
    @param lifetime : "Entities lifetime flag."
 *>
-macro World.@each(&self, char lifetime = 0b00000111; @body(entity)) {
+macro World.@each(&self, char lifetime = 0b00000111; @body(entity, lifetime)) {
 	if (lifetime & Lifetime.QUICK && self.use_quicks) {
 		/* Iterate entities in the buffer. */
 		for (usz idx = 0; idx < self.idx; idx++) {
 			if (self.deleted.contains(idx)) {	/* Omit deleted entities. */
-				@body(&(*self.buffer)[idx]);
+				@body(&(*self.buffer)[idx], Lifetime.QUICK);
 			}
 		}
 
@@ -236,7 +295,7 @@ macro World.@each(&self, char lifetime = 0b00000111; @body(entity)) {
 			EntitiesIterator iter = block.iter();
 
 			while (block.next(&iter)) {
-				@body(iter.entity);
+				@body(iter.entity, Lifetime.QUICK);
 			}
 		}
 	}
@@ -246,7 +305,7 @@ macro World.@each(&self, char lifetime = 0b00000111; @body(entity)) {
 			EntitiesIterator iter = block.iter();
 
 			while (block.next(&iter)) {
-				@body(iter.entity);
+				@body(iter.entity, Lifetime.DYNAMIC);
 			}
 		}
 	}
@@ -256,15 +315,71 @@ macro World.@each(&self, char lifetime = 0b00000111; @body(entity)) {
 			EntitiesIterator iter = block.iter();
 
 			while (block.next(&iter)) {
-				@body(iter.entity);
+				@body(iter.entity, Lifetime.STATIC);
 			}
 		}
 	}
 }
 
+<* Checks if system with specific name was mounted.
+   @param name : "System name."
+   @require name != "" : "Name can't be empty."
+   @return "True if system exists, otherwise - false."
+*>
+fn bool World.has_system(&self, String name) {
+	foreach (&system : self.systems) {
+		if ((*system).name == name) return true;
+	}
+
+	return false;
+}
+
+<* Gets reference to the system by its name.
+   @param name : "System name."
+   @require name != "" : "Name can't be empty."
+   @return "Pointer to the system."
+   @return? NOT_FOUND : "System was not found (mounted)."
+*>
+fn System*? World.get_system(&self, String name) {
+	foreach (&system : self.systems) {
+		if ((*system).name == name) return system;
+	}
+
+	return NOT_FOUND?;
+}
+
 <* Progress one step of the world life.
    Runs all mounted systems. *>
 fn void World.progress(&self) {
+	/* Clear all systems entities collections. */
+	foreach (&system : self.systems) {
+		if ((*system).enabled()) (*system).entities.clear();
+	}
+	
+	self.@each(; Entity* entity, Lifetime lifetime) {
+		foreach (&system : self.systems) {
+			if ((*system).enabled() &&					/* If system is enabled and                           */
+				(*system).lifetime & lifetime) {		/* consider system lifetime.                          */
+				if ((!(*system).has_tags() ||			/* If system query has no tags, or                    */
+						(*system).tags					/* take system tags bits,                             */
+							.and((*entity).tags)		/* perform and (&) with entity tags bits              */
+							.xor((*system).tags)		/* and perform xor (^) with system tags bits.         */
+							.cardinality() == 0) &&		/* Ensure that xor prove all system tags match.       */
+					(!(*system).has_components() ||		/* If system query has no components, or              */
+						(*system).components			/* take system components bits,                       */
+							.and((*entity).components)	/* perform and (&) with entity components bits        */
+							.xor((*system).components)	/* and perform xor (^) with system components bits.   */
+							.cardinality() == 0)) {		/* Ensure that xor prove all system components match. */
+					/* Add pointer to entity into system collection of entities for current system call.      */
+					system.entities.push(entity);
+				}
+			}
+		}
+	};
+
+	foreach (&system : self.systems) {
+		if ((*system).enabled()) (*system).callback((*system).entities);
+	}
 }
 
 <* Gets the reference to block interface that is available to insert new entities,

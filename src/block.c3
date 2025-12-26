@@ -7,7 +7,7 @@ import std::io;
 
 <* Entities collection (chunk) for the block.
    The index of the entity corresponds to the index of its components in each chunk. *>
-alias Entities = Entity[CHUNK_SIZE];
+alias EntitiesChunk = Entity[CHUNK_SIZE];
 
 <* Indexes type for deleted rows and other chunk sized data. *>
 alias Indexes = ElasticArray { usz, CHUNK_SIZE };
@@ -21,8 +21,8 @@ struct Block (BlockGene) {
 	World* world;
 	<* Block lifetime. *>
 	Lifetime lifetime;
-	<* Entities collection for the block. *>
-	Entities* entities;
+	<* Entities chunk (collection) for the block. *>
+	EntitiesChunk* entities;
 	<* Component chunks collection for the block. *>
 	Chunks chunks;
 	<* Deleted (freed) rows in the dynamic lifetime block. *>
@@ -38,7 +38,7 @@ struct Block (BlockGene) {
    @require !self.chunks.is_initialized() : "Block was already initialized."
 *>
 fn void Block.init(&self) @dynamic @private {
-	self.entities = mem::alloc(Entities);
+	self.entities = mem::alloc(EntitiesChunk);
 	self.chunks.init(mem);
 
 	self.world.components.@each_ref(; typeid type, Component* c) {

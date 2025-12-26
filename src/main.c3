@@ -49,6 +49,18 @@ fn usz? Resource2.to_format(&self, Formatter* f) @dynamic {
 Clock clock @noinit;
 NanoDuration duration @noinit;
 
+fn void system1(Entities entities) {
+	
+}
+
+fn void system2(Entities entities) {
+	
+}
+
+fn void system3(Entities entities) {
+	
+}
+
 fn void main() {
 	init();
 
@@ -64,6 +76,7 @@ fn void main() {
 	io::printn(world.size_of(Lifetime.QUICK, Lifetime.DYNAMIC));
 	// io::printn(Tag1.typeid == Tag1.typeid);
 
+	io::printn("--- registering ---");
 	world.register(COMPONENT, Position, &positions)
 		 .register(COMPONENT, Center, &centers)
 		 .register(COMPONENT, VecType, &vectors)
@@ -71,11 +84,13 @@ fn void main() {
 		 .register(RESOURCE, Resource2)
 		 .register(TAG, Tag1)
 		 .register(TAG, Tag2)
+		 .mount({ .tags = { Tag1 }, .callback = &system1 })
+		 .mount({ .tags = { Tag2 }, .callback = &system1 })
+		 .mount({ .components = { Position, Center }, .callback = &system1 })
+		 .mount({ .components = { Position, Center }, .tags = { Tag1, Tag2 }, .callback = &system1 })
+		 .mount({ .name = "s1", .components = { Position }, .tags = { Tag1 }, .callback = &system2 })
+		 .mount({ .name = "s2", .components = { Position, Center, VecType }, .tags = { Tag1 }, .callback = &system2 })
 		 .run();
-
-	world.run();
-
-	io::printn(world.use_quicks);
 
 	// world.spawn(QUICK)
 	// 	.add((Position){ .x = 1, .y = 1 })
@@ -252,51 +267,60 @@ fn void main() {
 		io::printn(r);
 	}
 
-	io::printfn("-- iterating dynamics ( %d ) --", DYNAMIC_CHUNK_SIZE * 1000 + 3);
-	clock = clock::now();
+	// io::printfn("-- iterating dynamics ( %d ) --", DYNAMIC_CHUNK_SIZE * 1000 + 3);
+	// clock = clock::now();
 
-	world.@each(Lifetime.DYNAMIC; Entity* entity) {
-		if (try Position* p = e.get(Position) && try Center* c = e.get(Center)) {
-			// some actions...
-		}
-	};
+	// world.@each(Lifetime.DYNAMIC; Entity* entity, Lifetime lifetime) {
+	// 	if (try Position* p = e.get(Position) && try Center* c = e.get(Center)) {
+	// 		// some actions...
+	// 	}
+	// };
 	
-	duration = clock.mark();
-	io::printfn("\nEllapsed: %s", duration);
+	// duration = clock.mark();
+	// io::printfn("\nEllapsed: %s", duration);
 
-	io::printfn("-- iterating quicks ( %d ) --", QUICK_CHUNK_SIZE * 1000 + 3);
-	clock = clock::now();
+	// io::printfn("-- iterating quicks ( %d ) --", QUICK_CHUNK_SIZE * 1000 + 3);
+	// clock = clock::now();
 
-	world.@each(Lifetime.QUICK; Entity* entity) {
-		if (try Position* p = e.get(Position) && try Center* c = e.get(Center)) {
-			// some actions...
-		}
-	};
+	// world.@each(Lifetime.QUICK; Entity* entity, Lifetime lifetime) {
+	// 	if (try Position* p = e.get(Position) && try Center* c = e.get(Center)) {
+	// 		// some actions...
+	// 	}
+	// };
 	
-	duration = clock.mark();
-	io::printfn("\nEllapsed: %s", duration);
+	// duration = clock.mark();
+	// io::printfn("\nEllapsed: %s", duration);
 
-	io::printfn("-- iterating statics ( %d ) --", STATIC_CHUNK_SIZE * 1000 + 3);
-	clock = clock::now();
+	// io::printfn("-- iterating statics ( %d ) --", STATIC_CHUNK_SIZE * 1000 + 3);
+	// clock = clock::now();
 
-	world.@each(Lifetime.STATIC; Entity* entity) {
-		if (try Position* p = e.get(Position) && try Center* c = e.get(Center)) {
-			// some actions...
-		}
-	};
+	// world.@each(Lifetime.STATIC; Entity* entity, Lifetime lifetime) {
+	// 	if (try Position* p = e.get(Position) && try Center* c = e.get(Center)) {
+	// 		// some actions...
+	// 	}
+	// };
 	
-	duration = clock.mark();
-	io::printfn("\nEllapsed: %s", duration);
+	// duration = clock.mark();
+	// io::printfn("\nEllapsed: %s", duration);
 
-	io::printn("-- iterating all --");
-	clock = clock::now();
+	// io::printn("-- iterating all --");
+	// clock = clock::now();
 
-	world.@each(; Entity* entity) {
-		if (try Position* p = e.get(Position) && try Center* c = e.get(Center)) {
-			// some actions...
-		}
-	};
+	// world.@each(; Entity* entity, Lifetime lifetime) {
+	// 	if (try Position* p = e.get(Position) && try Center* c = e.get(Center)) {
+	// 		// some actions...
+	// 	}
+	// };
 	
-	duration = clock.mark();
-	io::printf("\nEllapsed: %s", duration);
+	// duration = clock.mark();
+	// io::printf("\nEllapsed: %s", duration);
+
+	usz step = 0;
+	
+	while (step++ < 100) {
+		clock = clock::now();
+		world.progress();
+		duration = clock.mark();
+		io::printf("\nStep ellapsed: %s", duration);
+	}
 }

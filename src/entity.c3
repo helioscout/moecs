@@ -353,6 +353,11 @@ fn void Entity.despawn(&self) {
 	}
 }
 
+<* Checks if the entity has been deleted.
+   @return "True if entity is deleted, otherwise - false."
+*>
+fn bool Entity.deleted(&self) @inline => self.state & ElementState.DELETED != 0;
+
 <* Gets parent world reference.
    @return "Reference to the world."
 *>
