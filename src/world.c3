@@ -153,6 +153,7 @@ fn World* World.mount(&self, SystemDefinition definition) {
 fn World* World.unmount(&self, String name) {
 	if (try system = self.get_system(name)) {
 		self.systems.remove_item(*system);
+		(*system).entities.free();
 	}
 	
 	return self;

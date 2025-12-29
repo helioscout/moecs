@@ -316,11 +316,12 @@ fn void main() {
 	// io::printf("\nEllapsed: %s", duration);
 
 	usz step = 0;
+	clock = clock::now();
 	
 	while (step++ < 100) {
-		clock = clock::now();
 		world.progress();
-		duration = clock.mark();
-		io::printf("\nStep ellapsed: %s", duration);
 	}
+	
+	duration = clock.mark();
+	io::printf("\nStep ellapsed: %s", duration);
 }
