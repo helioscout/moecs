@@ -4,7 +4,7 @@
   // Warnings used for all targets.
   "warnings": [ "no-unused" ],
   // Directories where C3 library files may be found.
-  "dependency-search-paths": [ "lib" ],
+  "dependency-search-paths": [ "lib", "src" ],
   // Libraries to use for all targets.
   "dependencies": [ ],
   // Authors, optionally with email.

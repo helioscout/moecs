@@ -1,7 +1,10 @@
-module moecs;
+module moecs_test;
 
 import std::io;
 import std::time;
+import moecs;
+
+alias ecs = module moecs;
 
 struct Position (Printable) {
 	double x, y;
@@ -25,10 +28,10 @@ typedef VecType = float[<2>];
 typedef Tag1 = int;
 typedef Tag2 = int;
 
-Entity[QUICK_CHUNK_SIZE] entities;
-Position[QUICK_CHUNK_SIZE] positions;
-Center[QUICK_CHUNK_SIZE] centers;
-VecType[QUICK_CHUNK_SIZE] vectors;
+Entity[ecs::QUICK_CHUNK_SIZE] entities;
+Position[ecs::QUICK_CHUNK_SIZE] positions;
+Center[ecs::QUICK_CHUNK_SIZE] centers;
+VecType[ecs::QUICK_CHUNK_SIZE] vectors;
 
 fn usz? Position.to_format(&self, Formatter* f) @dynamic {
 	return f.printf("{ x: %f, y: %f }", self.x, self.y);
@@ -62,9 +65,9 @@ fn void system3(Entities entities) {
 }
 
 fn void main() {
-	init();
+	ecs::init();
 
-	World* world = new(&entities);
+	World* world = ecs::new(&entities);
 
 	io::printn("---------");
 	io::printn(Lifetime.QUICK);
@@ -214,30 +217,30 @@ fn void main() {
 	es.untag_all(Tag2, Tag1);
 	io::printn(es.tagged_all(Tag1, Tag2));
 
-	io::printfn("-- spawning dynamics ( %d ) --", DYNAMIC_CHUNK_SIZE * 1000 + 3);
+	io::printfn("-- spawning dynamics ( %d ) --", ecs::DYNAMIC_CHUNK_SIZE * 1000 + 3);
 	clock = clock::now();
 	
-	for (usz i = 0; i < DYNAMIC_CHUNK_SIZE * 1000 + 3; i++) {
+	for (usz i = 0; i < ecs::DYNAMIC_CHUNK_SIZE * 1000 + 3; i++) {
 		world.spawn(DYNAMIC);
 	}
 
 	duration = clock.mark();
 	io::printfn("\nEllapsed: %s", duration);
 
-	io::printfn("-- spawning quicks ( %d ) --", QUICK_CHUNK_SIZE * 1000 + 3);
+	io::printfn("-- spawning quicks ( %d ) --", ecs::QUICK_CHUNK_SIZE * 1000 + 3);
 	clock = clock::now();
 	
-	for (usz i = 0; i < QUICK_CHUNK_SIZE * 1000 + 3; i++) {
+	for (usz i = 0; i < ecs::QUICK_CHUNK_SIZE * 1000 + 3; i++) {
 		world.spawn(QUICK);
 	}
 
 	duration = clock.mark();
 	io::printfn("\nEllapsed: %s", duration);
 
-	io::printfn("-- spawning statics ( %d ) --", STATIC_CHUNK_SIZE * 1000 + 3);
+	io::printfn("-- spawning statics ( %d ) --", ecs::STATIC_CHUNK_SIZE * 1000 + 3);
 	clock = clock::now();
 	
-	for (usz i = 0; i < STATIC_CHUNK_SIZE * 1000 + 3; i++) {
+	for (usz i = 0; i < ecs::STATIC_CHUNK_SIZE * 1000 + 3; i++) {
 		world.spawn(STATIC);
 	}
 
