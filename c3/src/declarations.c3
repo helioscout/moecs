@@ -81,7 +81,7 @@ enum Lifetime : const inline char {
 <* Kinds of elements that the world can consist of. *>
 enum Element {
    <* Component element type (Position, Mass, Velocity).
-      Must be defined as a struct or typedef custom typs. *>
+      Must be defined as a struct or typedef custom type. *>
    COMPONENT,
    <* Tag element type for marking entities with some kind of characteristic.
       Must be defined as a typedef with a simple fundamental underlying type (typedef Tag = int). *>
