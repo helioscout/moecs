@@ -85,6 +85,7 @@ fn bool Block.has_free_rows(&self) @inline @dynamic @private {
 <* Checks if all rows in the block are filled in. *>
 fn bool Block.full(&self) @inline @dynamic @private {
 	switch (self.lifetime) {
+		/* Even if one row is occupied, quick lifetime block can't be used for insert. */
 		case QUICK:   return self.occupied.cardinality() > 0;
 		case DYNAMIC: return self.idx == CHUNK_SIZE && self.deleted.size == 0;
 		case STATIC:  return self.idx == CHUNK_SIZE;
