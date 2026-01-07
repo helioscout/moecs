@@ -13,8 +13,10 @@ MAX_COMPONENTS_COUNT : uint : 128
 /* Maximum tags count available for adding to entity. */
 MAX_TAGS_COUNT       : uint : 128
 
-/* Worlds collection in the space. */
-Worlds :: []^World
+/* Component chunks collection for each block, key by component struct type.
+   Chunk is represented as an array of component struct values ($Type[(QUICK|DYNAMIC|STATIC)_CHUNK_SIZE]).
+   But is created as a pointer to allocated memory block. */
+Chunks :: map[typeid]rawptr
 
 /* Registered components collection for each world. */
 Components :: map[typeid]Component
@@ -53,4 +55,18 @@ Element :: enum {
 	RESOURCE,
 	/* System element type for running actions at each step of the world progress. */
 	SYSTEM
+}
+
+/* The state flags for an element (entity or system). */
+ElementState :: enum u8 {
+	/* Entity is stored in quick lifetime buffer. */
+	BUFFERED       = 0b00000001,
+	/* Entity has been deleted. */
+	DELETED        = 0b00000010,
+	/* System is enabled. */
+	ENABLED        = 0b00000100,
+	/* System has tags in the match query. */
+	HAS_TAGS       = 0b00001000,
+	/* System has components in the match query. */
+	HAS_COMPONENTS = 0b00010000
 }

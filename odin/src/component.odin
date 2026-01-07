@@ -9,5 +9,5 @@ Component :: struct {
 	/* Type size for allocations. */
 	size : uint,
 	/* Pointer to buffer for quick lifetime chunk, must be provided from the main app. */
-	buffer : any
+	buffer : rawptr
 }
