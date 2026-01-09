@@ -62,7 +62,7 @@ set_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type) {
    `entity`  : Pointer to the entity.
    `$Type`   : Component type.
    `returns` : Pointer to the component and operation success. */
-get_component :: proc(entity: ^Entity, $Type: typeid) -> (^Type, bool) {
+get_component :: proc(entity: ^Entity, $Type: typeid) -> (^Type, bool) #optional_ok {
 	if component, ok := &get_world(entity).components[Type]; ok {
 		if marker_is_set(entity.components[:], component.idx) {
 			if .BUFFERED in entity.state {
@@ -92,7 +92,7 @@ get_component :: proc(entity: ^Entity, $Type: typeid) -> (^Type, bool) {
 /* Removes component from entity by its type.
    `entity` : Pointer to the entity.
    `type`   : Component type. */
-remove :: proc(entity: ^Entity, type: typeid) {
+remove_component :: proc(entity: ^Entity, type: typeid) {
 	if component, ok := &get_world(entity).components[type]; ok {
 		marker_unset(entity.components[:], component.idx)
 	}
@@ -101,8 +101,114 @@ remove :: proc(entity: ^Entity, type: typeid) {
 /* Removes components from entity of all passed types.
    `entity` : Pointer to the entity.
    `types`  : Companent types. */
-remove_all :: proc(entity: ^Entity, types: ..typeid) {
-	for type in types do remove(entity, type)
+remove_components :: proc(entity: ^Entity, types: ..typeid) {
+	for type in types do remove_component(entity, type)
+}
+
+/* Checks if the enity has a component.
+   `entity`  : Pointer to the entity.
+   `type`    : Component type.
+   `returns` : True if entity has a component, otherwise - false. */
+has_component :: proc(entity: ^Entity, type: typeid) -> bool {
+	if component, ok := &get_world(entity).components[type]; ok {
+		return marker_is_set(entity.components[:], component.idx)
+	} else {
+		return false
+	}
+}
+
+/* Checks if the entity has all components of passed types.
+   `entity`  : Pointer to the entity.
+   `types`   : Companent types.
+   `returns` : True if entity has all components, otherwise - false. */
+has_components :: proc(entity: ^Entity, types: ..typeid) -> bool {
+	world: ^World = get_world(entity)
+	has := true
+
+	for type in types {
+		if component, ok := &world.components[type]; ok {
+			has &&= marker_is_set(entity.components[:], component.idx)
+		} else {
+			has = false
+		}
+	}
+
+	return has
+}
+
+/* Tags entity with specified tag type.
+   `entity`  : Pointer to the entity.
+   `type`    : Tag type. */
+set_tag :: proc(entity: ^Entity, type: typeid) {
+	if tag, ok := &get_world(entity).tags[type]; ok {
+		marker_set(entity.tags[:], tag.idx)
+	}
+}
+
+/* Tags entity with all passed tag types.
+   `entity`  : Pointer to the entity.
+   `types`   : Tag types. */
+set_tags :: proc(entity: ^Entity, types: ..typeid) {
+	world: ^World = get_world(entity)
+
+	for type in types {
+		if tag, ok := &world.tags[type]; ok {
+			marker_set(entity.tags[:], tag.idx)
+		}
+	}
+}
+
+/* Removes tag from entity.
+   `entity`  : Pointer to the entity.
+   `type`    : Tag type. */
+unset_tag :: proc(entity: ^Entity, type: typeid) {
+	if tag, ok := &get_world(entity).tags[type]; ok {
+		marker_unset(entity.tags[:], tag.idx)
+	}
+}
+
+/* Removes tags from entity of all passed types.
+   `entity`  : Pointer to the entity.
+   `types`   : Tag types. */
+unset_tags :: proc(entity: ^Entity, types: ..typeid) {
+	world: ^World = get_world(entity)
+
+	for type in types {
+		if tag, ok := &world.tags[type]; ok {
+			marker_unset(entity.tags[:], tag.idx)
+		}
+	}
+}
+
+/* Checks if the entity is tagged with specified tag type.
+   `entity`  : Pointer to the entity.
+   `type`    : Tag type.
+   `returns` : True if the entity has tag, otherwise - false. */
+has_tag :: proc(entity: ^Entity, type: typeid) -> bool {
+	if tag, ok := &get_world(entity).tags[type]; ok {
+		return marker_is_set(entity.tags[:], tag.idx)
+	} else {
+		return false
+	}
+}
+
+/* Checks if the entity is tagged with all passed tag types.
+   `entity`  : Pointer to the entity.
+   `types`   : Tag types.
+   `returns` : True if entity is tagged with all types, otherwise - false. */
+has_tags :: proc(entity: ^Entity, types: ..typeid) -> bool {
+	world: ^World = get_world(entity)
+	has := true
+
+	for type in types {
+		if tag, ok := &world.tags[type]; ok {
+			has &&= marker_is_set(entity.tags[:], tag.idx)
+		} else {
+			has = false
+		}
+	}
+
+	return has
 }
 
 /* Gets parent world reference.

@@ -80,3 +80,28 @@ get :: proc {
 	get_component,
 	get_resource
 }
+
+remove :: proc {
+	remove_component,
+	remove_components
+}
+
+has :: proc {
+	has_component,
+	has_components
+}
+
+tag :: proc {
+	set_tag,
+	set_tags
+}
+
+untag :: proc {
+	unset_tag,
+	unset_tags
+}
+
+tagged :: proc {
+	has_tag,
+	has_tags
+}

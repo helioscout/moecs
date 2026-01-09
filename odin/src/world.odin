@@ -126,13 +126,13 @@ new_block :: proc(world: ^World, lifetime: Lifetime) -> ^Block {
 /* Gets reference to the resource value by its type.
    `world`   : Pointer to the world.
    `$Type`   : Resource type.
-   `returns` : Pointer to the resource. */
-get_resource :: proc(world: ^World, $Type: typeid) -> ^Type {
-	if Type in world.resources {
-		return cast(^Type)world.resources[Type].value
-	} else {
-		return nil
+   `returns` : Pointer to the resource and operation success. */
+get_resource :: proc(world: ^World, $Type: typeid) -> (^Type, bool) #optional_ok {
+	if resource, ok := world.resources[Type]; ok {
+		return cast(^Type)resource.value, true
 	}
+
+	return nil, false
 }
 
 /* Sets resource value by its type.

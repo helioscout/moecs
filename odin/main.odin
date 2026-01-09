@@ -55,7 +55,9 @@ main :: proc() {
 	ecs.set_resource(world, Resource1, Resource1 { enabled = true })
 	ecs.set(world, Resource2, Resource2 { count = 10 })
 	
-	fmt.println(ecs.get(world, Resource1))
+	if r, ok := ecs.get(world, Resource1); ok {
+		fmt.println(r)
+	}
 	fmt.println(ecs.get_resource(world, Resource2))
 
 	// block1: ecs.QuickBlock
@@ -80,7 +82,7 @@ main :: proc() {
 	ecs.add(e1, Center, &Center { cx = 3, cy = 4 })
 	ecs.add(e3, VecType, &VecType { 10, 20 })
 
-	// ecs.remove_all(e4, Position, Center, int)
+	// ecs.remove(e4, Position, Center, int)
 	// ecs.remove(e4, Position)
 
 	if c, ok := ecs.get(e4, Position); ok {
@@ -91,4 +93,19 @@ main :: proc() {
 		fmt.println(c)
 	} else do fmt.println("Component not found.")
 
+	// c := ecs.get(e4, Position)
+
+	fmt.println(ecs.has(e4, Position))
+	fmt.println(ecs.has(e4, Position, Center))
+
+	// ecs.tag(e1, Tag1)
+	ecs.tag(e1, Tag1, Tag2)
+
+	// ecs.untag(e1, Tag1)
+	// ecs.untag(e1, Tag1, Tag2, int)
+
+	fmt.println("-------------------------")
+
+	fmt.println(ecs.tagged(e1, Tag1))
+	fmt.println(ecs.tagged(e1, Tag1, Tag2, int))
 }
