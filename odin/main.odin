@@ -53,9 +53,9 @@ main :: proc() {
 	// resource1.enabled = true
 	
 	ecs.set_resource(world, Resource1, Resource1 { enabled = true })
-	ecs.set_resource(world, Resource2, Resource2 { count = 10 })
+	ecs.set(world, Resource2, Resource2 { count = 10 })
 	
-	fmt.println(ecs.get_resource(world, Resource1))
+	fmt.println(ecs.get(world, Resource1))
 	fmt.println(ecs.get_resource(world, Resource2))
 
 	// block1: ecs.QuickBlock
@@ -72,4 +72,23 @@ main :: proc() {
 
 	e4 := ecs.spawn(world, .QUICK)
 	e5 := ecs.spawn(world, .QUICK)
+
+	ecs.add(e5, Position, &Position { x = 3, y = 4 })
+	ecs.add(e4, Position, &Position { x = 1, y = 2 })
+	ecs.add(e4, Center, &Center { cx = 1, cy = 2 })
+	ecs.add(e2, Center, &Center { cx = 1, cy = 2 })
+	ecs.add(e1, Center, &Center { cx = 3, cy = 4 })
+	ecs.add(e3, VecType, &VecType { 10, 20 })
+
+	// ecs.remove_all(e4, Position, Center, int)
+	// ecs.remove(e4, Position)
+
+	if c, ok := ecs.get(e4, Position); ok {
+		fmt.println(c)
+	} else do fmt.println("Component not found.")
+	
+	if c, ok := ecs.get_component(e4, Center); ok {
+		fmt.println(c)
+	} else do fmt.println("Component not found.")
+
 }

@@ -23,9 +23,9 @@ World :: struct {
 	/* Buffer for quick life time entities, must be provided from the main app. */
 	buffer : ^[QUICK_CHUNK_SIZE]Entity,
 	/* Deleted (freed) rows in the quick lifetime buffer. */
-	deleted: [dynamic]uint,
+	deleted: [dynamic]int,
 	/* Current inserting index in the quick lifetime buffer (last inserted index + 1). */
-	idx : uint,
+	idx : int,
 	/* Indicates that the world is running. */
 	running : bool
 }
@@ -89,12 +89,11 @@ spawn :: proc(world: ^World, lifetime: Lifetime = .DYNAMIC) -> ^Entity {
 			
 			/* state has BUFFERED is a sign that entity is in the quick lifetime buffer, not a real block.		  */
 			/* But chunk_idx will not change when flushed. We need assign world reference for access the buffer. */
-			world.buffer[idx] = Entity { state = .BUFFERED, world = world, chunk_idx = idx }
+			world.buffer[idx] = Entity { state = { .BUFFERED }, world = world, chunk_idx = idx }
 			entity = &world.buffer[idx]
 		}
 			
-		case .DYNAMIC: fallthrough
-		case .STATIC: entity = block_insert(get_sparse_block(world, lifetime))
+		case .DYNAMIC, .STATIC: entity = block_insert(get_sparse_block(world, lifetime))
 	}
 
 	return entity
@@ -201,8 +200,8 @@ get_blocks :: proc(world: ^World, lifetime: Lifetime) -> ^[dynamic]Block {
    `returns` : Index of the row to insert.
 */
 @(private="file")
-pop_free_index :: proc(world: ^World) -> uint {
-	idx: uint = ---
+pop_free_index :: proc(world: ^World) -> int {
+	idx: int = ---
 	
 	if len(world.deleted) == 0 {
 		idx = world.idx

@@ -1,5 +1,7 @@
 package moecs
 
+import "core:mem"
+import "base:runtime"
 import "core:fmt"
 
 /* Block type, building block of the world. */
@@ -14,20 +16,30 @@ Block :: struct {
 	/* Component chunks collection for the block. */
 	chunks : Chunks,
 	/* Deleted (freed) rows in the dynamic lifetime block. */
-	deleted : [dynamic]uint,
+	deleted : [dynamic]int,
 	/* Occupied (used) rows in the quick lifetime block. */
 	occupied : [QUICK_CHUNK_SIZE]u8,
 	/* Current inserting index in the block (last inserted index + 1).
 	   If it equals ChunkSize than new block should be inserted to the world. */
-	idx : uint,
+	idx : int,
 	/* Block chunk size dependent on lifetime. */
-	size : uint
+	size : int
 }
 
 /* Initializes the block. */
 @(private="package")
 block_init :: proc(block: ^Block) {
 	resize(&block.entities, block.size)
+
+	for type, &component in block.world.components {
+		/* Allocate memory for components chunks.					 */
+		/* It should be later casted to corresponding array pointer. */
+		ptr, err := mem.alloc(component.size * block.size)
+
+		if err != .None do panic(fmt.tprintf("Chunk memory allocation error: %v", err))
+
+		block.chunks[type] = ptr
+	}
 }
 
 /* Checks for existence of free rows (places to insert new entities/components).
@@ -64,7 +76,7 @@ block_is_full :: proc(block: ^Block) -> bool {
 block_is_free :: proc(block: ^Block) -> bool {
 	switch block.lifetime {
 		case .QUICK:   return marker_is_all_unset(block.occupied[:])
-		case .DYNAMIC: return block.idx == 0 || len(block.deleted) == int(block.idx - 1)
+		case .DYNAMIC: return block.idx == 0 || len(block.deleted) == block.idx - 1
 		case .STATIC:  return block.idx == 0
 	}
 
@@ -97,8 +109,8 @@ block_absorb :: proc(block: ^Block) {
    `block`   : Reference to the block.
    `returns` : Index of the row to insert. */
 @(private="file")
-block_pop_free_index :: proc(block: ^Block) -> uint {
-	idx: uint = ---
+block_pop_free_index :: proc(block: ^Block) -> int {
+	idx: int = ---
 
 	switch block.lifetime {
 		/* Quick blocks can be only completely filled and reused when they are totally free. */

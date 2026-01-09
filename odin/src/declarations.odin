@@ -2,16 +2,16 @@ package moecs
 
 /* Size (items count) of the one components chunk or entities collection for each block. */
 /* Quick lifetime chunk size. */
-QUICK_CHUNK_SIZE   : uint : 100
+QUICK_CHUNK_SIZE   : int : 100
 /* Dynamic lifetime chunk size. */
-DYNAMIC_CHUNK_SIZE : uint : 500
+DYNAMIC_CHUNK_SIZE : int : 500
 /* Static lifetime chunk size. */
-STATIC_CHUNK_SIZE  : uint : 300
+STATIC_CHUNK_SIZE  : int : 300
 
 /* Maximum components count available for adding to entity. */
-MAX_COMPONENTS_COUNT : uint : 128
+MAX_COMPONENTS_COUNT : int : 128
 /* Maximum tags count available for adding to entity. */
-MAX_TAGS_COUNT       : uint : 128
+MAX_TAGS_COUNT       : int : 128
 
 /* Component chunks collection for each block, key by component struct type.
    Chunk is represented as an array of component struct values ($Type[(QUICK|DYNAMIC|STATIC)_CHUNK_SIZE]).
@@ -58,15 +58,25 @@ Element :: enum {
 }
 
 /* The state flags for an element (entity or system). */
-ElementState :: enum u8 {
+ElementState :: enum{
 	/* Entity is stored in quick lifetime buffer. */
-	BUFFERED       = 0b00000001,
+	BUFFERED,
 	/* Entity has been deleted. */
-	DELETED        = 0b00000010,
+	DELETED,
 	/* System is enabled. */
-	ENABLED        = 0b00000100,
+	ENABLED,
 	/* System has tags in the match query. */
-	HAS_TAGS       = 0b00001000,
+	HAS_TAGS,
 	/* System has components in the match query. */
-	HAS_COMPONENTS = 0b00010000
+	HAS_COMPONENTS
+}
+
+set :: proc {
+	set_component,
+	set_resource
+}
+
+get :: proc {
+	get_component,
+	get_resource
 }
