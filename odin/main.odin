@@ -52,13 +52,18 @@ main :: proc() {
 	// resource1 : ^Resource1 = ecs.get_resource(world, Resource1)
 	// resource1.enabled = true
 	
-	ecs.set_resource(world, Resource1, Resource1 { enabled = true })
-	ecs.set(world, Resource2, Resource2 { count = 10 })
+	ecs.set(world,
+		Resource1, Resource1 { enabled = true },
+		Resource2, Resource2 { count = 10 })
 	
-	if r, ok := ecs.get(world, Resource1); ok {
-		fmt.println(r)
-	}
-	fmt.println(ecs.get_resource(world, Resource2))
+	// if r, ok := ecs.get(world, Resource1); ok {
+	// 	fmt.println(r)
+	// }
+
+	r1, r2 := ecs.get(world, Resource1, Resource2)
+
+	fmt.println(r1)
+	fmt.println(r2)
 
 	// block1: ecs.QuickBlock
 	// block2: ecs.DynamicBlock
@@ -76,11 +81,15 @@ main :: proc() {
 	e5 := ecs.spawn(world, .QUICK)
 
 	ecs.add(e5, Position, &Position { x = 3, y = 4 })
-	ecs.add(e4, Position, &Position { x = 1, y = 2 })
-	ecs.add(e4, Center, &Center { cx = 1, cy = 2 })
+	// ecs.add(e4, Position, &Position { x = 1, y = 2 })
+	// ecs.add(e4, Center, &Center { cx = 1, cy = 2 })
 	ecs.add(e2, Center, &Center { cx = 1, cy = 2 })
 	ecs.add(e1, Center, &Center { cx = 3, cy = 4 })
 	ecs.add(e3, VecType, &VecType { 10, 20 })
+
+	ecs.add(e4,
+		Position, &Position { x = 1, y = 2 },
+		Center,   &Center   { cx = 1, cy = 2 })
 
 	// ecs.remove(e4, Position, Center, int)
 	// ecs.remove(e4, Position)
@@ -92,6 +101,14 @@ main :: proc() {
 	if c, ok := ecs.get_component(e4, Center); ok {
 		fmt.println(c)
 	} else do fmt.println("Component not found.")
+
+	ecs.set(e4, Position, &Position { x = 10, y = 20 },
+				Center,   &Center { cx = 11, cy = 22 })
+
+	pos, center := ecs.get(e4, Position, Center)
+
+	fmt.println(pos)
+	fmt.println(center)
 
 	// c := ecs.get(e4, Position)
 

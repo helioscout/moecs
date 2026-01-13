@@ -24,7 +24,7 @@ Entity :: struct {
    `entity`    : Pointer to the entity.
    `$Type`     : Component type.
    `component` : Reference to the component instance. */
-add :: proc(entity: ^Entity, $Type: typeid, component: ^Type) {
+add_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type) {
 	if c, ok := &get_world(entity).components[Type]; ok {
 		set_component(entity, Type, component)		/* Storing value in the chunk. */
 		marker_set(entity.components[:], c.idx)		/* Setting marker bit.		   */
