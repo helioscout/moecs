@@ -1,6 +1,7 @@
 package moecs
 
 /* Tag element type description. */
+@(private="package")
 Tag :: struct {
 	/* Type id of the tag type. */
 	type : typeid,

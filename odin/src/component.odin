@@ -1,6 +1,7 @@
 package moecs
 
 /* Component elment type description. */
+@(private="package")
 Component :: struct {
 	/* Type id of the component type. */
 	type : typeid,

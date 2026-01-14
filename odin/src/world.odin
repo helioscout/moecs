@@ -1,5 +1,6 @@
 package moecs
 
+import sa "core:container/small_array"
 import "core:fmt"
 
 World :: struct {
@@ -23,7 +24,7 @@ World :: struct {
 	/* Buffer for quick life time entities, must be provided from the main app. */
 	buffer : ^[QUICK_CHUNK_SIZE]Entity,
 	/* Deleted (freed) rows in the quick lifetime buffer. */
-	deleted: [dynamic]int,
+	deleted: sa.Small_Array(QUICK_CHUNK_SIZE, int),
 	/* Current inserting index in the quick lifetime buffer (last inserted index + 1). */
 	idx : int,
 	/* Indicates that the world is running. */
@@ -78,7 +79,7 @@ spawn :: proc(world: ^World, lifetime: Lifetime = .DYNAMIC) -> ^Entity {
 		case .QUICK: {
 			if !world.use_quicks do panic("Quick lifetime was disabled, you should provide entity and components buffers.")
 
-			if len(world.deleted) == 0 && world.idx == QUICK_CHUNK_SIZE {
+			if sa.len(world.deleted) == 0 && world.idx == QUICK_CHUNK_SIZE {
 			    /* If buffers are full we must flush them to free quick block. */
 			    block_absorb(get_free_block(world, .QUICK))
 				/* And reset current inserting index. */
@@ -97,6 +98,26 @@ spawn :: proc(world: ^World, lifetime: Lifetime = .DYNAMIC) -> ^Entity {
 	}
 
 	return entity
+}
+
+/* Despawns entity from the world.
+   `world`  : Pointer to the world.
+   `entity` : Reference to the entity. */
+despawn_entity :: proc(world: ^World, entity: ^Entity) {
+	if .BUFFERED in entity.state {
+		sa.append(&world.deleted, entity.chunk_idx)
+	} else {
+		block_delete(entity.block, entity.chunk_idx)
+	}
+
+	entity.state += { .DELETED }
+}
+
+/* Despawns entities from the world.
+   `world`    : Pointer to the world.
+   `entities` : References to the entities. */
+despawn_entities :: #force_inline proc(world: ^World, entities: ..^Entity) {
+	for entity in entities do despawn_entity(world, entity)
 }
 
 /* Creates new empty block in the world.
@@ -203,11 +224,11 @@ get_blocks :: proc(world: ^World, lifetime: Lifetime) -> ^[dynamic]Block {
 pop_free_index :: proc(world: ^World) -> int {
 	idx: int = ---
 	
-	if len(world.deleted) == 0 {
+	if sa.len(world.deleted) == 0 {
 		idx = world.idx
 		world.idx += 1
 	} else {
-		idx = pop(&world.deleted)
+		idx = sa.pop_back(&world.deleted)
 	}
 
 	return idx

@@ -1,6 +1,7 @@
 package main
 
 import "core:fmt"
+import "core:time"
 import ecs "src"
 
 Position :: struct {
@@ -35,6 +36,9 @@ vectors   : [ecs.QUICK_CHUNK_SIZE]VecType
 // }
 
 main :: proc() {
+	_time: time.Time = ---
+	_duration: time.Duration = ---
+	
 	ecs.init()
 	
 	world : ^ecs.World = ecs.new_world(&entities)
@@ -48,6 +52,8 @@ main :: proc() {
 	ecs.register(world, .TAG, Tag2)
 
 	ecs.run(world)
+
+	fmt.printfln("Entity size: %v", size_of(ecs.Entity))
 
 	// resource1 : ^Resource1 = ecs.get_resource(world, Resource1)
 	// resource1.enabled = true
@@ -125,4 +131,45 @@ main :: proc() {
 
 	fmt.println(ecs.tagged(e1, Tag1))
 	fmt.println(ecs.tagged(e1, Tag1, Tag2, int))
+
+	ecs.despawn(world, e1, e2, e4, e5)
+
+	_time = time.now();
+	fmt.printfln("-- spawning quicks ( %v )", ecs.QUICK_CHUNK_SIZE * 1000 + 3)
+
+	for i in 0..<ecs.QUICK_CHUNK_SIZE * 1000 + 3 {
+		ecs.add(ecs.spawn(world, .QUICK),
+			Position, &Position { x = 10, y = 10 },
+			Center, &Center { cx = 20, cy = 20 })
+		// ecs.spawn(world, .QUICK)
+	}
+
+	_duration = time.diff(_time, time.now())
+	fmt.printfln("-- ellapsed: %v", _duration)
+
+	_time = time.now();
+	fmt.printfln("-- spawning dynamics ( %v )", ecs.DYNAMIC_CHUNK_SIZE * 1000 + 3)
+
+	for i in 0..<ecs.DYNAMIC_CHUNK_SIZE * 1000 + 3 {
+		ecs.add(ecs.spawn(world, .DYNAMIC),
+			Position, &Position { x = 10, y = 10 },
+			Center, &Center { cx = 20, cy = 20 })
+		// ecs.spawn(world, .DYNAMIC)
+	}
+
+	_duration = time.diff(_time, time.now())
+	fmt.printfln("-- ellapsed: %v", _duration)
+
+	_time = time.now();
+	fmt.printfln("-- spawning statics ( %v )", ecs.STATIC_CHUNK_SIZE * 1000 + 3)
+
+	for i in 0..<ecs.STATIC_CHUNK_SIZE * 1000 + 3 {
+		ecs.add(ecs.spawn(world, .STATIC),
+			Position, &Position { x = 10, y = 10 },
+			Center, &Center { cx = 20, cy = 20 })
+		// ecs.spawn(world, .STATIC)
+	}
+
+	_duration = time.diff(_time, time.now())
+	fmt.printfln("-- ellapsed: %v", _duration)
 }

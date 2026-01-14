@@ -211,6 +211,12 @@ has_tags :: proc(entity: ^Entity, types: ..typeid) -> bool {
 	return has
 }
 
+/* Checks if the entity has been deleted.
+   `returns` : True if entity is deleted, otherwise - false. */
+deleted :: #force_inline proc(entity: ^Entity) -> bool {
+	return .DELETED in entity.state
+}
+
 /* Gets parent world reference.
    `entity`  : Pointer to the entity.
    `returns` : Reference to the world. */

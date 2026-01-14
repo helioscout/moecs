@@ -2,9 +2,11 @@ package moecs
 
 import "core:mem"
 import "base:runtime"
+import sa "core:container/small_array"
 import "core:fmt"
 
 /* Block type, building block of the world. */
+@(private="package")
 Block :: struct {
 	/* Reference to the parent world. */
 	world : ^World,
@@ -16,7 +18,7 @@ Block :: struct {
 	/* Component chunks collection for the block. */
 	chunks : Chunks,
 	/* Deleted (freed) rows in the dynamic lifetime block. */
-	deleted : [dynamic]int,
+	deleted : sa.Small_Array(DYNAMIC_CHUNK_SIZE, int),
 	/* Occupied (used) rows in the quick lifetime block. */
 	occupied : [QUICK_CHUNK_SIZE]u8,
 	/* Current inserting index in the block (last inserted index + 1).
@@ -49,7 +51,7 @@ block_init :: proc(block: ^Block) {
 block_has_free_rows :: proc(block: ^Block) -> bool {
 	switch block.lifetime {
 		case .QUICK:   return marker_is_all_unset(block.occupied[:])
-		case .DYNAMIC: return block.idx < DYNAMIC_CHUNK_SIZE || len(block.deleted) > 0
+		case .DYNAMIC: return block.idx < DYNAMIC_CHUNK_SIZE || sa.len(block.deleted) > 0
 		case .STATIC:  return block.idx < STATIC_CHUNK_SIZE
 	}
 
@@ -63,7 +65,7 @@ block_is_full :: proc(block: ^Block) -> bool {
 	switch block.lifetime {
 		/* Even if one row is occupied, quick lifetime block can't be used for insert. */
 		case .QUICK:   return marker_cardinality(block.occupied[:]) > 0
-		case .DYNAMIC: return block.idx == DYNAMIC_CHUNK_SIZE && len(block.deleted) == 0
+		case .DYNAMIC: return block.idx == DYNAMIC_CHUNK_SIZE && sa.len(block.deleted) == 0
 		case .STATIC:  return block.idx == STATIC_CHUNK_SIZE
 	}
 
@@ -76,7 +78,7 @@ block_is_full :: proc(block: ^Block) -> bool {
 block_is_free :: proc(block: ^Block) -> bool {
 	switch block.lifetime {
 		case .QUICK:   return marker_is_all_unset(block.occupied[:])
-		case .DYNAMIC: return block.idx == 0 || len(block.deleted) == block.idx - 1
+		case .DYNAMIC: return block.idx == 0 || sa.len(block.deleted) == block.idx - 1
 		case .STATIC:  return block.idx == 0
 	}
 
@@ -95,13 +97,44 @@ block_insert :: proc(block: ^Block) -> ^Entity {
 	return &block.entities[idx]
 }
 
-/* Flush all chunks from the buffers into this block.*/
+/* Deletes entity from the block.
+   `block` : Reference to the block.
+   `idx`   : Entity index. */
+@(private="package")
+block_delete :: proc(block: ^Block, idx: int) {
+	switch block.lifetime {
+		case .QUICK:   marker_unset(block.occupied[:], idx)
+		case .DYNAMIC: sa.append(&block.deleted, idx)
+		case .STATIC:  panic("Static entities can't be deleted.")
+	}
+}
+
+/* Flush all chunks from the buffers into this block.
+   Only quick lifetime block can absorb chunks from the buffer.*/
 @(private="package")
 block_absorb :: proc(block: ^Block) {
-	/* self.world.idx - count of buffered entities.      */
+	/* block.world.idx - count of buffered entities.      */
 	/* Copy buffered entities to the block's collection. */
 	copy(block.entities[0:block.world.idx], block.world.buffer[0:block.world.idx])
 
+	/* Copy components from buffers to block chunks. */
+	for type, &component in block.world.components {
+		mem.copy(block.chunks[type], component.buffer, component.size * block.world.idx)
+	}
+
+	/* Step through all copied entities. */
+	for i in 0..<block.world.idx {
+		block.entities[i].state -= { .BUFFERED }	/* Unset entity BUFFERED state.          */
+		marker_set(block.occupied[:], i)			/* Set occupied marker for entity index. */
+	}
+
+	/* If buffer is not full, we need unset occupied marker for its rest. */
+	if block.world.idx < block.size {
+		for i in block.world.idx..<block.size {		/* block.size here will be */
+			marker_unset(block.occupied[:], i)		/* QUICK_CHUNK_SIZE btw.   */
+		}
+	}
+	
 	block.idx = block.world.idx
 }
 
@@ -116,11 +149,11 @@ block_pop_free_index :: proc(block: ^Block) -> int {
 		/* Quick blocks can be only completely filled and reused when they are totally free. */
 		case .QUICK: idx = 0
 		case .DYNAMIC:
-			if len(block.deleted) == 0 {
+			if sa.len(block.deleted) == 0 {
 				idx = block.idx
 				block.idx += 1
 			} else {
-				idx = pop(&block.deleted)
+				idx = sa.pop_back(&block.deleted)
 			}
 		case .STATIC:
 			idx = block.idx

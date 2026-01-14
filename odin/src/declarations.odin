@@ -16,16 +16,16 @@ MAX_TAGS_COUNT       : int : 128
 /* Component chunks collection for each block, key by component struct type.
    Chunk is represented as an array of component struct values ($Type[(QUICK|DYNAMIC|STATIC)_CHUNK_SIZE]).
    But is created as a pointer to allocated memory block. */
-Chunks :: map[typeid]rawptr
+@(private) Chunks :: map[typeid]rawptr
 
 /* Registered components collection for each world. */
-Components :: map[typeid]Component
+@(private) Components :: map[typeid]Component
 
 /* Registered tags collection for each world. */
-Tags :: map[typeid]Tag
+@(private) Tags :: map[typeid]Tag
 
 /* Registered resources collection (with values) for each world. */
-Resources :: map[typeid]Resource
+@(private) Resources :: map[typeid]Resource
 
 /* Entities/blocks lifetime. */
 Lifetime :: enum u8 {
@@ -208,4 +208,9 @@ untag :: proc {
 tagged :: proc {
 	has_tag,
 	has_tags
+}
+
+despawn :: proc {
+	despawn_entity,
+	despawn_entities
 }
