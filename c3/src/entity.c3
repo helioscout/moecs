@@ -49,6 +49,12 @@ macro Entity* Entity.@set(&self, $Type, #init) {
 		}
 	} else {
 		switch (self.block.get_lifetime()) {
+			case QUICK: {
+				if (try chunk = ($Type[QUICK_CHUNK_SIZE]*)self.block.get_chunk($Type)) {
+					(*chunk)[self.chunk_idx] = #init;
+				}
+			}
+
 			case DYNAMIC: {
 				if (try chunk = ($Type[DYNAMIC_CHUNK_SIZE]*)self.block.get_chunk($Type)) {
 					(*chunk)[self.chunk_idx] = #init;
@@ -91,6 +97,12 @@ macro Entity* Entity.set(&self, $component) {
 		}
 	} else {
 		switch (self.block.get_lifetime()) {
+			case QUICK: {
+				if (try chunk = ($typeof($component)[QUICK_CHUNK_SIZE]*)self.block.get_chunk($typeof($component))) {
+					(*chunk)[self.chunk_idx] = $component;
+				}
+			}
+
 			case DYNAMIC: {
 				if (try chunk = ($typeof($component)[DYNAMIC_CHUNK_SIZE]*)self.block.get_chunk($typeof($component))) {
 					(*chunk)[self.chunk_idx] = $component;
@@ -121,6 +133,12 @@ macro void*? Entity.get(&self, $Type) {
 				return &(*chunk)[self.chunk_idx];
 			} else {
 				switch (self.block.get_lifetime()) {
+					case QUICK: {
+						if (try chunk = ($Type[QUICK_CHUNK_SIZE]*)self.block.get_chunk($Type)) {
+							return &(*chunk)[self.chunk_idx];
+						}
+					}
+
 					case DYNAMIC: {
 						if (try chunk = ($Type[DYNAMIC_CHUNK_SIZE]*)self.block.get_chunk($Type)) {
 							return &(*chunk)[self.chunk_idx];

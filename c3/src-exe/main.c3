@@ -69,6 +69,7 @@ fn void main() {
 
 	World* world = ecs::new(&entities);
 
+	io::printfn("Entity size: %s", Entity.sizeof);
 	io::printn("---------");
 	io::printn(Lifetime.QUICK);
 	io::printn(Lifetime.DYNAMIC);
@@ -94,6 +95,17 @@ fn void main() {
 		 .mount({ .name = "s1", .components = { Position }, .tags = { Tag1 }, .callback = &system2 })
 		 .mount({ .name = "s2", .components = { Position, Center, VecType }, .tags = { Tag1 }, .callback = &system2 })
 		 .run();
+
+	for (usz i = 0; i < ecs::QUICK_CHUNK_SIZE + 3; i++) {
+		world.spawn(QUICK)
+			.add((Position) { .x = 1, .y = 2 });
+	}
+
+	world.@each(Lifetime.QUICK; Entity* entity, Lifetime lifetime) {
+		if (try Position* p = entity.get(Position)) {
+			io::printn(*p);
+		}
+	};
 
 	// world.spawn(QUICK)
 	// 	.add((Position){ .x = 1, .y = 1 })
@@ -246,6 +258,8 @@ fn void main() {
 
 	duration = clock.mark();
 	io::printfn("\nEllapsed: %s", duration);
+
+	// io::readline(tmem)!!;
 
 	if (try Resource1* r = world.get(Resource1)) {
 		io::printn(r);

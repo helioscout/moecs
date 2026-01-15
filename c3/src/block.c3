@@ -144,6 +144,7 @@ fn void Block.absorb(&self) @dynamic @private {
 
 	/* Step through all copied entities. */
 	for (usz i = 0; i < self.world.idx; i++) {
+		(*self.entities)[i].block = self;						/* Change container to the block.        */
 		(*self.entities)[i].state &= ~ElementState.BUFFERED;	/* Unset entity BUFFERED state.          */
 		self.occupied.set(i);									/* Set occupied marker for entity index. */
 	}

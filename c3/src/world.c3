@@ -287,7 +287,7 @@ macro World.@each(&self, char lifetime = 0b00000111; @body(entity, lifetime)) {
 	if (lifetime & Lifetime.QUICK && self.use_quicks) {
 		/* Iterate entities in the buffer. */
 		for (usz idx = 0; idx < self.idx; idx++) {
-			if (self.deleted.contains(idx)) {	/* Omit deleted entities. */
+			if (!self.deleted.contains(idx)) {	/* Omit deleted entities. */
 				@body(&(*self.buffer)[idx], Lifetime.QUICK);
 			}
 		}
