@@ -7,14 +7,16 @@ Entity :: struct {
 	/* Entity state. */
 	state : bit_set[ElementState; u8],
 	/* Components marker, each set bit specifies that the component exists in the entity. */
-	components : [MAX_COMPONENTS_COUNT]u8,
+	components : [COMPONENTS_MARKER_SIZE]uint,
 	/* Tags marker, each set bit specifies that the tag exists in the entity. */
-	tags : [MAX_TAGS_COUNT]u8,
-	/* Reference to the parent block interface. Use only if stae has not BUFFERED flag. */
-	block : ^Block,
-	/* Reference to the parent world.
-	   If active (state has BUFFERED flag) than entity is in the quick lifetime buffer, not a real block. */
-	world : ^World,
+	tags : [TAGS_MARKER_SIZE]uint,
+	using container: struct #raw_union {
+		/* Reference to the parent block interface. Use only if stae has not BUFFERED flag. */
+		block : ^Block,
+		/* Reference to the parent world.
+		   If active (state has BUFFERED flag) than entity is in the quick lifetime buffer, not a real block. */
+		world : ^World,
+	},
 	/* The index of the entity in the collection (chunk index for its components). */
 	chunk_idx : int
 }
@@ -26,8 +28,8 @@ Entity :: struct {
    `component` : Reference to the component instance. */
 add_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type) {
 	if c, ok := &get_world(entity).components[Type]; ok {
-		set_component(entity, Type, component)		/* Storing value in the chunk. */
-		marker_set(entity.components[:], c.idx)		/* Setting marker bit.		   */
+		set_component(entity, Type, component)										/* Storing value in the chunk. */
+		marker_set(COMPONENTS_MARKER_SIZE, &entity.components, c.idx)	/* Setting marker bit. */
 	}
 }
 
@@ -43,6 +45,12 @@ set_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type) {
 		}
 	} else {
 		#partial switch entity.block.lifetime {
+			case .QUICK:
+				if ptr, ok := entity.block.chunks[Type]; ok {
+					chunk: ^[QUICK_CHUNK_SIZE]Type = cast(^[QUICK_CHUNK_SIZE]Type)ptr
+					chunk[entity.chunk_idx] = component^
+				}
+
 			case .DYNAMIC:
 				if ptr, ok := entity.block.chunks[Type]; ok {
 					chunk: ^[DYNAMIC_CHUNK_SIZE]Type = cast(^[DYNAMIC_CHUNK_SIZE]Type)ptr
@@ -64,12 +72,18 @@ set_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type) {
    `returns` : Pointer to the component and operation success. */
 get_component :: proc(entity: ^Entity, $Type: typeid) -> (^Type, bool) #optional_ok {
 	if component, ok := &get_world(entity).components[Type]; ok {
-		if marker_is_set(entity.components[:], component.idx) {
+		if marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, component.idx) {
 			if .BUFFERED in entity.state {
 				chunk: ^[QUICK_CHUNK_SIZE]Type = cast(^[QUICK_CHUNK_SIZE]Type)component.buffer
 				return &chunk[entity.chunk_idx], true
 			} else {
 				#partial switch entity.block.lifetime {
+					case .QUICK:
+						if ptr, ok := entity.block.chunks[Type]; ok {
+							chunk: ^[QUICK_CHUNK_SIZE]Type = cast(^[QUICK_CHUNK_SIZE]Type)ptr
+							return &chunk[entity.chunk_idx], true
+						}
+
 					case .DYNAMIC:
 						if ptr, ok := entity.block.chunks[Type]; ok {
 							chunk: ^[DYNAMIC_CHUNK_SIZE]Type = cast(^[DYNAMIC_CHUNK_SIZE]Type)ptr
@@ -94,7 +108,7 @@ get_component :: proc(entity: ^Entity, $Type: typeid) -> (^Type, bool) #optional
    `type`   : Component type. */
 remove_component :: proc(entity: ^Entity, type: typeid) {
 	if component, ok := &get_world(entity).components[type]; ok {
-		marker_unset(entity.components[:], component.idx)
+		marker_unset(COMPONENTS_MARKER_SIZE, &entity.components, component.idx)
 	}
 }
 
@@ -111,7 +125,7 @@ remove_components :: proc(entity: ^Entity, types: ..typeid) {
    `returns` : True if entity has a component, otherwise - false. */
 has_component :: proc(entity: ^Entity, type: typeid) -> bool {
 	if component, ok := &get_world(entity).components[type]; ok {
-		return marker_is_set(entity.components[:], component.idx)
+		return marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, component.idx)
 	} else {
 		return false
 	}
@@ -127,7 +141,7 @@ has_components :: proc(entity: ^Entity, types: ..typeid) -> bool {
 
 	for type in types {
 		if component, ok := &world.components[type]; ok {
-			has &&= marker_is_set(entity.components[:], component.idx)
+			has &&= marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, component.idx)
 		} else {
 			has = false
 		}
@@ -141,7 +155,7 @@ has_components :: proc(entity: ^Entity, types: ..typeid) -> bool {
    `type`    : Tag type. */
 set_tag :: proc(entity: ^Entity, type: typeid) {
 	if tag, ok := &get_world(entity).tags[type]; ok {
-		marker_set(entity.tags[:], tag.idx)
+		marker_set(TAGS_MARKER_SIZE, &entity.tags, tag.idx)
 	}
 }
 
@@ -153,7 +167,7 @@ set_tags :: proc(entity: ^Entity, types: ..typeid) {
 
 	for type in types {
 		if tag, ok := &world.tags[type]; ok {
-			marker_set(entity.tags[:], tag.idx)
+			marker_set(TAGS_MARKER_SIZE, &entity.tags, tag.idx)
 		}
 	}
 }
@@ -163,7 +177,7 @@ set_tags :: proc(entity: ^Entity, types: ..typeid) {
    `type`    : Tag type. */
 unset_tag :: proc(entity: ^Entity, type: typeid) {
 	if tag, ok := &get_world(entity).tags[type]; ok {
-		marker_unset(entity.tags[:], tag.idx)
+		marker_unset(TAGS_MARKER_SIZE, &entity.tags, tag.idx)
 	}
 }
 
@@ -175,7 +189,7 @@ unset_tags :: proc(entity: ^Entity, types: ..typeid) {
 
 	for type in types {
 		if tag, ok := &world.tags[type]; ok {
-			marker_unset(entity.tags[:], tag.idx)
+			marker_unset(TAGS_MARKER_SIZE, &entity.tags, tag.idx)
 		}
 	}
 }
@@ -186,7 +200,7 @@ unset_tags :: proc(entity: ^Entity, types: ..typeid) {
    `returns` : True if the entity has tag, otherwise - false. */
 has_tag :: proc(entity: ^Entity, type: typeid) -> bool {
 	if tag, ok := &get_world(entity).tags[type]; ok {
-		return marker_is_set(entity.tags[:], tag.idx)
+		return marker_is_set(TAGS_MARKER_SIZE, entity.tags, tag.idx)
 	} else {
 		return false
 	}
@@ -202,7 +216,7 @@ has_tags :: proc(entity: ^Entity, types: ..typeid) -> bool {
 
 	for type in types {
 		if tag, ok := &world.tags[type]; ok {
-			has &&= marker_is_set(entity.tags[:], tag.idx)
+			has &&= marker_is_set(TAGS_MARKER_SIZE, entity.tags, tag.idx)
 		} else {
 			has = false
 		}

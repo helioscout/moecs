@@ -13,6 +13,15 @@ MAX_COMPONENTS_COUNT : int : 128
 /* Maximum tags count available for adding to entity. */
 MAX_TAGS_COUNT       : int : 128
 
+/* Count of bits in one marker word (element of marker array). */
+@(private) MARKER_BITS_COUNT : uint : size_of(uint) * 8
+/* Size of components marker (array of bitset). */
+@(private) COMPONENTS_MARKER_SIZE : uint : (uint(MAX_COMPONENTS_COUNT) + MARKER_BITS_COUNT - 1) / MARKER_BITS_COUNT
+/* Size of tags marker (array of bitset). */
+@(private) TAGS_MARKER_SIZE : uint : (uint(MAX_TAGS_COUNT) + MARKER_BITS_COUNT - 1) / MARKER_BITS_COUNT
+/* Size of quick lifetime marker (array of bitset). */
+@(private) QUICK_MARKER_SIZE : uint : (uint(QUICK_CHUNK_SIZE) + MARKER_BITS_COUNT - 1) / MARKER_BITS_COUNT
+
 /* Component chunks collection for each block, key by component struct type.
    Chunk is represented as an array of component struct values ($Type[(QUICK|DYNAMIC|STATIC)_CHUNK_SIZE]).
    But is created as a pointer to allocated memory block. */
