@@ -15,7 +15,7 @@ Block :: struct {
 	lifetime : Lifetime,
 	/* Entities collection (chunk) for the block.
 	   The index of the entity corresponds to the index of its components in each chunk. */
-	entities : [dynamic]Entity,
+	entities : []Entity,
 	/* Component chunks collection for the block. */
 	chunks : Chunks,
 	/* Deleted (freed) rows in the dynamic lifetime block. */
@@ -32,7 +32,11 @@ Block :: struct {
 /* Initializes the block. */
 @(private="package")
 block_init :: proc(block: ^Block) {
-	resize(&block.entities, block.size)
+	switch block.lifetime {
+		case .QUICK:   block.entities = new([QUICK_CHUNK_SIZE]Entity)[:]
+		case .DYNAMIC: block.entities = new([DYNAMIC_CHUNK_SIZE]Entity)[:]
+		case .STATIC:  block.entities = new([STATIC_CHUNK_SIZE]Entity)[:]
+	}
 
 	for type, &component in block.world.components {
 		/* Allocate memory for components chunks.					 */

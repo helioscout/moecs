@@ -225,14 +225,14 @@ fn BlockGene World.new(&self, Lifetime lifetime) @local {
 
 	switch (lifetime) {
 		case QUICK:
-			self.quicks.push({ .lifetime = QUICK, .world = self });
-			block = self.quicks.get_ref(self.quicks.size - 1);
+			self.quicks.push(mem::new(QuickBlock, { .lifetime = QUICK, .world = self }));
+			block = self.quicks.get(self.quicks.size - 1);
 		case DYNAMIC:
-			self.dynamics.push({ .lifetime = DYNAMIC, .world = self });
-			block = self.dynamics.get_ref(self.dynamics.size - 1);
+			self.dynamics.push(mem::new(DynamicBlock, { .lifetime = DYNAMIC, .world = self }));
+			block = self.dynamics.get(self.dynamics.size - 1);
 		case STATIC:
-			self.statics.push({ .lifetime = STATIC, .world = self });
-			block = self.statics.get_ref(self.statics.size - 1);
+			self.statics.push(mem::new(StaticBlock, { .lifetime = STATIC, .world = self }));
+			block = self.statics.get(self.statics.size - 1);
 	}
 
 	block.init();
@@ -292,7 +292,7 @@ macro World.@each(&self, char lifetime = 0b00000111; @body(entity, lifetime)) {
 			}
 		}
 
-		foreach (&block : self.quicks) {
+		foreach (block : self.quicks) {
 			EntitiesIterator iter = block.iter();
 
 			while (block.next(&iter)) {
@@ -302,7 +302,7 @@ macro World.@each(&self, char lifetime = 0b00000111; @body(entity, lifetime)) {
 	}
 
 	if (lifetime & Lifetime.DYNAMIC) {
-		foreach (&block : self.dynamics) {
+		foreach (block : self.dynamics) {
 			EntitiesIterator iter = block.iter();
 
 			while (block.next(&iter)) {
@@ -312,7 +312,7 @@ macro World.@each(&self, char lifetime = 0b00000111; @body(entity, lifetime)) {
 	}
 
 	if (lifetime & Lifetime.STATIC) {
-		foreach (&block : self.statics) {
+		foreach (block : self.statics) {
 			EntitiesIterator iter = block.iter();
 
 			while (block.next(&iter)) {
@@ -410,11 +410,11 @@ fn BlockGene World.get_free_block(&self, Lifetime lifetime) @inline @local {
 fn BlockGene? World.find_block(&self, Lifetime lifetime, BlockGeneMatch match) @private {
 	switch (lifetime) {
 		case QUICK:
-			foreach (&b : self.quicks) { if (match(b)) return b; }
+			foreach (b : self.quicks) { if (match(b)) return b; }
 		case DYNAMIC:
-			foreach (&b : self.dynamics) { if (match(b)) return b; }
+			foreach (b : self.dynamics) { if (match(b)) return b; }
 		case STATIC:
-			foreach (&b : self.statics) { if (match(b)) return b; }
+			foreach (b : self.statics) { if (match(b)) return b; }
 	}
 
 	return NOT_FOUND?;

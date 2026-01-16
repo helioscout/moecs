@@ -26,11 +26,11 @@ alias DynamicBlock = Block { DYNAMIC_CHUNK_SIZE };
 alias StaticBlock = Block { STATIC_CHUNK_SIZE };
 
 <* Quick (lifetime) blocks collection for each world. *>
-alias QuickBlocks = List { QuickBlock };
+alias QuickBlocks = List { QuickBlock* };
 <* Dynamic (lifetime) blocks collection for each world. *>
-alias DynamicBlocks = List { DynamicBlock };
+alias DynamicBlocks = List { DynamicBlock* };
 <* Static (lifetime) blocks collection for each world. *>
-alias StaticBlocks = List { StaticBlock };
+alias StaticBlocks = List { StaticBlock* };
 
 <* Component chunks collection for each block, key by component struct type.
    Chunk is represented as an array of component struct values ($Type[(QUICK|DYNAMIC|STATIC)_CHUNK_SIZE]).

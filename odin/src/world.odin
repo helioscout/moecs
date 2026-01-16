@@ -13,11 +13,11 @@ World :: struct {
 	   Collection of all world resources. */
 	resources : Resources,
 	/* Blocks for entities with quick lifetime. */
-	quicks : [dynamic]Block,
+	quicks : [dynamic]^Block,
 	/* Blocks for entities with dynamic lifetime. */
-	dynamics : [dynamic]Block,
+	dynamics : [dynamic]^Block,
 	/* Blocks for entities with static lifetime. */
-	statics : [dynamic]Block,
+	statics : [dynamic]^Block,
 	/* Defines that world uses quick lifetime (default: true).
 	   If at least one component is registered without a buffer it will be set to false.
 	   If disabled than all attempts to create quick lifetime entites will fail. */
@@ -127,18 +127,18 @@ despawn_entities :: #force_inline proc(world: ^World, entities: ..^Entity) {
    `returns`  : Pointer to newly created block. */
 @(private="file")
 new_block :: proc(world: ^World, lifetime: Lifetime) -> ^Block {
-	block: ^Block = ---
+	block: ^Block = new(Block)
 	
 	switch lifetime {
 		case .QUICK:
-			append(&world.quicks, Block { lifetime = .QUICK, world = world, size = QUICK_CHUNK_SIZE })
-			block = &world.quicks[len(world.quicks) - 1]
+			block^ = { lifetime = .QUICK, world = world, size = QUICK_CHUNK_SIZE }
+			append(&world.quicks, block)
 		case .DYNAMIC:
-			append(&world.dynamics, Block { lifetime = .DYNAMIC, world = world, size = DYNAMIC_CHUNK_SIZE })
-			block = &world.dynamics[len(world.dynamics) - 1]
+			block^ = { lifetime = .DYNAMIC, world = world, size = DYNAMIC_CHUNK_SIZE }
+			append(&world.dynamics, block)
 		case .STATIC:
-			append(&world.statics, Block { lifetime = .STATIC, world = world, size = STATIC_CHUNK_SIZE })
-			block = &world.statics[len(world.statics) - 1]
+			block^ = { lifetime = .STATIC, world = world, size = STATIC_CHUNK_SIZE }
+			append(&world.statics, block)
 	}
 
 	block_init(block)
@@ -185,30 +185,30 @@ each :: proc(world: ^World, lifetime: bit_set[Lifetime; u8] = { .QUICK, .DYNAMIC
 			}
 		}
 
-		for &block in world.quicks {
+		for block in world.quicks {
 			iter : EntitiesIterator
 
-			for block_iter(&block, &iter) {
+			for block_iter(block, &iter) {
 				callback(iter.entity, .QUICK)
 			}
 		}
 	}
 
 	if .DYNAMIC in lifetime {
-		for &block in world.dynamics {
+		for block in world.dynamics {
 			iter : EntitiesIterator
 
-			for block_iter(&block, &iter) {
+			for block_iter(block, &iter) {
 				callback(iter.entity, .DYNAMIC)
 			}
 		}
 	}
 
 	if .STATIC in lifetime {
-		for &block in world.statics {
+		for block in world.statics {
 			iter : EntitiesIterator
 
-			for block_iter(&block, &iter) {
+			for block_iter(block, &iter) {
 				callback(iter.entity, .STATIC)
 			}
 		}
@@ -224,8 +224,8 @@ each :: proc(world: ^World, lifetime: bit_set[Lifetime; u8] = { .QUICK, .DYNAMIC
 get_sparse_block :: proc(world: ^World, lifetime: Lifetime) -> ^Block {
 	blocks := get_blocks(world, lifetime)
 	
-	for &b in blocks^ {
-		if block_has_free_rows(&b) do return &b
+	for block in blocks^ {
+		if block_has_free_rows(block) do return block
 	}
 
 	return new_block(world, lifetime)
@@ -239,8 +239,8 @@ get_sparse_block :: proc(world: ^World, lifetime: Lifetime) -> ^Block {
 get_free_block :: proc(world: ^World, lifetime: Lifetime) -> ^Block {
 	blocks := get_blocks(world, lifetime)
 
-	for &b in blocks^ {
-		if block_is_free(&b) do return &b
+	for block in blocks^ {
+		if block_is_free(block) do return block
 	}
 
 	return new_block(world, lifetime)
@@ -251,7 +251,7 @@ get_free_block :: proc(world: ^World, lifetime: Lifetime) -> ^Block {
    `lifetime` : Block lifetime.
    `returns`  : Pointer to free block. */
 @(private="file")
-get_blocks :: proc(world: ^World, lifetime: Lifetime) -> ^[dynamic]Block {
+get_blocks :: proc(world: ^World, lifetime: Lifetime) -> ^[dynamic]^Block {
 	switch lifetime {
 		case .QUICK:   return &world.quicks
 		case .DYNAMIC: return &world.dynamics

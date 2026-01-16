@@ -32,6 +32,8 @@ positions : [ecs.QUICK_CHUNK_SIZE]Position
 centers   : [ecs.QUICK_CHUNK_SIZE]Center
 vectors   : [ecs.QUICK_CHUNK_SIZE]VecType
 
+count : uint = 0
+
 // test :: proc(block: ecs.Block($ChunkSize)) {
 // 	fmt.println(len(block.entities))
 // }
@@ -116,16 +118,21 @@ main :: proc() {
 	fmt.println(r2)
 
 	for i in 0..<ecs.QUICK_CHUNK_SIZE * 1000 + 3 {
-		// ecs.add(ecs.spawn(world, .QUICK),
-		// 	Position, &Position { x = 10, y = 10 },
-		// 	Center, &Center { cx = 20, cy = 20 })
-		ecs.spawn(world, .QUICK)
+		ecs.add(ecs.spawn(world, .QUICK),
+			Position, &Position { x = f64(i) + 10, y = f64(i) + 10 },
+			Center, &Center { cx = i + 20, cy = i + 20 })
+		// ecs.spawn(world, .QUICK)
 	}
 
+	fmt.println(len(world.quicks))
+
 	ecs.each(world, callback = proc(entity: ^ecs.Entity, lifetime: ecs.Lifetime) {
-		if pos, ok := ecs.get(entity, Position); ok {
-			fmt.println(pos)
-		}
+		pos, center := ecs.get(entity, Position, Center)
+		// fmt.println(pos, center)
+
+		// if pos, ok := ecs.get(entity, Position); ok {
+		// 	fmt.println(pos)
+		// }
 
 		// if center, ok := ecs.get(entity, Center); ok {
 		// 	fmt.println(center)
@@ -154,18 +161,18 @@ main :: proc() {
 	ecs.add(e1, Center, &Center { cx = 3, cy = 4 })
 	ecs.add(e3, VecType, &VecType { 10, 20 })
 
-	ecs.add(e1,
+	ecs.add(e4,
 		Position, &Position { x = 1, y = 2 },
 		Center,   &Center   { cx = 1, cy = 2 })
 
 	// ecs.remove(e4, Position, Center, int)
 	// ecs.remove(e4, Position)
 
-	if c, ok := ecs.get(e1, Position); ok {
+	if c, ok := ecs.get(e4, Position); ok {
 		fmt.println(c)
 	} else do fmt.println("Component not found.")
 	
-	if c, ok := ecs.get_component(e1, Center); ok {
+	if c, ok := ecs.get_component(e4, Center); ok {
 		fmt.println(c)
 	} else do fmt.println("Component not found.")
 
@@ -195,45 +202,57 @@ main :: proc() {
 
 	ecs.despawn(world, e1, e2, e4, e5)
 
-	// _time = time.now()
-	// fmt.printfln("-- spawning quicks ( %v )", ecs.QUICK_CHUNK_SIZE * 1000 + 3)
+	_time = time.now()
+	fmt.printfln("-- spawning quicks ( %v )", ecs.QUICK_CHUNK_SIZE * 1000 + 3)
 
-	// for i in 0..<ecs.QUICK_CHUNK_SIZE * 1000 + 3 {
-	// 	ecs.add(ecs.spawn(world, .QUICK),
-	// 		Position, &Position { x = 10, y = 10 },
-	// 		Center, &Center { cx = 20, cy = 20 })
-	// 	// ecs.spawn(world, .QUICK)
-	// }
+	for i in 0..<ecs.QUICK_CHUNK_SIZE * 1000 + 3 {
+		ecs.add(ecs.spawn(world, .QUICK),
+			Position, &Position { x = 10, y = 10 },
+			Center, &Center { cx = 20, cy = 20 })
+		// ecs.spawn(world, .QUICK)
+	}
 
-	// _duration = time.diff(_time, time.now())
-	// fmt.printfln("-- ellapsed: %v", _duration)
+	_duration = time.diff(_time, time.now())
+	fmt.printfln("-- ellapsed: %v", _duration)
 
-	// _time = time.now()
-	// fmt.printfln("-- spawning dynamics ( %v )", ecs.DYNAMIC_CHUNK_SIZE * 1000 + 3)
+	_time = time.now()
+	fmt.printfln("-- spawning dynamics ( %v )", ecs.DYNAMIC_CHUNK_SIZE * 1000 + 3)
 
-	// for i in 0..<ecs.DYNAMIC_CHUNK_SIZE * 1000 + 3 {
-	// 	ecs.add(ecs.spawn(world, .DYNAMIC),
-	// 		Position, &Position { x = 10, y = 10 },
-	// 		Center, &Center { cx = 20, cy = 20 })
-	// 	// ecs.spawn(world, .DYNAMIC)
-	// }
+	for i in 0..<ecs.DYNAMIC_CHUNK_SIZE * 1000 + 3 {
+		ecs.add(ecs.spawn(world, .DYNAMIC),
+			Position, &Position { x = 10, y = 10 },
+			Center, &Center { cx = 20, cy = 20 })
+		// ecs.spawn(world, .DYNAMIC)
+	}
 
-	// _duration = time.diff(_time, time.now())
-	// fmt.printfln("-- ellapsed: %v", _duration)
+	_duration = time.diff(_time, time.now())
+	fmt.printfln("-- ellapsed: %v", _duration)
 
-	// _time = time.now()
-	// fmt.printfln("-- spawning statics ( %v )", ecs.STATIC_CHUNK_SIZE * 1000 + 3)
+	_time = time.now()
+	fmt.printfln("-- spawning statics ( %v )", ecs.STATIC_CHUNK_SIZE * 1000 + 3)
 
-	// for i in 0..<ecs.STATIC_CHUNK_SIZE * 1000 + 3 {
-	// 	ecs.add(ecs.spawn(world, .STATIC),
-	// 		Position, &Position { x = 10, y = 10 },
-	// 		Center, &Center { cx = 20, cy = 20 })
-	// 	// ecs.spawn(world, .STATIC)
-	// }
+	for i in 0..<ecs.STATIC_CHUNK_SIZE * 1000 + 3 {
+		ecs.add(ecs.spawn(world, .STATIC),
+			Position, &Position { x = 10, y = 10 },
+			Center, &Center { cx = 20, cy = 20 })
+		// ecs.spawn(world, .STATIC)
+	}
 
-	// _duration = time.diff(_time, time.now())
-	// fmt.printfln("-- ellapsed: %v", _duration)
+	_duration = time.diff(_time, time.now())
+	fmt.printfln("-- ellapsed: %v", _duration)
 
 	// buffer: [10]byte
 	// os.read(os.stdin, buffer[:])
+
+	_time = time.now()
+	fmt.println("--- iterating ---")
+
+	ecs.each(world, callback = proc(entity: ^ecs.Entity, lifetime: ecs.Lifetime) {
+		pos, center := ecs.get(entity, Position, Center)
+		count += 1
+		// fmt.println(pos, center)
+	});
+
+	_duration = time.diff(_time, time.now())
+	fmt.printfln("-- ellapsed: %v, count: %v", _duration, count)
 }

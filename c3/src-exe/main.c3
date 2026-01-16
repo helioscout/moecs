@@ -96,9 +96,9 @@ fn void main() {
 		 .mount({ .name = "s2", .components = { Position, Center, VecType }, .tags = { Tag1 }, .callback = &system2 })
 		 .run();
 
-	for (usz i = 0; i < ecs::QUICK_CHUNK_SIZE + 3; i++) {
+	for (usz i = 0; i < ecs::QUICK_CHUNK_SIZE * 1000 + 3; i++) {
 		world.spawn(QUICK)
-			.add((Position) { .x = 1, .y = 2 });
+			.@add(Position, { .x = (double)i + 10, .y = (double)i + 20 });
 	}
 
 	world.@each(Lifetime.QUICK; Entity* entity, Lifetime lifetime) {
@@ -261,13 +261,17 @@ fn void main() {
 
 	io::printfn("--- iterating ---");
 	clock = clock::now();
-	world.@each(Lifetime.STATIC; Entity* entity, Lifetime lifetime) {
+
+	usz count;
+	
+	world.@each(; Entity* entity, Lifetime lifetime) {
 		if (try Position* p = entity.get(Position)) {
+			count++;
 		}
 	};
 
 	duration = clock.mark();
-	io::printfn("\nEllapsed: %s", duration);
+	io::printfn("\nEllapsed: %s, count: %s", duration, count);
 
 	// io::readline(tmem)!!;
 
