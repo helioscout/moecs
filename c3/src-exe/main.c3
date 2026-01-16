@@ -103,7 +103,7 @@ fn void main() {
 
 	world.@each(Lifetime.QUICK; Entity* entity, Lifetime lifetime) {
 		if (try Position* p = entity.get(Position)) {
-			io::printn(*p);
+			// io::printn(*p);
 		}
 	};
 
@@ -233,7 +233,7 @@ fn void main() {
 	clock = clock::now();
 	
 	for (usz i = 0; i < ecs::DYNAMIC_CHUNK_SIZE * 1000 + 3; i++) {
-		world.spawn(DYNAMIC);
+		world.spawn(DYNAMIC).add((Position) { .x = 1, .y = 2 });
 	}
 
 	duration = clock.mark();
@@ -243,7 +243,7 @@ fn void main() {
 	clock = clock::now();
 	
 	for (usz i = 0; i < ecs::QUICK_CHUNK_SIZE * 1000 + 3; i++) {
-		world.spawn(QUICK);
+		world.spawn(QUICK).add((Position) { .x = 1, .y = 2 });
 	}
 
 	duration = clock.mark();
@@ -253,8 +253,18 @@ fn void main() {
 	clock = clock::now();
 	
 	for (usz i = 0; i < ecs::STATIC_CHUNK_SIZE * 1000 + 3; i++) {
-		world.spawn(STATIC);
+		world.spawn(STATIC).add((Position) { .x = 1, .y = 2 });
 	}
+
+	duration = clock.mark();
+	io::printfn("\nEllapsed: %s", duration);
+
+	io::printfn("--- iterating ---");
+	clock = clock::now();
+	world.@each(Lifetime.STATIC; Entity* entity, Lifetime lifetime) {
+		if (try Position* p = entity.get(Position)) {
+		}
+	};
 
 	duration = clock.mark();
 	io::printfn("\nEllapsed: %s", duration);

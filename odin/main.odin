@@ -36,19 +36,19 @@ vectors   : [ecs.QUICK_CHUNK_SIZE]VecType
 // 	fmt.println(len(block.entities))
 // }
 
-MAX_COUNT :: 130
-BITS_COUNT : uint : size_of(uint) * 8
-MARKER_SIZE : uint : (uint(MAX_COUNT) + BITS_COUNT - 1) / BITS_COUNT
+// MAX_COUNT :: 130
+// BITS_COUNT : uint : size_of(uint) * 8
+// MARKER_SIZE : uint : (uint(MAX_COUNT) + BITS_COUNT - 1) / BITS_COUNT
 
-marker_print :: proc(marker: [MARKER_SIZE]uint) {
-	fmt.println("--- marker ---")
+// marker_print :: proc(marker: [MARKER_SIZE]uint) {
+// 	fmt.println("--- marker ---")
 	
-	for i in 0..<len(marker) {
-		fmt.printfln("| word %v: %b", i, marker[i])
-	}
+// 	for i in 0..<len(marker) {
+// 		fmt.printfln("| word %v: %b", i, marker[i])
+// 	}
 
-	fmt.println("--------------")
-}
+// 	fmt.println("--------------")
+// }
 
 main :: proc() {
 	_time: time.Time = ---
@@ -68,36 +68,36 @@ main :: proc() {
 
 	ecs.run(world)
 
-	fmt.printfln("marker: %b", max(uint) >> (64 - 3 % 64))
-	fmt.println(3 % 64)
-	fmt.println(3 / 64)
-	fmt.printfln("Entity size: %v", size_of(ecs.Entity))
+	// fmt.printfln("marker: %b", max(uint) >> (64 - 3 % 64))
+	// fmt.println(3 % 64)
+	// fmt.println(3 / 64)
+	// fmt.printfln("Entity size: %v", size_of(ecs.Entity))
 
-	marker: [MARKER_SIZE]uint
+	// marker: [MARKER_SIZE]uint
 
-	marker_print(marker)
-	fmt.printfln("is all unset: %v", ecs.marker_is_all_unset(MAX_COUNT, MARKER_SIZE, marker))
-	ecs.marker_set(MARKER_SIZE, &marker, 7)
-	ecs.marker_set(MARKER_SIZE, &marker, 63)
-	ecs.marker_set(MARKER_SIZE, &marker, 129)
-	marker_print(marker)
-	fmt.printfln("is 5-th bit set: %v", ecs.marker_is_set(MARKER_SIZE, marker, 4))
-	fmt.printfln("is 64-th bit set: %v", ecs.marker_is_set(MARKER_SIZE, marker, 63))
-	fmt.printfln("is 129-th bit set: %v", ecs.marker_is_set(MARKER_SIZE, marker, 128))
-	fmt.printfln("is 130-th bit set: %v", ecs.marker_is_set(MARKER_SIZE, marker, 129))
+	// marker_print(marker)
+	// fmt.printfln("is all unset: %v", ecs.marker_is_all_unset(MAX_COUNT, MARKER_SIZE, marker))
+	// ecs.marker_set(MARKER_SIZE, &marker, 7)
+	// ecs.marker_set(MARKER_SIZE, &marker, 63)
+	// ecs.marker_set(MARKER_SIZE, &marker, 129)
+	// marker_print(marker)
+	// fmt.printfln("is 5-th bit set: %v", ecs.marker_is_set(MARKER_SIZE, marker, 4))
+	// fmt.printfln("is 64-th bit set: %v", ecs.marker_is_set(MARKER_SIZE, marker, 63))
+	// fmt.printfln("is 129-th bit set: %v", ecs.marker_is_set(MARKER_SIZE, marker, 128))
+	// fmt.printfln("is 130-th bit set: %v", ecs.marker_is_set(MARKER_SIZE, marker, 129))
 
-	for i in 0..<130 do ecs.marker_set(MARKER_SIZE, &marker, i)
+	// for i in 0..<130 do ecs.marker_set(MARKER_SIZE, &marker, i)
 	
-	marker_print(marker)
-	fmt.printfln("is all set: %v", ecs.marker_is_all_set(MAX_COUNT, MARKER_SIZE, marker))
-	ecs.marker_unset(MARKER_SIZE, &marker, 7)
-	ecs.marker_unset(MARKER_SIZE, &marker, 63)
-	ecs.marker_unset(MARKER_SIZE, &marker, 129)
-	marker_print(marker)
+	// marker_print(marker)
+	// fmt.printfln("is all set: %v", ecs.marker_is_all_set(MAX_COUNT, MARKER_SIZE, marker))
+	// ecs.marker_unset(MARKER_SIZE, &marker, 7)
+	// ecs.marker_unset(MARKER_SIZE, &marker, 63)
+	// ecs.marker_unset(MARKER_SIZE, &marker, 129)
+	// marker_print(marker)
 
-	marker1: [MARKER_SIZE]uint = { max(uint), max(uint), max(uint) }
+	// marker1: [MARKER_SIZE]uint = { max(uint), max(uint), max(uint) }
 
-	marker_print(ecs.marker_xor(MARKER_SIZE, marker, marker1))
+	// marker_print(ecs.marker_xor(MARKER_SIZE, marker, marker1))
 		
 	// resource1 : ^Resource1 = ecs.get_resource(world, Resource1)
 	// resource1.enabled = true
@@ -116,11 +116,21 @@ main :: proc() {
 	fmt.println(r2)
 
 	for i in 0..<ecs.QUICK_CHUNK_SIZE * 1000 + 3 {
-		ecs.add(ecs.spawn(world, .QUICK),
-			Position, &Position { x = 10, y = 10 },
-			Center, &Center { cx = 20, cy = 20 })
-		// ecs.spawn(world, .QUICK)
+		// ecs.add(ecs.spawn(world, .QUICK),
+		// 	Position, &Position { x = 10, y = 10 },
+		// 	Center, &Center { cx = 20, cy = 20 })
+		ecs.spawn(world, .QUICK)
 	}
+
+	ecs.each(world, callback = proc(entity: ^ecs.Entity, lifetime: ecs.Lifetime) {
+		if pos, ok := ecs.get(entity, Position); ok {
+			fmt.println(pos)
+		}
+
+		// if center, ok := ecs.get(entity, Center); ok {
+		// 	fmt.println(center)
+		// }
+	});
 
 	// block1: ecs.QuickBlock
 	// block2: ecs.DynamicBlock
@@ -144,18 +154,18 @@ main :: proc() {
 	ecs.add(e1, Center, &Center { cx = 3, cy = 4 })
 	ecs.add(e3, VecType, &VecType { 10, 20 })
 
-	ecs.add(e4,
+	ecs.add(e1,
 		Position, &Position { x = 1, y = 2 },
 		Center,   &Center   { cx = 1, cy = 2 })
 
 	// ecs.remove(e4, Position, Center, int)
 	// ecs.remove(e4, Position)
 
-	if c, ok := ecs.get(e4, Position); ok {
+	if c, ok := ecs.get(e1, Position); ok {
 		fmt.println(c)
 	} else do fmt.println("Component not found.")
 	
-	if c, ok := ecs.get_component(e4, Center); ok {
+	if c, ok := ecs.get_component(e1, Center); ok {
 		fmt.println(c)
 	} else do fmt.println("Component not found.")
 
@@ -185,7 +195,7 @@ main :: proc() {
 
 	ecs.despawn(world, e1, e2, e4, e5)
 
-	// _time = time.now();
+	// _time = time.now()
 	// fmt.printfln("-- spawning quicks ( %v )", ecs.QUICK_CHUNK_SIZE * 1000 + 3)
 
 	// for i in 0..<ecs.QUICK_CHUNK_SIZE * 1000 + 3 {
@@ -198,7 +208,7 @@ main :: proc() {
 	// _duration = time.diff(_time, time.now())
 	// fmt.printfln("-- ellapsed: %v", _duration)
 
-	// _time = time.now();
+	// _time = time.now()
 	// fmt.printfln("-- spawning dynamics ( %v )", ecs.DYNAMIC_CHUNK_SIZE * 1000 + 3)
 
 	// for i in 0..<ecs.DYNAMIC_CHUNK_SIZE * 1000 + 3 {
@@ -211,7 +221,7 @@ main :: proc() {
 	// _duration = time.diff(_time, time.now())
 	// fmt.printfln("-- ellapsed: %v", _duration)
 
-	// _time = time.now();
+	// _time = time.now()
 	// fmt.printfln("-- spawning statics ( %v )", ecs.STATIC_CHUNK_SIZE * 1000 + 3)
 
 	// for i in 0..<ecs.STATIC_CHUNK_SIZE * 1000 + 3 {

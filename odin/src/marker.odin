@@ -1,4 +1,4 @@
-// #+private
+#+private
 package moecs
 
 /* Bits enumeration starts from 0. */

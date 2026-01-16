@@ -67,7 +67,7 @@ Element :: enum {
 }
 
 /* The state flags for an element (entity or system). */
-ElementState :: enum{
+ElementState :: enum {
 	/* Entity is stored in quick lifetime buffer. */
 	BUFFERED,
 	/* Entity has been deleted. */
@@ -79,6 +79,19 @@ ElementState :: enum{
 	/* System has components in the match query. */
 	HAS_COMPONENTS
 }
+
+/* Entities iterator. */
+@(private) EntitiesIterator :: struct {
+	/* Current entity index. */
+	idx : int,
+	/* Current entity pointer. */
+	entity : ^Entity
+}
+
+/* Callback procedure for entities iteration.
+   `entity`   : Pointer to the current entity.
+   `lifetime` : Current lifetime. */
+@(private) IteratorCallback :: proc(entity: ^Entity, lifetime: Lifetime)
 
 add :: proc {
 	add_component,

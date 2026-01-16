@@ -2,6 +2,7 @@ package moecs
 
 import "core:mem"
 import "base:runtime"
+import "core:slice"
 import sa "core:container/small_array"
 import "core:fmt"
 
@@ -20,7 +21,7 @@ Block :: struct {
 	/* Deleted (freed) rows in the dynamic lifetime block. */
 	deleted : sa.Small_Array(DYNAMIC_CHUNK_SIZE, int),
 	/* Occupied (used) rows in the quick lifetime block. */
-	occupied : [QUICK_CHUNK_SIZE]u8,
+	occupied : [QUICK_MARKER_SIZE]uint,
 	/* Current inserting index in the block (last inserted index + 1).
 	   If it equals ChunkSize than new block should be inserted to the world. */
 	idx : int,
@@ -50,7 +51,7 @@ block_init :: proc(block: ^Block) {
 @(private="package")
 block_has_free_rows :: proc(block: ^Block) -> bool {
 	switch block.lifetime {
-		case .QUICK:   return marker_is_all_unset(block.occupied[:])
+		case .QUICK:   return marker_is_all_unset(QUICK_CHUNK_SIZE, QUICK_MARKER_SIZE, block.occupied)
 		case .DYNAMIC: return block.idx < DYNAMIC_CHUNK_SIZE || sa.len(block.deleted) > 0
 		case .STATIC:  return block.idx < STATIC_CHUNK_SIZE
 	}
@@ -64,7 +65,7 @@ block_has_free_rows :: proc(block: ^Block) -> bool {
 block_is_full :: proc(block: ^Block) -> bool {
 	switch block.lifetime {
 		/* Even if one row is occupied, quick lifetime block can't be used for insert. */
-		case .QUICK:   return marker_cardinality(block.occupied[:]) > 0
+		case .QUICK:   return marker_is_any_set(QUICK_MARKER_SIZE, block.occupied)
 		case .DYNAMIC: return block.idx == DYNAMIC_CHUNK_SIZE && sa.len(block.deleted) == 0
 		case .STATIC:  return block.idx == STATIC_CHUNK_SIZE
 	}
@@ -77,7 +78,7 @@ block_is_full :: proc(block: ^Block) -> bool {
 @(private="package")
 block_is_free :: proc(block: ^Block) -> bool {
 	switch block.lifetime {
-		case .QUICK:   return marker_is_all_unset(block.occupied[:])
+		case .QUICK:   return marker_is_all_unset(QUICK_CHUNK_SIZE, QUICK_MARKER_SIZE, block.occupied)
 		case .DYNAMIC: return block.idx == 0 || sa.len(block.deleted) == block.idx - 1
 		case .STATIC:  return block.idx == 0
 	}
@@ -103,7 +104,7 @@ block_insert :: proc(block: ^Block) -> ^Entity {
 @(private="package")
 block_delete :: proc(block: ^Block, idx: int) {
 	switch block.lifetime {
-		case .QUICK:   marker_unset(block.occupied[:], idx)
+		case .QUICK:   marker_unset(QUICK_MARKER_SIZE, &block.occupied, idx)
 		case .DYNAMIC: sa.append(&block.deleted, idx)
 		case .STATIC:  panic("Static entities can't be deleted.")
 	}
@@ -124,18 +125,43 @@ block_absorb :: proc(block: ^Block) {
 
 	/* Step through all copied entities. */
 	for i in 0..<block.world.idx {
-		block.entities[i].state -= { .BUFFERED }	/* Unset entity BUFFERED state.          */
-		marker_set(block.occupied[:], i)			/* Set occupied marker for entity index. */
+		block.entities[i].block = block				/* Change container to the block. */
+		block.entities[i].state -= { .BUFFERED }	/* Unset entity BUFFERED state.   */
+		marker_set(QUICK_MARKER_SIZE, &block.occupied, i)	/* Set occupied marker for entity index. */
 	}
 
 	/* If buffer is not full, we need unset occupied marker for its rest. */
 	if block.world.idx < block.size {
-		for i in block.world.idx..<block.size {		/* block.size here will be */
-			marker_unset(block.occupied[:], i)		/* QUICK_CHUNK_SIZE btw.   */
+		for i in block.world.idx..<block.size {					/* block.size here will be */
+			marker_unset(QUICK_MARKER_SIZE, &block.occupied, i) /* QUICK_CHUNK_SIZE btw.   */
 		}
 	}
 	
 	block.idx = block.world.idx
+}
+
+/* Iterate to the next alive (not deleted) entity in the block.
+   `block`   : Reference to the block.
+   `iter`    : Entities iterator.
+   `returns` : True if next entity found, otherwise - false. */
+@(private="package")
+block_iter :: #force_inline proc(block: ^Block, iter: ^EntitiesIterator) -> bool #no_bounds_check {
+	/* Start from next possible entity index. */
+	idx := iter.entity == nil ? 0 : iter.idx + 1
+
+	for idx < block.idx {
+		if block.lifetime == .QUICK   && !marker_is_set(QUICK_MARKER_SIZE, block.occupied, idx) ||
+		   block.lifetime == .DYNAMIC && slice.contains(sa.slice(&block.deleted), idx) {
+			idx += 1
+		} else {
+			iter.entity = &block.entities[idx] 
+			iter.idx = idx
+			
+			return true
+		}
+	}
+
+	return false
 }
 
 /* Returns index of the first free to insert (last deleted) row in the block.

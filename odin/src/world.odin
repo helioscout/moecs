@@ -1,5 +1,6 @@
 package moecs
 
+import "core:slice"
 import sa "core:container/small_array"
 import "core:fmt"
 
@@ -167,6 +168,50 @@ set_resource :: proc(world: ^World, $Type: typeid, resource: Type) -> bool {
 		return true
 	} else {
 		return false
+	}
+}
+
+/* Step through each entity reference in the world.
+   `world`    : Pointer to the world.
+   `lifetime` : Entities lifetime flag.
+*/
+each :: proc(world: ^World, lifetime: bit_set[Lifetime; u8] = { .QUICK, .DYNAMIC, .STATIC },
+	callback: IteratorCallback) {
+	if .QUICK in lifetime && world.use_quicks {
+		/* Iterate entities in the buffer. */
+		for idx in 0..<world.idx {
+			if !slice.contains(sa.slice(&world.deleted), idx) {		/* Omit deleted entities. */
+				callback(&world.buffer[idx], .QUICK)
+			}
+		}
+
+		for &block in world.quicks {
+			iter : EntitiesIterator
+
+			for block_iter(&block, &iter) {
+				callback(iter.entity, .QUICK)
+			}
+		}
+	}
+
+	if .DYNAMIC in lifetime {
+		for &block in world.dynamics {
+			iter : EntitiesIterator
+
+			for block_iter(&block, &iter) {
+				callback(iter.entity, .DYNAMIC)
+			}
+		}
+	}
+
+	if .STATIC in lifetime {
+		for &block in world.statics {
+			iter : EntitiesIterator
+
+			for block_iter(&block, &iter) {
+				callback(iter.entity, .STATIC)
+			}
+		}
 	}
 }
 
