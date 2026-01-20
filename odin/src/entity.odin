@@ -28,7 +28,7 @@ Entity :: struct {
    `component` : Reference to the component instance. */
 add_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type) {
 	if c, ok := &get_world(entity).components[Type]; ok {
-		set_component(entity, Type, component)										/* Storing value in the chunk. */
+		set_component(entity, Type, component)					/* Storing value in the chunk. */
 		marker_set(COMPONENTS_MARKER_SIZE, &entity.components, c.idx)	/* Setting marker bit. */
 	}
 }

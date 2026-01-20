@@ -61,7 +61,7 @@ fn void system2(Entities entities) {
 }
 
 fn void system3(Entities entities) {
-	
+	// io::printn(entities.len());
 }
 
 fn void main() {
@@ -91,7 +91,7 @@ fn void main() {
 		 .mount({ .tags = { Tag1 }, .callback = &system1 })
 		 .mount({ .tags = { Tag2 }, .callback = &system1 })
 		 .mount({ .components = { Position, Center }, .callback = &system1 })
-		 .mount({ .components = { Position, Center }, .tags = { Tag1, Tag2 }, .callback = &system1 })
+		 .mount({ .components = { Position, Center }, .tags = { Tag1, Tag2 }, .callback = &system3 })
 		 .mount({ .name = "s1", .components = { Position }, .tags = { Tag1 }, .callback = &system2 })
 		 .mount({ .name = "s2", .components = { Position, Center, VecType }, .tags = { Tag1 }, .callback = &system2 })
 		 .run();
@@ -233,7 +233,11 @@ fn void main() {
 	clock = clock::now();
 	
 	for (usz i = 0; i < ecs::DYNAMIC_CHUNK_SIZE * 1000 + 3; i++) {
-		world.spawn(DYNAMIC).add((Position) { .x = 1, .y = 2 });
+		Entity* e7 = world.spawn(DYNAMIC);
+
+		e7.add((Position) { .x = 1, .y = 2 }).add((Center) { .cx = 1, .cy = 2 });
+
+		if (i >= 100 && i < 105) e7.tag_all(Tag1, Tag2);
 	}
 
 	duration = clock.mark();
@@ -355,4 +359,6 @@ fn void main() {
 	
 	duration = clock.mark();
 	io::printf("\nStep ellapsed: %s", duration);
+
+	// io::readline(tmem)!!;
 }

@@ -90,8 +90,12 @@ ElementState :: enum {
 
 /* Callback procedure for entities iteration.
    `entity`   : Pointer to the current entity.
-   `lifetime` : Current lifetime. */
-@(private) IteratorCallback :: proc(entity: ^Entity, lifetime: Lifetime)
+   `lifetime` : Current lifetime.
+   `world`    : Pointer to the world. */
+@(private) IteratorCallback :: proc(entity: ^Entity, lifetime: Lifetime, world: ^World)
+
+/* Callback function for the system. */
+SystemCallback :: proc(entities: []^Entity)
 
 add :: proc {
 	add_component,
@@ -165,6 +169,7 @@ set :: proc {
 get :: proc {
 	get_component,
 	get_resource,
+	get_system,
 	get_2_components,
 	get_3_components,
 	get_4_components,
@@ -214,7 +219,8 @@ remove :: proc {
 
 has :: proc {
 	has_component,
-	has_components
+	has_components,
+	has_system
 }
 
 tag :: proc {

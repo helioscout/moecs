@@ -18,9 +18,9 @@ fn void init() {
    @param buffer : "Pointer to buffer for quick lifetime entities. Ensure that you don't use same buffers for different worlds."
 *>
 fn World* new(Entity[QUICK_CHUNK_SIZE]* buffer = null) {
-	worlds.push({ .use_quicks = buffer != null, .buffer = buffer });
-
-	World* world = worlds.get_ref(worlds.size - 1);
+	World* world = mem::new(World, { .use_quicks = buffer != null, .buffer = buffer });
+	
+	worlds.push(world);
 	world.init();
 
 	return world;

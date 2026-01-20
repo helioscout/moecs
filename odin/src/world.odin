@@ -1,6 +1,7 @@
 package moecs
 
 import "core:slice"
+import str "core:strings"
 import sa "core:container/small_array"
 import "core:fmt"
 
@@ -12,6 +13,8 @@ World :: struct {
 	/* Registered resource types with its instances (values).
 	   Collection of all world resources. */
 	resources : Resources,
+	/* Mounted systems. */
+	systems : [dynamic]^System,
 	/* Blocks for entities with quick lifetime. */
 	quicks : [dynamic]^Block,
 	/* Blocks for entities with dynamic lifetime. */
@@ -55,6 +58,57 @@ register :: proc(world: ^World, element: Element, $Type: typeid, buffer : rawptr
 			world.tags[Type] = { type = Type, idx = len(world.tags) }
 		case .RESOURCE:
 			world.resources[Type] = { type = Type, value = new(Type) }
+	}
+}
+
+/* Mounts new system to the world.
+   `world`      : Pointer to the world.
+   `definition` : System definition. */
+mount :: proc(world: ^World, definition: SystemDefinition) {
+	if len(definition.name) > 0 && has_system(world, definition.name) do panic("System with such name has already been mounted.")
+	if len(definition.components) == 0 && len(definition.tags) == 0 do panic("Components or tags must be specified.")
+	if definition.callback == nil do panic("Callback must be provided.")
+	if world.running do panic("You can't change already running world.")
+
+	system : ^System = new(System)
+
+	system^ = { name = definition.name, state = { .ENABLED }, callback = definition.callback,
+				lifetime = card(definition.lifetime) == 0 ? { .QUICK, .DYNAMIC, .STATIC } : definition.lifetime }
+
+	if len(definition.components) > 0 {
+		for type in definition.components {
+			if component, ok := world.components[type]; ok {
+				marker_set(COMPONENTS_MARKER_SIZE, &system.components, component.idx)
+			}
+		}
+
+		system.state += { .HAS_COMPONENTS }
+	}
+
+	if len(definition.tags) > 0 {
+		for type in definition.tags {
+			if tag, ok := world.tags[type]; ok {
+				marker_set(TAGS_MARKER_SIZE, &system.tags, tag.idx)
+			}
+		}
+
+		system.state += { .HAS_TAGS }
+	}
+
+	append(&world.systems, system)
+}
+
+/* Unmounts the system from the world.
+   `world` : Pointer to the world.
+   `name`  : System name. */
+unmount :: proc(world: ^World, name: string) {
+	for system, index in world.systems {
+		if str.compare(system.name, name) == 0 {
+			delete(system.entities)
+			unordered_remove(&world.systems, index)
+			
+			break
+		}
 	}
 }
 
@@ -176,41 +230,93 @@ set_resource :: proc(world: ^World, $Type: typeid, resource: Type) -> bool {
    `lifetime` : Entities lifetime flag.
 */
 each :: proc(world: ^World, lifetime: bit_set[Lifetime; u8] = { .QUICK, .DYNAMIC, .STATIC },
-	callback: IteratorCallback) {
+	callback: IteratorCallback) #no_bounds_check {
 	if .QUICK in lifetime && world.use_quicks {
 		/* Iterate entities in the buffer. */
 		for idx in 0..<world.idx {
 			if !slice.contains(sa.slice(&world.deleted), idx) {		/* Omit deleted entities. */
-				callback(&world.buffer[idx], .QUICK)
+				callback(&world.buffer[idx], .QUICK, world)
 			}
 		}
 
 		for block in world.quicks {
-			iter : EntitiesIterator
-
-			for block_iter(block, &iter) {
-				callback(iter.entity, .QUICK)
+			for idx in 0..<block.idx {
+				if marker_is_set(QUICK_MARKER_SIZE, block.occupied, idx) {
+					callback(&block.entities[idx], .QUICK, world)
+				}
 			}
 		}
 	}
 
 	if .DYNAMIC in lifetime {
 		for block in world.dynamics {
-			iter : EntitiesIterator
-
-			for block_iter(block, &iter) {
-				callback(iter.entity, .DYNAMIC)
+			for idx in 0..<block.idx {
+				if !slice.contains(sa.slice(&block.deleted), idx) {
+					callback(&block.entities[idx], .DYNAMIC, world)
+				}
 			}
 		}
 	}
 
 	if .STATIC in lifetime {
 		for block in world.statics {
-			iter : EntitiesIterator
-
-			for block_iter(block, &iter) {
-				callback(iter.entity, .STATIC)
+			for idx in 0..<block.idx {
+				callback(&block.entities[idx], .STATIC, world)
 			}
+		}
+	}
+}
+
+/* Checks if system with specific name was mounted.
+   `world`   : Pointer to the world.
+   `name`    : System name.
+   `returns` : True if system exists, otherwise - false. */
+has_system :: #force_inline proc(world: ^World, name: string) -> bool  {
+	if len(name) == 0 do panic("System name can't be empty.")
+
+	for system in world.systems {
+		if str.compare(system.name, name) == 0 do return true
+	}
+
+	return false
+}
+
+/* Gets reference to the system by its name.
+   `world`   : Pointer to the world.
+   `name`    : System name.
+   `returns` : Pointer to the system and operation success. */
+get_system :: #force_inline proc(world: ^World, name: string) -> (^System, bool) #optional_ok {
+	if len(name) == 0 do panic("System name can't be empty.")
+
+	for system in world.systems {
+		if str.compare(system.name, name) == 0 do return system, true
+	}
+
+	return nil, false
+}
+
+/* Progress one step of the world life. Runs all mounted systems.
+   `world` : Pointer to the world. */
+progress :: proc(world: ^World) {
+	for system in world.systems do clear(&system.entities)
+	
+	each(world, callback = proc(entity: ^Entity, lifetime: Lifetime, world: ^World) {
+		for system in world.systems {
+			if enabled(system) && lifetime in system.lifetime {
+				if (.HAS_TAGS not_in system.state ||
+				   marker_is_subset(MAX_TAGS_COUNT, TAGS_MARKER_SIZE, entity.tags, system.tags)) &&
+				   (.HAS_COMPONENTS not_in system.state ||
+				   marker_is_subset(MAX_COMPONENTS_COUNT, COMPONENTS_MARKER_SIZE, entity.components, system.components)) {
+					/* Add pointer to entity into system collection of entities for current system call. */
+					append(&system.entities, entity)
+				}
+			}
+		}
+	})
+
+	for system in world.systems {
+		if enabled(system) {
+			system.callback(system.entities[:])
 		}
 	}
 }

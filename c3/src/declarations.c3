@@ -38,7 +38,7 @@ alias StaticBlocks = List { StaticBlock* };
 alias Chunks = HashMap { typeid, char* };
 
 <* Worlds collection in the space. *>
-alias Worlds = List { World };
+alias Worlds = List { World* };
 
 <* Registered components collection for each world. *>
 alias Components = HashMap { typeid, Component };
@@ -61,7 +61,7 @@ alias ComponentPointers = ElasticArray { any, MAX_COMPONENTS_COUNT };
 alias Entities = List { Entity* };
 
 <* Systems collection in the world. *>
-alias Systems = List { System };
+alias Systems = List { System* };
 
 <* Entities/blocks lifetime. *>
 enum Lifetime : const inline char {

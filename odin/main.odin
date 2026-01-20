@@ -38,19 +38,35 @@ count : uint = 0
 // 	fmt.println(len(block.entities))
 // }
 
-// MAX_COUNT :: 130
-// BITS_COUNT : uint : size_of(uint) * 8
-// MARKER_SIZE : uint : (uint(MAX_COUNT) + BITS_COUNT - 1) / BITS_COUNT
+MAX_COUNT :: 130
+BITS_COUNT : uint : size_of(uint) * 8
+MARKER_SIZE : uint : (uint(MAX_COUNT) + BITS_COUNT - 1) / BITS_COUNT
 
-// marker_print :: proc(marker: [MARKER_SIZE]uint) {
-// 	fmt.println("--- marker ---")
+marker_print :: proc(marker: [MARKER_SIZE]uint) {
+	fmt.println("--- marker ---")
 	
-// 	for i in 0..<len(marker) {
-// 		fmt.printfln("| word %v: %b", i, marker[i])
-// 	}
+	for i in 0..<len(marker) {
+		fmt.printfln("| word %v: %b", i, marker[i])
+	}
 
-// 	fmt.println("--------------")
-// }
+	fmt.println("--------------")
+}
+
+system1 :: proc(entities: []^ecs.Entity) {
+	
+}
+
+system2 :: proc(entities: []^ecs.Entity) {
+	
+}
+
+system3 :: proc(entities: []^ecs.Entity) {
+	// for entity in entities {
+	// 	pos, center := ecs.get(entity, Position, Center)
+
+	// 	fmt.println(pos, center)
+	// }
+}
 
 main :: proc() {
 	_time: time.Time = ---
@@ -68,7 +84,17 @@ main :: proc() {
 	ecs.register(world, .TAG, Tag1)
 	ecs.register(world, .TAG, Tag2)
 
+	ecs.mount(world, { tags = { Tag1 }, callback = system1 })
+	ecs.mount(world, { tags = { Tag2 }, callback = system1 })
+	ecs.mount(world, { components = { Position, Center }, callback = system1 })
+	ecs.mount(world, { components = { Position, Center }, tags = { Tag1, Tag2 }, callback = system3})
+	ecs.mount(world, { name = "s1", components = { Position }, tags = { Tag1 }, callback = system2 })
+	ecs.mount(world, { name = "s2", components = { Position, Center, VecType }, tags = { Tag1 }, callback = system2 })
+
 	ecs.run(world)
+
+	// ecs.unmount(world, "s2")
+	// fmt.println(ecs.get(world, "s2"))
 
 	// fmt.printfln("marker: %b", max(uint) >> (64 - 3 % 64))
 	// fmt.println(3 % 64)
@@ -98,8 +124,15 @@ main :: proc() {
 	// marker_print(marker)
 
 	// marker1: [MARKER_SIZE]uint = { max(uint), max(uint), max(uint) }
+	// marker2 := ecs.marker_clone(MARKER_SIZE, marker1)
+
+	// ecs.marker_unset(MARKER_SIZE, &marker2, 123)
 
 	// marker_print(ecs.marker_xor(MARKER_SIZE, marker, marker1))
+	// fmt.printfln("is equals: %v", ecs.marker_equals(MAX_COUNT, MARKER_SIZE, marker1, marker2))
+	// fmt.printfln("is subset: %v", ecs.marker_is_subset(MAX_COUNT, MARKER_SIZE, marker1, marker2))
+	// marker_print(marker1)
+	// marker_print(marker2)
 		
 	// resource1 : ^Resource1 = ecs.get_resource(world, Resource1)
 	// resource1.enabled = true
@@ -126,7 +159,7 @@ main :: proc() {
 
 	fmt.println(len(world.quicks))
 
-	ecs.each(world, callback = proc(entity: ^ecs.Entity, lifetime: ecs.Lifetime) {
+	ecs.each(world, callback = proc(entity: ^ecs.Entity, lifetime: ecs.Lifetime, world: ^ecs.World) {
 		pos, center := ecs.get(entity, Position, Center)
 		// fmt.println(pos, center)
 
@@ -219,9 +252,15 @@ main :: proc() {
 	fmt.printfln("-- spawning dynamics ( %v )", ecs.DYNAMIC_CHUNK_SIZE * 1000 + 3)
 
 	for i in 0..<ecs.DYNAMIC_CHUNK_SIZE * 1000 + 3 {
-		ecs.add(ecs.spawn(world, .DYNAMIC),
+		e := ecs.spawn(world, .DYNAMIC)
+
+		ecs.add(e,
 			Position, &Position { x = 10, y = 10 },
 			Center, &Center { cx = 20, cy = 20 })
+		
+		if i >= 100 && i < 105 {
+			ecs.tag(e, Tag1, Tag2)
+		}
 		// ecs.spawn(world, .DYNAMIC)
 	}
 
@@ -247,7 +286,7 @@ main :: proc() {
 	_time = time.now()
 	fmt.println("--- iterating ---")
 
-	ecs.each(world, callback = proc(entity: ^ecs.Entity, lifetime: ecs.Lifetime) {
+	ecs.each(world, callback = proc(entity: ^ecs.Entity, lifetime: ecs.Lifetime, world: ^ecs.World) {
 		pos, center := ecs.get(entity, Position, Center)
 		count += 1
 		// fmt.println(pos, center)
@@ -255,4 +294,17 @@ main :: proc() {
 
 	_duration = time.diff(_time, time.now())
 	fmt.printfln("-- ellapsed: %v, count: %v", _duration, count)
+
+	_time = time.now()
+	fmt.println("--- progress 100 times ---")
+
+	for i in 0..<100 {
+		ecs.progress(world)
+	}
+
+	_duration = time.diff(_time, time.now())
+	fmt.printfln("-- ellapsed: %v", _duration)
+
+	buffer: [10]byte
+	os.read(os.stdin, buffer[:])
 }

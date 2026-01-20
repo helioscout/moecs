@@ -44,7 +44,7 @@ fn void System.enable(&self) @inline {
 	self.state |= ElementState.ENABLED;
 }
 
-<* Enables the system. *>
+<* Disables the system. *>
 fn void System.disable(&self) @inline {
 	self.state &= ~ElementState.ENABLED;
 }

@@ -32,11 +32,7 @@ Block :: struct {
 /* Initializes the block. */
 @(private="package")
 block_init :: proc(block: ^Block) {
-	switch block.lifetime {
-		case .QUICK:   block.entities = new([QUICK_CHUNK_SIZE]Entity)[:]
-		case .DYNAMIC: block.entities = new([DYNAMIC_CHUNK_SIZE]Entity)[:]
-		case .STATIC:  block.entities = new([STATIC_CHUNK_SIZE]Entity)[:]
-	}
+	block.entities = make([]Entity, block.size)
 
 	for type, &component in block.world.components {
 		/* Allocate memory for components chunks.					 */

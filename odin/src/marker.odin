@@ -14,11 +14,7 @@ marker_is_all_set :: #force_inline proc($count: int, $size: uint, marker: [size]
 
 	remaining := max(uint) >> (MARKER_BITS_COUNT - uint(count) % MARKER_BITS_COUNT)
 	
-	if marker[size - 1] & remaining != remaining {
-		return false
-	} else {
-		return true
-	}
+	return marker[size - 1] & remaining == remaining
 }
 
 /* Checks if all bits in the marker are set to 0.
@@ -32,11 +28,7 @@ marker_is_all_unset :: #force_inline proc($count: int, $size: uint, marker: [siz
 
 	remaining := max(uint) >> (MARKER_BITS_COUNT - uint(count) % MARKER_BITS_COUNT)
 
-	if marker[size - 1] & remaining != 0 {
-		return false
-	} else {
-		return true
-	}
+	return marker[size - 1] & remaining == 0
 }
 
 /* Checks if any of bits in the marker are set to 1.
@@ -48,6 +40,42 @@ marker_is_any_set :: #force_inline proc($size: uint, marker: [size]uint) -> bool
 	}
 
 	return false
+}
+
+/* Checks if all the bits of two markers are equal.
+   `$count`  : Whole marker bits count.
+   `$size`   : Markers (arrays) size.
+   `marker1` : First bitset (marker array).
+   `marker2` : Second bitset (marker array). */
+marker_equals :: #force_inline proc($count: int, $size: uint, marker1: [size]uint, marker2: [size]uint) -> bool #no_bounds_check {
+	for i in 0..<size - 1 {
+		if marker1[i] != marker2[i] do return false
+	}
+
+	remaining := max(uint) >> (MARKER_BITS_COUNT - uint(count) % MARKER_BITS_COUNT)
+
+	return marker1[size - 1] & remaining == marker2[size - 1] & remaining
+}
+
+/* Clones marker.
+   `$size`   : Marker (array) size.
+   `marker`  : Pointer to bitset (marker array).
+   `returns` : New marker. */
+marker_clone :: #force_inline proc($size: uint, marker: [size]uint) -> [size]uint #no_bounds_check {
+	clone: [size]uint
+
+	for i in 0..<size do clone[i] = marker[i]
+
+	return clone
+}
+
+/* Checks if all bits of one marker (subset) included into other marker.
+   `$count` : Whole marker bits count.
+   `$size`  : Markers (arrays) size.
+   `marker` : Bitset that should include a subset.
+   `subset` : Bitset that should be included into marker. */
+marker_is_subset :: #force_inline proc($count: int, $size: uint, marker: [size]uint, subset: [size]uint) -> bool {
+	return marker_equals(count, size, marker_and(size, marker, subset), subset)
 }
 
 /* Sets marker's bit to 1.

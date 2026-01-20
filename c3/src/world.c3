@@ -116,8 +116,8 @@ macro World* World.register(&self, Element element, $Type, any buffer = null) {
    @return "Pointer to the world for chain calls."
 *>
 fn World* World.mount(&self, SystemDefinition definition) {
-	System system = { .name = definition.name, .callback = definition.callback,
-					  .lifetime = definition.lifetime == 0 ? 0b00000111 : definition.lifetime };
+	System* system = mem::new(System, { .name = definition.name, .callback = definition.callback, .state = ENABLED,
+					  .lifetime = definition.lifetime == 0 ? 0b00000111 : definition.lifetime });
 
 	if (definition.components.len > 0) {
 		foreach (type : definition.components) {
@@ -152,8 +152,8 @@ fn World* World.mount(&self, SystemDefinition definition) {
 *>
 fn World* World.unmount(&self, String name) {
 	if (try system = self.get_system(name)) {
-		self.systems.remove_item(*system);
-		(*system).entities.free();
+		self.systems.remove_item(system);
+		system.entities.free();
 	}
 	
 	return self;
@@ -328,8 +328,8 @@ macro World.@each(&self, char lifetime = 0b00000111; @body(entity, lifetime)) {
    @return "True if system exists, otherwise - false."
 *>
 fn bool World.has_system(&self, String name) {
-	foreach (&system : self.systems) {
-		if ((*system).name == name) return true;
+	foreach (system : self.systems) {
+		if (system.name == name) return true;
 	}
 
 	return false;
@@ -342,8 +342,8 @@ fn bool World.has_system(&self, String name) {
    @return? NOT_FOUND : "System was not found (mounted)."
 *>
 fn System*? World.get_system(&self, String name) {
-	foreach (&system : self.systems) {
-		if ((*system).name == name) return system;
+	foreach (system : self.systems) {
+		if (system.name == name) return system;
 	}
 
 	return NOT_FOUND?;
@@ -353,23 +353,23 @@ fn System*? World.get_system(&self, String name) {
    Runs all mounted systems. *>
 fn void World.progress(&self) {
 	/* Clear all systems entities collections. */
-	foreach (&system : self.systems) {
-		if ((*system).enabled()) (*system).entities.clear();
+	foreach (system : self.systems) {
+		if (system.enabled()) system.entities.clear();
 	}
 	
 	self.@each(; Entity* entity, Lifetime lifetime) {
-		foreach (&system : self.systems) {
-			if ((*system).enabled() &&					/* If system is enabled and                           */
-				(*system).lifetime & lifetime) {		/* consider system lifetime.                          */
-				if ((!(*system).has_tags() ||			/* If system query has no tags, or                    */
-						(*system).tags					/* take system tags bits,                             */
-							.and((*entity).tags)		/* perform and (&) with entity tags bits              */
-							.xor((*system).tags)		/* and perform xor (^) with system tags bits.         */
+		foreach (system : self.systems) {
+			if (system.enabled() &&						/* If system is enabled and                           */
+				system.lifetime & lifetime) {			/* consider system lifetime.                          */
+				if ((!system.has_tags() ||				/* If system query has no tags, or                    */
+						system.tags						/* take system tags bits,                             */
+							.and(entity.tags)			/* perform and (&) with entity tags bits              */
+							.xor(system.tags)			/* and perform xor (^) with system tags bits.         */
 							.cardinality() == 0) &&		/* Ensure that xor prove all system tags match.       */
-					(!(*system).has_components() ||		/* If system query has no components, or              */
-						(*system).components			/* take system components bits,                       */
-							.and((*entity).components)	/* perform and (&) with entity components bits        */
-							.xor((*system).components)	/* and perform xor (^) with system components bits.   */
+					(!system.has_components() ||		/* If system query has no components, or              */
+						system.components				/* take system components bits,                       */
+							.and(entity.components)		/* perform and (&) with entity components bits        */
+							.xor(system.components)		/* and perform xor (^) with system components bits.   */
 							.cardinality() == 0)) {		/* Ensure that xor prove all system components match. */
 					/* Add pointer to entity into system collection of entities for current system call.      */
 					system.entities.push(entity);
@@ -378,8 +378,8 @@ fn void World.progress(&self) {
 		}
 	};
 
-	foreach (&system : self.systems) {
-		if ((*system).enabled()) (*system).callback((*system).entities);
+	foreach (system : self.systems) {
+		if (system.enabled()) system.callback(system.entities);
 	}
 }
 
