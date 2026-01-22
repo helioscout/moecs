@@ -9,6 +9,8 @@ alias BufferedIndexes = ElasticArray { usz, QUICK_CHUNK_SIZE };
 
 <* World type, main container of the sapce. The world is built of blocks. *>
 struct World {
+	<* Query match approach. *>
+	Approach approach;
 	<* Registered component types. *>
 	Components components;
 	<* Registered tag types. *>
@@ -18,6 +20,8 @@ struct World {
 	Resources resources;
 	<* Mounted systems. *>
 	Systems systems;
+	<* Archetypes collection of the world. *>
+	Archetypes archetypes;
 	<* Blocks for entities with quick lifetime. *>
 	QuickBlocks quicks;
 	<* Blocks for entities with dynamic lifetime. *>
@@ -36,6 +40,10 @@ struct World {
 	usz idx;
 	<* Indicates that the world is running. *>
 	bool running;
+	<* Indicates that the world is in performing stage (runs deffered actions). *>
+	bool performing;
+	<* Deffered actions for the world. *>
+	Deffered deffered;
 }
 
 <* Gets world blocks count for specific (default: all) lifetimes.
@@ -74,6 +82,12 @@ fn void World.init(&self) @private {
 	self.quicks.init(mem);
 	self.dynamics.init(mem);
 	self.statics.init(mem);
+
+	if (self.approach == ARCHETYPE) {
+		self.archetypes.init(mem);
+		self.deffered.despawning.init(mem);
+		self.deffered.archetyping.init(mem);
+	}
 }
 
 <* Registers element type for the world.
@@ -168,6 +182,8 @@ fn World* World.unmount(&self, String name) {
 fn World* World.run(&self) {
 	self.running = true;
 
+	self.perform();
+	
 	return self;
 }
 
@@ -207,10 +223,16 @@ fn Entity* World.spawn(&self, Lifetime lifetime = DYNAMIC) {
    @param entity : "Reference to the entity."
 *>
 fn void World.despawn(&self, Entity* entity) {
-	if (entity.state & ElementState.BUFFERED) {
-		self.deleted.push(entity.chunk_idx);
+	if (entity.deleted()) return;
+	
+	if (self.approach == ARCHETYPE && self.running && !self.performing) {
+		self.deffered.despawning.push(entity);
 	} else {
-		entity.block.delete(entity.chunk_idx);
+		if (entity.state & ElementState.BUFFERED) {
+			self.deleted.push(entity.chunk_idx);
+		} else {
+			entity.block.delete(entity.chunk_idx);
+		}
 	}
 
 	entity.state |= ElementState.DELETED;
@@ -350,37 +372,124 @@ fn System*? World.get_system(&self, String name) {
 }
 
 <* Progress one step of the world life.
-   Runs all mounted systems. *>
+   Runs all mounted systems.
+   @require self.running : "Run the world first."
+*>
 fn void World.progress(&self) {
-	/* Clear all systems entities collections. */
-	foreach (system : self.systems) {
-		if (system.enabled()) system.entities.clear();
-	}
-	
-	self.@each(; Entity* entity, Lifetime lifetime) {
+	if (self.approach == ARCHETYPE) {
 		foreach (system : self.systems) {
-			if (system.enabled() &&						/* If system is enabled and                           */
-				system.lifetime & lifetime) {			/* consider system lifetime.                          */
-				if ((!system.has_tags() ||				/* If system query has no tags, or                    */
-						system.tags						/* take system tags bits,                             */
-							.and(entity.tags)			/* perform and (&) with entity tags bits              */
-							.xor(system.tags)			/* and perform xor (^) with system tags bits.         */
-							.cardinality() == 0) &&		/* Ensure that xor prove all system tags match.       */
-					(!system.has_components() ||		/* If system query has no components, or              */
-						system.components				/* take system components bits,                       */
-							.and(entity.components)		/* perform and (&) with entity components bits        */
-							.xor(system.components)		/* and perform xor (^) with system components bits.   */
-							.cardinality() == 0)) {		/* Ensure that xor prove all system components match. */
-					/* Add pointer to entity into system collection of entities for current system call.      */
-					system.entities.push(entity);
+			if (system.enabled()) {
+				foreach (archetype : self.archetypes) {
+					if ((!system.has_tags() ||
+							system.tags
+								.and(archetype.tags)
+								.xor(system.tags)
+								.cardinality() == 0) &&
+						(!system.has_components() ||
+							system.components
+								.and(archetype.components)
+								.xor(system.components)
+								.cardinality() == 0)) {
+					   	/* Call system callback for matched archetype. */
+						system.callback(archetype.entities, self);
+					}
 				}
 			}
 		}
-	};
+		
+		self.perform();
+	} else if (self.approach == ITERATION) {
+		/* Clear all systems entities collections. */
+		foreach (system : self.systems) {
+			if (system.enabled()) system.entities.clear();
+		}
+	
+		self.@each(; Entity* entity, Lifetime lifetime) {
+			foreach (system : self.systems) {
+				if (system.enabled() &&						/* If system is enabled and                           */
+					system.lifetime & lifetime) {			/* consider system lifetime.                          */
+					if ((!system.has_tags() ||				/* If system query has no tags, or                    */
+							system.tags						/* take system tags bits,                             */
+								.and(entity.tags)			/* perform and (&) with entity tags bits              */
+								.xor(system.tags)			/* and perform xor (^) with system tags bits.         */
+								.cardinality() == 0) &&		/* Ensure that xor prove all system tags match.       */
+						(!system.has_components() ||		/* If system query has no components, or              */
+							system.components				/* take system components bits,                       */
+								.and(entity.components)		/* perform and (&) with entity components bits        */
+								.xor(system.components)		/* and perform xor (^) with system components bits.   */
+								.cardinality() == 0)) {		/* Ensure that xor prove all system components match. */
+						/* Add pointer to entity into system collection of entities for current system call.      */
+						system.entities.push(entity);
+					}
+				}
+			}
+		};
 
-	foreach (system : self.systems) {
-		if (system.enabled()) system.callback(system.entities);
+		foreach (system : self.systems) {
+			if (system.enabled()) system.callback(system.entities, self);
+		}
 	}
+}
+
+<* Perform deffered actions for the world. *>
+fn void World.perform(&self) {
+	self.performing = true;
+
+	/* Perform deffered despawning. */
+	foreach (entity : self.deffered.despawning) {
+		self.despawn(entity);
+		if (entity.archetype != null) entity.archetype.entities.remove_item(entity);
+	}
+
+	self.deffered.despawning.clear();
+
+	/* Perform deffered archetyping. */
+	foreach (entity : self.deffered.archetyping) {
+		if (entity.state & ElementState.ARCHETYPING != 0 && !entity.deleted()) {
+			entity.archetyping();
+			entity.state &= ~ElementState.ARCHETYPING;
+		}
+	}
+
+	self.deffered.archetyping.clear();
+
+	/* We need to delete empty archetypes. */
+	foreach (archetype : self.archetypes) {
+		if (archetype.entities.len() == 0) archetype.entities.free();
+	}
+	
+	self.archetypes.remove_if(fn (archetype) => (*archetype).entities.len() == 0);
+
+	self.performing = false;
+}
+
+<* Creates new archetype.
+   @param components : "Components bitset."
+   @param tags : "Tags bitset."
+*>
+fn Archetype* World.new_archetype(&self, ComponentsMarker components, TagsMarker tags) @local {
+	Archetype* archetype = mem::new(Archetype, { .components = components, .tags = tags });
+
+	archetype.init();
+	self.archetypes.push(archetype);
+
+	return archetype;
+}
+
+<* Gets archetype by query match bitsets.
+   @param components : "Components bitset."
+   @param tags : "Tags bitset."
+   @return "Pointer to archetype."
+*>
+fn Archetype* World.get_archetype(&self, ComponentsMarker components, TagsMarker tags) @private {
+	foreach (archetype : self.archetypes) {
+		if (archetype.components.xor(components).cardinality() == 0 &&
+			archetype.tags.xor(tags).cardinality() == 0) {
+			return archetype;
+		}
+	}
+
+	return self.new_archetype(components, tags);
 }
 
 <* Gets the reference to block interface that is available to insert new entities,

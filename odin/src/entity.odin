@@ -18,18 +18,26 @@ Entity :: struct {
 		world : ^World,
 	},
 	/* The index of the entity in the collection (chunk index for its components). */
-	chunk_idx : int
+	chunk_idx : int,
+	/* Archetype reference which entity belongs to. Is nill for entities without components/tags. */
+	archetype : ^Archetype,
+	/* Entity index in the archetype collection (for fast removing). */
+	arch_idx : int
 }
 
 /* Adds component to the entity by type and instance (initializer).
    If entity already has a component it will be replaced by new one.
    `entity`    : Pointer to the entity.
    `$Type`     : Component type.
-   `component` : Reference to the component instance. */
-add_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type) {
+   `component` : Reference to the component instance.
+   `perform`   : Perform archetyping of the entity.
+				 You should not change this parameter (inner logic). */
+add_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type, perform: bool = true) {
 	if c, ok := &get_world(entity).components[Type]; ok {
 		set_component(entity, Type, component)					/* Storing value in the chunk. */
 		marker_set(COMPONENTS_MARKER_SIZE, &entity.components, c.idx)	/* Setting marker bit. */
+
+		if perform do archetyping(entity)
 	}
 }
 
@@ -104,11 +112,15 @@ get_component :: proc(entity: ^Entity, $Type: typeid) -> (^Type, bool) #optional
 }
 
 /* Removes component from entity by its type.
-   `entity` : Pointer to the entity.
-   `type`   : Component type. */
-remove_component :: proc(entity: ^Entity, type: typeid) {
+   `entity`  : Pointer to the entity.
+   `type`    : Component type.
+   `perform` : Perform archetyping of the entity.
+			   You should not change this parameter (inner logic). */
+remove_component :: proc(entity: ^Entity, type: typeid, perform: bool = true) {
 	if component, ok := &get_world(entity).components[type]; ok {
 		marker_unset(COMPONENTS_MARKER_SIZE, &entity.components, component.idx)
+
+		if perform do archetyping(entity)
 	}
 }
 
@@ -116,7 +128,9 @@ remove_component :: proc(entity: ^Entity, type: typeid) {
    `entity` : Pointer to the entity.
    `types`  : Companent types. */
 remove_components :: proc(entity: ^Entity, types: ..typeid) {
-	for type in types do remove_component(entity, type)
+	for type in types do remove_component(entity, type, false)
+
+	archetyping(entity)
 }
 
 /* Checks if the enity has a component.
@@ -152,10 +166,14 @@ has_components :: proc(entity: ^Entity, types: ..typeid) -> bool {
 
 /* Tags entity with specified tag type.
    `entity`  : Pointer to the entity.
-   `type`    : Tag type. */
-set_tag :: proc(entity: ^Entity, type: typeid) {
+   `type`    : Tag type.
+   `perform` : Perform archetyping of the entity.
+			   You should not change this parameter (inner logic). */
+set_tag :: proc(entity: ^Entity, type: typeid, perform: bool = true) {
 	if tag, ok := &get_world(entity).tags[type]; ok {
 		marker_set(TAGS_MARKER_SIZE, &entity.tags, tag.idx)
+
+		if perform do archetyping(entity)
 	}
 }
 
@@ -170,15 +188,21 @@ set_tags :: proc(entity: ^Entity, types: ..typeid) {
 			marker_set(TAGS_MARKER_SIZE, &entity.tags, tag.idx)
 		}
 	}
+	
+	archetyping(entity)
 }
 
 /* Removes tag from entity.
    `entity`  : Pointer to the entity.
-   `type`    : Tag type. */
-unset_tag :: proc(entity: ^Entity, type: typeid) {
+   `type`    : Tag type.
+   `perform` : Perform archetyping of the entity.
+			   You should not change this parameter (inner logic). */
+unset_tag :: proc(entity: ^Entity, type: typeid, perform: bool = true) {
 	if tag, ok := &get_world(entity).tags[type]; ok {
 		marker_unset(TAGS_MARKER_SIZE, &entity.tags, tag.idx)
 	}
+	
+	if perform do archetyping(entity)
 }
 
 /* Removes tags from entity of all passed types.
@@ -192,6 +216,8 @@ unset_tags :: proc(entity: ^Entity, types: ..typeid) {
 			marker_unset(TAGS_MARKER_SIZE, &entity.tags, tag.idx)
 		}
 	}
+
+	archetyping(entity)
 }
 
 /* Checks if the entity is tagged with specified tag type.
@@ -237,4 +263,38 @@ deleted :: #force_inline proc(entity: ^Entity) -> bool {
 @(private="file")
 get_world :: #force_inline proc(entity: ^Entity) -> ^World {
 	return .BUFFERED in entity.state ? entity.world : entity.block.world
+}
+
+/* Bind the entity to appropriate archetype.
+   `entity` : Pointer to the entity. */
+@(private="package")
+archetyping :: proc(entity: ^Entity) {
+	world : = get_world(entity)
+
+	if world.approach != .ARCHETYPE do return
+
+	if world.running && !world.performing {
+		if .ARCHETYPING not_in entity.state {
+			append(&world.deffered.archetyping, entity)
+			entity.state += { .ARCHETYPING }
+		}
+
+		return
+	}
+
+	archetype_remove(entity)
+
+	if marker_is_all_unset(MAX_COMPONENTS_COUNT, COMPONENTS_MARKER_SIZE, entity.components) &&
+	   marker_is_all_unset(MAX_TAGS_COUNT, TAGS_MARKER_SIZE, entity.tags) {
+		/* If entity has no components and no tags, clear reference to archetype. */
+		entity.archetype = nil
+	} else {
+		/* Find appropriate archetype or new one. */
+		archetype := get_archetype(world, entity.components, entity.tags)
+
+		append(&archetype.entities, entity)
+
+		entity.archetype = archetype
+		entity.arch_idx = len(archetype.entities) - 1
+	}
 }

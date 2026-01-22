@@ -8,8 +8,10 @@ package moecs
    `componentN` : Reference to the N-th component instance. */
 add_2_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2) {
-	add_component(entity, Type1, component1)
-	add_component(entity, Type2, component2)
+	add_component(entity, Type1, component1, false)
+	add_component(entity, Type2, component2, false)
+
+	archetyping(entity)
 }
 
 /* Adds 3 components to the entity by type and instance (initializer).
@@ -20,9 +22,11 @@ add_2_components :: #force_inline proc(entity: ^Entity,
 add_3_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2,
 	$Type3: typeid, component3: ^Type3) {
-	add_component(entity, Type1, component1)
-	add_component(entity, Type2, component2)
-	add_component(entity, Type3, component3)
+	add_component(entity, Type1, component1, false)
+	add_component(entity, Type2, component2, false)
+	add_component(entity, Type3, component3, false)
+
+	archetyping(entity)
 }
 
 /* Adds 4 components to the entity by type and instance (initializer).
@@ -33,10 +37,12 @@ add_3_components :: #force_inline proc(entity: ^Entity,
 add_4_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2,
 	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4) {
-	add_component(entity, Type1, component1)
-	add_component(entity, Type2, component2)
-	add_component(entity, Type3, component3)
-	add_component(entity, Type4, component4)
+	add_component(entity, Type1, component1, false)
+	add_component(entity, Type2, component2, false)
+	add_component(entity, Type3, component3, false)
+	add_component(entity, Type4, component4, false)
+
+	archetyping(entity)
 }
 
 /* Adds 5 components to the entity by type and instance (initializer).
@@ -48,11 +54,13 @@ add_5_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2,
 	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4,
 	$Type5: typeid, component5: ^Type5) {
-	add_component(entity, Type1, component1)
-	add_component(entity, Type2, component2)
-	add_component(entity, Type3, component3)
-	add_component(entity, Type4, component4)
-	add_component(entity, Type5, component5)
+	add_component(entity, Type1, component1, false)
+	add_component(entity, Type2, component2, false)
+	add_component(entity, Type3, component3, false)
+	add_component(entity, Type4, component4, false)
+	add_component(entity, Type5, component5, false)
+
+	archetyping(entity)
 }
 
 /* Adds 6 components to the entity by type and instance (initializer).
@@ -64,12 +72,14 @@ add_6_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2,
 	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4,
 	$Type5: typeid, component5: ^Type5, $Type6: typeid, component6: ^Type6) {
-	add_component(entity, Type1, component1)
-	add_component(entity, Type2, component2)
-	add_component(entity, Type3, component3)
-	add_component(entity, Type4, component4)
-	add_component(entity, Type5, component5)
-	add_component(entity, Type6, component6)
+	add_component(entity, Type1, component1, false)
+	add_component(entity, Type2, component2, false)
+	add_component(entity, Type3, component3, false)
+	add_component(entity, Type4, component4, false)
+	add_component(entity, Type5, component5, false)
+	add_component(entity, Type6, component6, false)
+
+	archetyping(entity)
 }
 
 /* Adds 7 components to the entity by type and instance (initializer).
@@ -82,13 +92,15 @@ add_7_components :: #force_inline proc(entity: ^Entity,
 	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4,
 	$Type5: typeid, component5: ^Type5, $Type6: typeid, component6: ^Type6,
 	$Type7: typeid, component7: ^Type7) {
-	add_component(entity, Type1, component1)
-	add_component(entity, Type2, component2)
-	add_component(entity, Type3, component3)
-	add_component(entity, Type4, component4)
-	add_component(entity, Type5, component5)
-	add_component(entity, Type6, component6)
-	add_component(entity, Type7, component7)
+	add_component(entity, Type1, component1, false)
+	add_component(entity, Type2, component2, false)
+	add_component(entity, Type3, component3, false)
+	add_component(entity, Type4, component4, false)
+	add_component(entity, Type5, component5, false)
+	add_component(entity, Type6, component6, false)
+	add_component(entity, Type7, component7, false)
+
+	archetyping(entity)
 }
 
 /* Adds 8 components to the entity by type and instance (initializer).
@@ -101,14 +113,16 @@ add_8_components :: #force_inline proc(entity: ^Entity,
 	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4,
 	$Type5: typeid, component5: ^Type5, $Type6: typeid, component6: ^Type6,
 	$Type7: typeid, component7: ^Type7, $Type8: typeid, component8: ^Type8) {
-	add_component(entity, Type1, component1)
-	add_component(entity, Type2, component2)
-	add_component(entity, Type3, component3)
-	add_component(entity, Type4, component4)
-	add_component(entity, Type5, component5)
-	add_component(entity, Type6, component6)
-	add_component(entity, Type7, component7)
-	add_component(entity, Type8, component8)
+	add_component(entity, Type1, component1, false)
+	add_component(entity, Type2, component2, false)
+	add_component(entity, Type3, component3, false)
+	add_component(entity, Type4, component4, false)
+	add_component(entity, Type5, component5, false)
+	add_component(entity, Type6, component6, false)
+	add_component(entity, Type7, component7, false)
+	add_component(entity, Type8, component8, false)
+
+	archetyping(entity)
 }
 
 /* Adds 9 components to the entity by type and instance (initializer).
@@ -122,15 +136,17 @@ add_9_components :: #force_inline proc(entity: ^Entity,
 	$Type5: typeid, component5: ^Type5, $Type6: typeid, component6: ^Type6,
 	$Type7: typeid, component7: ^Type7, $Type8: typeid, component8: ^Type8,
 	$Type9: typeid, component9: ^Type9) {
-	add_component(entity, Type1, component1)
-	add_component(entity, Type2, component2)
-	add_component(entity, Type3, component3)
-	add_component(entity, Type4, component4)
-	add_component(entity, Type5, component5)
-	add_component(entity, Type6, component6)
-	add_component(entity, Type7, component7)
-	add_component(entity, Type8, component8)
-	add_component(entity, Type9, component9)
+	add_component(entity, Type1, component1, false)
+	add_component(entity, Type2, component2, false)
+	add_component(entity, Type3, component3, false)
+	add_component(entity, Type4, component4, false)
+	add_component(entity, Type5, component5, false)
+	add_component(entity, Type6, component6, false)
+	add_component(entity, Type7, component7, false)
+	add_component(entity, Type8, component8, false)
+	add_component(entity, Type9, component9, false)
+
+	archetyping(entity)
 }
 
 /* Adds 10 components to the entity by type and instance (initializer).
@@ -144,16 +160,18 @@ add_10_components :: #force_inline proc(entity: ^Entity,
 	$Type5: typeid, component5: ^Type5, $Type6: typeid, component6: ^Type6,
 	$Type7: typeid, component7: ^Type7, $Type8: typeid, component8: ^Type8,
 	$Type9: typeid, component9: ^Type9, $Type10: typeid, component10: ^Type10) {
-	add_component(entity, Type1, component1)
-	add_component(entity, Type2, component2)
-	add_component(entity, Type3, component3)
-	add_component(entity, Type4, component4)
-	add_component(entity, Type5, component5)
-	add_component(entity, Type6, component6)
-	add_component(entity, Type7, component7)
-	add_component(entity, Type8, component8)
-	add_component(entity, Type9, component9)
-	add_component(entity, Type10, component10)
+	add_component(entity, Type1, component1, false)
+	add_component(entity, Type2, component2, false)
+	add_component(entity, Type3, component3, false)
+	add_component(entity, Type4, component4, false)
+	add_component(entity, Type5, component5, false)
+	add_component(entity, Type6, component6, false)
+	add_component(entity, Type7, component7, false)
+	add_component(entity, Type8, component8, false)
+	add_component(entity, Type9, component9, false)
+	add_component(entity, Type10, component10, false)
+
+	archetyping(entity)
 }
 
 /* Adds 11 components to the entity by type and instance (initializer).
@@ -168,17 +186,19 @@ add_11_components :: #force_inline proc(entity: ^Entity,
 	$Type7: typeid, component7: ^Type7, $Type8: typeid, component8: ^Type8,
 	$Type9: typeid, component9: ^Type9, $Type10: typeid, component10: ^Type10,
 	$Type11: typeid, component11: ^Type11) {
-	add_component(entity, Type1, component1)
-	add_component(entity, Type2, component2)
-	add_component(entity, Type3, component3)
-	add_component(entity, Type4, component4)
-	add_component(entity, Type5, component5)
-	add_component(entity, Type6, component6)
-	add_component(entity, Type7, component7)
-	add_component(entity, Type8, component8)
-	add_component(entity, Type9, component9)
-	add_component(entity, Type10, component10)
-	add_component(entity, Type11, component11)
+	add_component(entity, Type1, component1, false)
+	add_component(entity, Type2, component2, false)
+	add_component(entity, Type3, component3, false)
+	add_component(entity, Type4, component4, false)
+	add_component(entity, Type5, component5, false)
+	add_component(entity, Type6, component6, false)
+	add_component(entity, Type7, component7, false)
+	add_component(entity, Type8, component8, false)
+	add_component(entity, Type9, component9, false)
+	add_component(entity, Type10, component10, false)
+	add_component(entity, Type11, component11, false)
+
+	archetyping(entity)
 }
 
 /* Adds 12 components to the entity by type and instance (initializer).
@@ -193,18 +213,20 @@ add_12_components :: #force_inline proc(entity: ^Entity,
 	$Type7: typeid, component7: ^Type7, $Type8: typeid, component8: ^Type8,
 	$Type9: typeid, component9: ^Type9, $Type10: typeid, component10: ^Type10,
 	$Type11: typeid, component11: ^Type11, $Type12: typeid, component12: ^Type12) {
-	add_component(entity, Type1, component1)
-	add_component(entity, Type2, component2)
-	add_component(entity, Type3, component3)
-	add_component(entity, Type4, component4)
-	add_component(entity, Type5, component5)
-	add_component(entity, Type6, component6)
-	add_component(entity, Type7, component7)
-	add_component(entity, Type8, component8)
-	add_component(entity, Type9, component9)
-	add_component(entity, Type10, component10)
-	add_component(entity, Type11, component11)
-	add_component(entity, Type12, component12)
+	add_component(entity, Type1, component1, false)
+	add_component(entity, Type2, component2, false)
+	add_component(entity, Type3, component3, false)
+	add_component(entity, Type4, component4, false)
+	add_component(entity, Type5, component5, false)
+	add_component(entity, Type6, component6, false)
+	add_component(entity, Type7, component7, false)
+	add_component(entity, Type8, component8, false)
+	add_component(entity, Type9, component9, false)
+	add_component(entity, Type10, component10, false)
+	add_component(entity, Type11, component11, false)
+	add_component(entity, Type12, component12, false)
+
+	archetyping(entity)
 }
 
 /* Adds 13 components to the entity by type and instance (initializer).
@@ -220,19 +242,21 @@ add_13_components :: #force_inline proc(entity: ^Entity,
 	$Type9: typeid, component9: ^Type9, $Type10: typeid, component10: ^Type10,
 	$Type11: typeid, component11: ^Type11, $Type12: typeid, component12: ^Type12,
 	$Type13: typeid, component13: ^Type13) {
-	add_component(entity, Type1, component1)
-	add_component(entity, Type2, component2)
-	add_component(entity, Type3, component3)
-	add_component(entity, Type4, component4)
-	add_component(entity, Type5, component5)
-	add_component(entity, Type6, component6)
-	add_component(entity, Type7, component7)
-	add_component(entity, Type8, component8)
-	add_component(entity, Type9, component9)
-	add_component(entity, Type10, component10)
-	add_component(entity, Type11, component11)
-	add_component(entity, Type12, component12)
-	add_component(entity, Type13, component13)
+	add_component(entity, Type1, component1, false)
+	add_component(entity, Type2, component2, false)
+	add_component(entity, Type3, component3, false)
+	add_component(entity, Type4, component4, false)
+	add_component(entity, Type5, component5, false)
+	add_component(entity, Type6, component6, false)
+	add_component(entity, Type7, component7, false)
+	add_component(entity, Type8, component8, false)
+	add_component(entity, Type9, component9, false)
+	add_component(entity, Type10, component10, false)
+	add_component(entity, Type11, component11, false)
+	add_component(entity, Type12, component12, false)
+	add_component(entity, Type13, component13, false)
+
+	archetyping(entity)
 }
 
 /* Adds 14 components to the entity by type and instance (initializer).
@@ -248,20 +272,22 @@ add_14_components :: #force_inline proc(entity: ^Entity,
 	$Type9: typeid, component9: ^Type9, $Type10: typeid, component10: ^Type10,
 	$Type11: typeid, component11: ^Type11, $Type12: typeid, component12: ^Type12,
 	$Type13: typeid, component13: ^Type13, $Type14: typeid, component14: ^Type14) {
-	add_component(entity, Type1, component1)
-	add_component(entity, Type2, component2)
-	add_component(entity, Type3, component3)
-	add_component(entity, Type4, component4)
-	add_component(entity, Type5, component5)
-	add_component(entity, Type6, component6)
-	add_component(entity, Type7, component7)
-	add_component(entity, Type8, component8)
-	add_component(entity, Type9, component9)
-	add_component(entity, Type10, component10)
-	add_component(entity, Type11, component11)
-	add_component(entity, Type12, component12)
-	add_component(entity, Type13, component13)
-	add_component(entity, Type14, component14)
+	add_component(entity, Type1, component1, false)
+	add_component(entity, Type2, component2, false)
+	add_component(entity, Type3, component3, false)
+	add_component(entity, Type4, component4, false)
+	add_component(entity, Type5, component5, false)
+	add_component(entity, Type6, component6, false)
+	add_component(entity, Type7, component7, false)
+	add_component(entity, Type8, component8, false)
+	add_component(entity, Type9, component9, false)
+	add_component(entity, Type10, component10, false)
+	add_component(entity, Type11, component11, false)
+	add_component(entity, Type12, component12, false)
+	add_component(entity, Type13, component13, false)
+	add_component(entity, Type14, component14, false)
+
+	archetyping(entity)
 }
 
 /* Adds 15 components to the entity by type and instance (initializer).
@@ -278,21 +304,23 @@ add_15_components :: #force_inline proc(entity: ^Entity,
 	$Type11: typeid, component11: ^Type11, $Type12: typeid, component12: ^Type12,
 	$Type13: typeid, component13: ^Type13, $Type14: typeid, component14: ^Type14,
 	$Type15: typeid, component15: ^Type15) {
-	add_component(entity, Type1, component1)
-	add_component(entity, Type2, component2)
-	add_component(entity, Type3, component3)
-	add_component(entity, Type4, component4)
-	add_component(entity, Type5, component5)
-	add_component(entity, Type6, component6)
-	add_component(entity, Type7, component7)
-	add_component(entity, Type8, component8)
-	add_component(entity, Type9, component9)
-	add_component(entity, Type10, component10)
-	add_component(entity, Type11, component11)
-	add_component(entity, Type12, component12)
-	add_component(entity, Type13, component13)
-	add_component(entity, Type14, component14)
-	add_component(entity, Type15, component15)
+	add_component(entity, Type1, component1, false)
+	add_component(entity, Type2, component2, false)
+	add_component(entity, Type3, component3, false)
+	add_component(entity, Type4, component4, false)
+	add_component(entity, Type5, component5, false)
+	add_component(entity, Type6, component6, false)
+	add_component(entity, Type7, component7, false)
+	add_component(entity, Type8, component8, false)
+	add_component(entity, Type9, component9, false)
+	add_component(entity, Type10, component10, false)
+	add_component(entity, Type11, component11, false)
+	add_component(entity, Type12, component12, false)
+	add_component(entity, Type13, component13, false)
+	add_component(entity, Type14, component14, false)
+	add_component(entity, Type15, component15, false)
+
+	archetyping(entity)
 }
 
 /* Adds 16 components to the entity by type and instance (initializer).
@@ -309,22 +337,24 @@ add_16_components :: #force_inline proc(entity: ^Entity,
 	$Type11: typeid, component11: ^Type11, $Type12: typeid, component12: ^Type12,
 	$Type13: typeid, component13: ^Type13, $Type14: typeid, component14: ^Type14,
 	$Type15: typeid, component15: ^Type15, $Type16: typeid, component16: ^Type16) {
-	add_component(entity, Type1, component1)
-	add_component(entity, Type2, component2)
-	add_component(entity, Type3, component3)
-	add_component(entity, Type4, component4)
-	add_component(entity, Type5, component5)
-	add_component(entity, Type6, component6)
-	add_component(entity, Type7, component7)
-	add_component(entity, Type8, component8)
-	add_component(entity, Type9, component9)
-	add_component(entity, Type10, component10)
-	add_component(entity, Type11, component11)
-	add_component(entity, Type12, component12)
-	add_component(entity, Type13, component13)
-	add_component(entity, Type14, component14)
-	add_component(entity, Type15, component15)
-	add_component(entity, Type16, component16)
+	add_component(entity, Type1, component1, false)
+	add_component(entity, Type2, component2, false)
+	add_component(entity, Type3, component3, false)
+	add_component(entity, Type4, component4, false)
+	add_component(entity, Type5, component5, false)
+	add_component(entity, Type6, component6, false)
+	add_component(entity, Type7, component7, false)
+	add_component(entity, Type8, component8, false)
+	add_component(entity, Type9, component9, false)
+	add_component(entity, Type10, component10, false)
+	add_component(entity, Type11, component11, false)
+	add_component(entity, Type12, component12, false)
+	add_component(entity, Type13, component13, false)
+	add_component(entity, Type14, component14, false)
+	add_component(entity, Type15, component15, false)
+	add_component(entity, Type16, component16, false)
+
+	archetyping(entity)
 }
 
 /* Adds 17 components to the entity by type and instance (initializer).
@@ -342,23 +372,25 @@ add_17_components :: #force_inline proc(entity: ^Entity,
 	$Type13: typeid, component13: ^Type13, $Type14: typeid, component14: ^Type14,
 	$Type15: typeid, component15: ^Type15, $Type16: typeid, component16: ^Type16,
 	$Type17: typeid, component17: ^Type17) {
-	add_component(entity, Type1, component1)
-	add_component(entity, Type2, component2)
-	add_component(entity, Type3, component3)
-	add_component(entity, Type4, component4)
-	add_component(entity, Type5, component5)
-	add_component(entity, Type6, component6)
-	add_component(entity, Type7, component7)
-	add_component(entity, Type8, component8)
-	add_component(entity, Type9, component9)
-	add_component(entity, Type10, component10)
-	add_component(entity, Type11, component11)
-	add_component(entity, Type12, component12)
-	add_component(entity, Type13, component13)
-	add_component(entity, Type14, component14)
-	add_component(entity, Type15, component15)
-	add_component(entity, Type16, component16)
-	add_component(entity, Type17, component17)
+	add_component(entity, Type1, component1, false)
+	add_component(entity, Type2, component2, false)
+	add_component(entity, Type3, component3, false)
+	add_component(entity, Type4, component4, false)
+	add_component(entity, Type5, component5, false)
+	add_component(entity, Type6, component6, false)
+	add_component(entity, Type7, component7, false)
+	add_component(entity, Type8, component8, false)
+	add_component(entity, Type9, component9, false)
+	add_component(entity, Type10, component10, false)
+	add_component(entity, Type11, component11, false)
+	add_component(entity, Type12, component12, false)
+	add_component(entity, Type13, component13, false)
+	add_component(entity, Type14, component14, false)
+	add_component(entity, Type15, component15, false)
+	add_component(entity, Type16, component16, false)
+	add_component(entity, Type17, component17, false)
+
+	archetyping(entity)
 }
 
 /* Adds 18 components to the entity by type and instance (initializer).
@@ -376,24 +408,26 @@ add_18_components :: #force_inline proc(entity: ^Entity,
 	$Type13: typeid, component13: ^Type13, $Type14: typeid, component14: ^Type14,
 	$Type15: typeid, component15: ^Type15, $Type16: typeid, component16: ^Type16,
 	$Type17: typeid, component17: ^Type17, $Type18: typeid, component18: ^Type18) {
-	add_component(entity, Type1, component1)
-	add_component(entity, Type2, component2)
-	add_component(entity, Type3, component3)
-	add_component(entity, Type4, component4)
-	add_component(entity, Type5, component5)
-	add_component(entity, Type6, component6)
-	add_component(entity, Type7, component7)
-	add_component(entity, Type8, component8)
-	add_component(entity, Type9, component9)
-	add_component(entity, Type10, component10)
-	add_component(entity, Type11, component11)
-	add_component(entity, Type12, component12)
-	add_component(entity, Type13, component13)
-	add_component(entity, Type14, component14)
-	add_component(entity, Type15, component15)
-	add_component(entity, Type16, component16)
-	add_component(entity, Type17, component17)
-	add_component(entity, Type18, component18)
+	add_component(entity, Type1, component1, false)
+	add_component(entity, Type2, component2, false)
+	add_component(entity, Type3, component3, false)
+	add_component(entity, Type4, component4, false)
+	add_component(entity, Type5, component5, false)
+	add_component(entity, Type6, component6, false)
+	add_component(entity, Type7, component7, false)
+	add_component(entity, Type8, component8, false)
+	add_component(entity, Type9, component9, false)
+	add_component(entity, Type10, component10, false)
+	add_component(entity, Type11, component11, false)
+	add_component(entity, Type12, component12, false)
+	add_component(entity, Type13, component13, false)
+	add_component(entity, Type14, component14, false)
+	add_component(entity, Type15, component15, false)
+	add_component(entity, Type16, component16, false)
+	add_component(entity, Type17, component17, false)
+	add_component(entity, Type18, component18, false)
+
+	archetyping(entity)
 }
 
 /* Adds 19 components to the entity by type and instance (initializer).
@@ -412,25 +446,27 @@ add_19_components :: #force_inline proc(entity: ^Entity,
 	$Type15: typeid, component15: ^Type15, $Type16: typeid, component16: ^Type16,
 	$Type17: typeid, component17: ^Type17, $Type18: typeid, component18: ^Type18,
 	$Type19: typeid, component19: ^Type19) {
-	add_component(entity, Type1, component1)
-	add_component(entity, Type2, component2)
-	add_component(entity, Type3, component3)
-	add_component(entity, Type4, component4)
-	add_component(entity, Type5, component5)
-	add_component(entity, Type6, component6)
-	add_component(entity, Type7, component7)
-	add_component(entity, Type8, component8)
-	add_component(entity, Type9, component9)
-	add_component(entity, Type10, component10)
-	add_component(entity, Type11, component11)
-	add_component(entity, Type12, component12)
-	add_component(entity, Type13, component13)
-	add_component(entity, Type14, component14)
-	add_component(entity, Type15, component15)
-	add_component(entity, Type16, component16)
-	add_component(entity, Type17, component17)
-	add_component(entity, Type18, component18)
-	add_component(entity, Type19, component19)
+	add_component(entity, Type1, component1, false)
+	add_component(entity, Type2, component2, false)
+	add_component(entity, Type3, component3, false)
+	add_component(entity, Type4, component4, false)
+	add_component(entity, Type5, component5, false)
+	add_component(entity, Type6, component6, false)
+	add_component(entity, Type7, component7, false)
+	add_component(entity, Type8, component8, false)
+	add_component(entity, Type9, component9, false)
+	add_component(entity, Type10, component10, false)
+	add_component(entity, Type11, component11, false)
+	add_component(entity, Type12, component12, false)
+	add_component(entity, Type13, component13, false)
+	add_component(entity, Type14, component14, false)
+	add_component(entity, Type15, component15, false)
+	add_component(entity, Type16, component16, false)
+	add_component(entity, Type17, component17, false)
+	add_component(entity, Type18, component18, false)
+	add_component(entity, Type19, component19, false)
+
+	archetyping(entity)
 }
 
 /* Adds 20 components to the entity by type and instance (initializer).
@@ -449,26 +485,28 @@ add_20_components :: #force_inline proc(entity: ^Entity,
 	$Type15: typeid, component15: ^Type15, $Type16: typeid, component16: ^Type16,
 	$Type17: typeid, component17: ^Type17, $Type18: typeid, component18: ^Type18,
 	$Type19: typeid, component19: ^Type19, $Type20: typeid, component20: ^Type20) {
-	add_component(entity, Type1, component1)
-	add_component(entity, Type2, component2)
-	add_component(entity, Type3, component3)
-	add_component(entity, Type4, component4)
-	add_component(entity, Type5, component5)
-	add_component(entity, Type6, component6)
-	add_component(entity, Type7, component7)
-	add_component(entity, Type8, component8)
-	add_component(entity, Type9, component9)
-	add_component(entity, Type10, component10)
-	add_component(entity, Type11, component11)
-	add_component(entity, Type12, component12)
-	add_component(entity, Type13, component13)
-	add_component(entity, Type14, component14)
-	add_component(entity, Type15, component15)
-	add_component(entity, Type16, component16)
-	add_component(entity, Type17, component17)
-	add_component(entity, Type18, component18)
-	add_component(entity, Type19, component19)
-	add_component(entity, Type20, component20)
+	add_component(entity, Type1, component1, false)
+	add_component(entity, Type2, component2, false)
+	add_component(entity, Type3, component3, false)
+	add_component(entity, Type4, component4, false)
+	add_component(entity, Type5, component5, false)
+	add_component(entity, Type6, component6, false)
+	add_component(entity, Type7, component7, false)
+	add_component(entity, Type8, component8, false)
+	add_component(entity, Type9, component9, false)
+	add_component(entity, Type10, component10, false)
+	add_component(entity, Type11, component11, false)
+	add_component(entity, Type12, component12, false)
+	add_component(entity, Type13, component13, false)
+	add_component(entity, Type14, component14, false)
+	add_component(entity, Type15, component15, false)
+	add_component(entity, Type16, component16, false)
+	add_component(entity, Type17, component17, false)
+	add_component(entity, Type18, component18, false)
+	add_component(entity, Type19, component19, false)
+	add_component(entity, Type20, component20, false)
+
+	archetyping(entity)
 }
 
 /* Adds 21 components to the entity by type and instance (initializer).
@@ -488,27 +526,29 @@ add_21_components :: #force_inline proc(entity: ^Entity,
 	$Type17: typeid, component17: ^Type17, $Type18: typeid, component18: ^Type18,
 	$Type19: typeid, component19: ^Type19, $Type20: typeid, component20: ^Type20,
 	$Type21: typeid, component21: ^Type21) {
-	add_component(entity, Type1, component1)
-	add_component(entity, Type2, component2)
-	add_component(entity, Type3, component3)
-	add_component(entity, Type4, component4)
-	add_component(entity, Type5, component5)
-	add_component(entity, Type6, component6)
-	add_component(entity, Type7, component7)
-	add_component(entity, Type8, component8)
-	add_component(entity, Type9, component9)
-	add_component(entity, Type10, component10)
-	add_component(entity, Type11, component11)
-	add_component(entity, Type12, component12)
-	add_component(entity, Type13, component13)
-	add_component(entity, Type14, component14)
-	add_component(entity, Type15, component15)
-	add_component(entity, Type16, component16)
-	add_component(entity, Type17, component17)
-	add_component(entity, Type18, component18)
-	add_component(entity, Type19, component19)
-	add_component(entity, Type20, component20)
-	add_component(entity, Type21, component21)
+	add_component(entity, Type1, component1, false)
+	add_component(entity, Type2, component2, false)
+	add_component(entity, Type3, component3, false)
+	add_component(entity, Type4, component4, false)
+	add_component(entity, Type5, component5, false)
+	add_component(entity, Type6, component6, false)
+	add_component(entity, Type7, component7, false)
+	add_component(entity, Type8, component8, false)
+	add_component(entity, Type9, component9, false)
+	add_component(entity, Type10, component10, false)
+	add_component(entity, Type11, component11, false)
+	add_component(entity, Type12, component12, false)
+	add_component(entity, Type13, component13, false)
+	add_component(entity, Type14, component14, false)
+	add_component(entity, Type15, component15, false)
+	add_component(entity, Type16, component16, false)
+	add_component(entity, Type17, component17, false)
+	add_component(entity, Type18, component18, false)
+	add_component(entity, Type19, component19, false)
+	add_component(entity, Type20, component20, false)
+	add_component(entity, Type21, component21, false)
+
+	archetyping(entity)
 }
 
 /* Sets 2 components values in the entity by their types and instances (initializers).

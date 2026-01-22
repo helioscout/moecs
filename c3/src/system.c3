@@ -15,9 +15,10 @@ struct System {
 	<* Tags marker, each set bit specifies tag in the system match query. *>
 	TagsMarker tags;
 	<* Entities lifetime flag to optimize queries and do not process lifetimes
-	   that you want to avoid for current system. Includes all lifetimes (0b00000111) by default.*>
+	   that you want to avoid for current system. Includes all lifetimes (0b00000111) by default.
+	   Not used in ARCHETYPE approach. *>
 	char lifetime;
-	<* Matched entities list (query result) for current system run. *>
+	<* Matched entities list (query result) for current system run. Not used in ARCHETYPE approach. *>
 	Entities entities;
 	<* Callback function that will be invoked each step of the world progress.
 	   Disable system to pause invokation. *>

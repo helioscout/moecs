@@ -52,15 +52,28 @@ fn usz? Resource2.to_format(&self, Formatter* f) @dynamic {
 Clock clock @noinit;
 NanoDuration duration @noinit;
 
-fn void system1(Entities entities) {
+fn void system1(Entities entities, World* world) {
+	bool despawned;
+	usz count;
+
+	foreach (entity : entities) {
+		if (count < 100) {
+			entity.add((Position) { .x = 111, .y = 222 });
+			count++;
+		}
+
+		if (!despawned) {
+			entity.despawn();
+			despawned = true;
+		}
+	}
+}
+
+fn void system2(Entities entities, World* world) {
 	
 }
 
-fn void system2(Entities entities) {
-	
-}
-
-fn void system3(Entities entities) {
+fn void system3(Entities entities, World* world) {
 	// io::printn(entities.len());
 }
 
@@ -349,6 +362,16 @@ fn void main() {
 	
 	// duration = clock.mark();
 	// io::printf("\nEllapsed: %s", duration);
+
+	// world.run();
+	io::printn("--- world is running ---");
+	world.despawn(e);
+	world.despawn(ed);
+	world.perform();
+
+	foreach (archetype : world.archetypes) {
+		io::printfn("archetype: %s, %s, %s", archetype.entities.len(), archetype.components.data, archetype.tags.data);
+	}
 
 	usz step = 0;
 	clock = clock::now();

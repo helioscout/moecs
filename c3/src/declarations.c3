@@ -57,11 +57,14 @@ alias TagsMarker = BitSet { MAX_TAGS_COUNT };
 <* Pointers to component values when retrieving/getting all. *>
 alias ComponentPointers = ElasticArray { any, MAX_COMPONENTS_COUNT };
 
-<* List of entities for system query result. *>
+<* List of entities for system query result and other purposes. *>
 alias Entities = List { Entity* };
 
 <* Systems collection in the world. *>
 alias Systems = List { System* };
+
+<* Archetypes collection of the world. *>
+alias Archetypes = List { Archetype* };
 
 <* Entities/blocks lifetime. *>
 enum Lifetime : const inline char {
@@ -104,14 +107,16 @@ enum ElementState : const inline char {
    <* System has tags in the match query. *>
    HAS_TAGS       = 0b00001000,
    <* System has components in the match query. *>
-   HAS_COMPONENTS = 0b00010000
+   HAS_COMPONENTS = 0b00010000,
+   <* Entity should be re-archetyped at deffered (perform) stage. *>
+   ARCHETYPING    = 0b00100000
 }
 
 <* Predicate function for match blocks using their intefraces. *>
 alias BlockGeneMatch = fn bool (BlockGene block);
 
 <* Callback function for the system. *>
-alias SystemCallback = fn void (Entities entities);
+alias SystemCallback = fn void (Entities entities, World* world);
 
 <* Entities iterator. *>
 struct EntitiesIterator {
@@ -119,4 +124,30 @@ struct EntitiesIterator {
 	usz idx;
 	<* Current entity pointer. *>
 	Entity* entity;
+}
+
+<* Query match approach of slection entities for the systems. *>
+enum Approach : char {
+	<* Using this approach at each progress step all world entites will be iterated
+	   with applying match conditions to select them for each running system. *>
+	ITERATION,
+	<* Each entity belongs to some unique archetype that is combination of bit flags
+	   that represent entity's components/tags configuration. At each world progress step
+	   all archetypes will be iterated witch applying match condition of each system. *>
+	ARCHETYPE
+}
+
+<* Deffered actions for the world. *>
+struct Deffered {
+	<* Despawning entities. We need to keep them in the archetypes till end of the current progress step,
+	   otherwise iterators inside systems code can lead to bugs, as they iterate over collections of
+	   the archetypes which we need to delete entities from. Entities will be marked as DELETED but
+	   despawned (deleted from the block) at performing stage. Also, a new entity can be written in place
+	   of a deleted entity, then bugs are inevitable since the reference to the deleted entity will
+	   continue to be stored in the archetype collection. *>
+	Entities despawning;
+	<* When tags/components is being added/removed to the entity and world is already running,
+	   entites should not be moved to other archetypes till end of the current progress step,
+	   so this archetyping action is deffered to the perform stage. *>
+	Entities archetyping;
 }

@@ -15,9 +15,9 @@ System :: struct {
 	/* Tags marker, each set bit specifies tag in the system match query. */
 	tags : [TAGS_MARKER_SIZE]uint,
 	/* Entities lifetime flag to optimize queries and do not process lifetimes
-	   that you want to avoid for current system. */
+	   that you want to avoid for current system. Not used in ARCHETYPE approach. */
 	lifetime : bit_set[Lifetime; u8],
-	/* Matched entities list (query result) for current system run. */
+	/* Matched entities list (query result) for current system run. Not used in ARCHETYPE approach. */
 	entities : [dynamic]^Entity,
 	/* Callback function that will be invoked each step of the world progress.
 	   Disable system to pause invokation. */

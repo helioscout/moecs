@@ -1,5 +1,7 @@
 module moecs;
 
+import std::io;
+
 <* Entity type. *>
 struct Entity {
 	<* Entity state. *>
@@ -19,18 +21,22 @@ struct Entity {
 	
 	<* The index of the entity in the collection (chunk index for its components). *>
 	usz chunk_idx;
+	<* Archetype reference which entity belongs to. Is nill for entities without components/tags. *>
+	Archetype* archetype;
 }
 
 <* Adds component to the entity by type and initializer.
    If entity already has a component it will be replaced by new one.
    @param $Type : "Component type."
    @param #init : "Component initialization block."
+   @param $perform : "Perform archetyping of the entity. You should not change this parameter (inner logic)."
    @return "Pointer to the entity."
 *>
-macro Entity* Entity.@add(&self, $Type, #init) {
+macro Entity* Entity.@add(&self, $Type, #init, bool $perform = true) {
 	if (try component = self.get_world().components.get_ref($Type.typeid)) {
 		self.@set($Type, #init);				/* Storing value in the chunk. */
 		self.components.set(component.idx);		/* Setting marker bit.		   */
+		if ($perform) self.archetyping();
 	}
 
 	return self;
@@ -74,12 +80,14 @@ macro Entity* Entity.@set(&self, $Type, #init) {
 
 <* Add component to the entity by its instance. If entity already has a component it will be replaced by new one.
    @param $component : "Component instance."
+   @param $perform : "Perform archetyping of the entity. You should not change this parameter (inner logic)."
    @return "Pointer to the entity."
 *>
-macro Entity* Entity.add(&self, $component) {
+macro Entity* Entity.add(&self, $component, bool $perform = true) {
 	if (try component = self.get_world().components.get_ref($typeof($component).typeid)) {
 		self.set($component);					/* Storing value in the chunk. */
 		self.components.set(component.idx);		/* Setting marker bit.		   */
+		if ($perform) self.archetyping();
 	}
 
 	return self;
@@ -244,10 +252,12 @@ macro Entity.@each(&self; @body(type, ptr)) {
 
 <* Removes component from entity by its type.
    @param type : "Component type id."
+   @param perform : "Perform archetyping of the entity. You should not change this parameter (inner logic)."
 *>
-fn void Entity.remove(&self, typeid type) {
+fn void Entity.remove(&self, typeid type, bool perform = true) {
 	if (try component = self.get_world().components.get_ref(type)) {
 		self.components.unset(component.idx);
+		if (perform) self.archetyping();
 	}
 }
 
@@ -257,8 +267,10 @@ fn void Entity.remove(&self, typeid type) {
 macro void Entity.remove_all(&self, ...) {
 	$for var $i = 0; $i < $vacount; $i++:
 		var $Type = $vaexpr[$i];
-		self.remove($Type.typeid);
+		self.remove($Type.typeid, false);
 	$endfor
+
+	self.archetyping();
 }
 
 <* Checks if the enity has a component.
@@ -294,10 +306,12 @@ fn bool Entity.has_all(&self, typeid... types) {
 
 <* Tags entity with specified tag type.
    @param type : "Tag type id."
+   @param perform : "Perform archetyping of the entity. You should not change this parameter (inner logic)."
 *>
-fn void Entity.tag(&self, typeid type) {
+fn void Entity.tag(&self, typeid type, bool perform = true) {
 	if (try tag = self.get_world().tags.get_ref(type)) {
 		self.tags.set(tag.idx);
+		if (perform) self.archetyping();
 	}
 }
 
@@ -307,16 +321,20 @@ fn void Entity.tag(&self, typeid type) {
 macro void Entity.tag_all(&self, ...) {
 	$for var $i = 0; $i < $vacount; $i++:
 		var $Type = $vaexpr[$i];
-		self.tag($Type.typeid);
+		self.tag($Type.typeid, false);
 	$endfor
+
+	self.archetyping();
 }
 
 <* Removes tag from entity.
    @param type : "Tag type id."
+   @param perform : "Perform archetyping of the entity. You should not change this parameter (inner logic)."
 *>
-fn void Entity.untag(&self, typeid type) {
+fn void Entity.untag(&self, typeid type, bool perform = true) {
 	if (try tag = self.get_world().tags.get_ref(type)) {
 		self.tags.unset(tag.idx);
+		if (perform) self.archetyping();
 	}
 }
 
@@ -326,8 +344,10 @@ fn void Entity.untag(&self, typeid type) {
 macro void Entity.untag_all(&self, ...) {
 	$for var $i = 0; $i < $vacount; $i++:
 		var $Type = $vaexpr[$i];
-		self.untag($Type.typeid);
+		self.untag($Type.typeid, false);
 	$endfor
+
+	self.archetyping();
 }
 
 <* Checks if the entity is tagged with specified tag type.
@@ -363,10 +383,19 @@ fn bool Entity.tagged_all(&self, typeid... types) {
 
 <* Despawns entity. *>
 fn void Entity.despawn(&self) {
+	if (self.deleted()) return;
+	
 	if (self.state & ElementState.BUFFERED) {
 		self.world.despawn(self);
 	} else {
-		self.block.delete(self.chunk_idx);
+		World* world = self.block.get_world();
+
+		if (world.approach == ARCHETYPE && world.running && !world.performing) {
+			world.deffered.despawning.push(self);
+		} else {
+			self.block.delete(self.chunk_idx);
+		}
+
 		self.state |= ElementState.DELETED;
 	}
 }
@@ -381,4 +410,33 @@ fn bool Entity.deleted(&self) @inline => self.state & ElementState.DELETED != 0;
 *>
 fn World* Entity.get_world(&self) @inline @local {
 	return self.state & ElementState.BUFFERED ? self.world : self.block.get_world();
+}
+
+<* Bind the entity to appropriate archetype. *>
+fn void Entity.archetyping(&self) @private {
+	World* world = self.get_world();
+
+	if (world.approach != ARCHETYPE) return;
+
+	if (world.running && !world.performing) {
+		if (self.state & ElementState.ARCHETYPING == 0) {
+			world.deffered.archetyping.push(self);
+			self.state |= ElementState.ARCHETYPING;
+		}
+
+		return;
+	}
+
+	if (self.archetype != null) self.archetype.entities.remove_item(self);
+
+	if (self.components.cardinality() == 0 && self.tags.cardinality() == 0) {
+		/* If entity has no components and no tags, clear reference to archetype. */
+		self.archetype = null;
+	} else {
+		/* Find appropriate archetype or new one. */
+		Archetype* archetype = world.get_archetype(self.components, self.tags);
+
+		archetype.entities.push(self);
+		self.archetype = archetype;
+	}
 }

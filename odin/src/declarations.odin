@@ -77,7 +77,35 @@ ElementState :: enum {
 	/* System has tags in the match query. */
 	HAS_TAGS,
 	/* System has components in the match query. */
-	HAS_COMPONENTS
+	HAS_COMPONENTS,
+	/* Entity should be re-archetyped at deffered (perform) stage. */
+	ARCHETYPING
+}
+
+/* Query match approach of slection entities for the systems. */
+Approach :: enum {
+	/* Using this approach at each progress step all world entites will be iterated
+	   with applying match conditions to select them for each running system. */
+	ITERATION,
+	/* Each entity belongs to some unique archetype that is combination of bit flags
+	   that represent entity's components/tags configuration. At each world progress step
+	   all archetypes will be iterated witch applying match condition of each system. */
+	ARCHETYPE
+}
+
+/* Deffered actions for the world. */
+@(private) Deffered :: struct {
+	/* Despawning entities. We need to keep them in the archetypes till end of the current progress step,
+	   otherwise iterators inside systems code can lead to bugs, as they iterate over collections of
+	   the archetypes which we need to delete entities from. Entities will be marked as DELETED but
+	   despawned (deleted from the block) at performing stage. Also, a new entity can be written in place
+	   of a deleted entity, then bugs are inevitable since the reference to the deleted entity will
+	   continue to be stored in the archetype collection. */
+	despawning : [dynamic]^Entity,
+	/* When tags/components is being added/removed to the entity and world is already running,
+	   entites should not be moved to other archetypes till end of the current progress step,
+	   so this archetyping action is deffered to the perform stage. */
+	archetyping : [dynamic]^Entity
 }
 
 /* Entities iterator. */
@@ -94,8 +122,10 @@ ElementState :: enum {
    `world`    : Pointer to the world. */
 @(private) IteratorCallback :: proc(entity: ^Entity, lifetime: Lifetime, world: ^World)
 
-/* Callback function for the system. */
-SystemCallback :: proc(entities: []^Entity)
+/* Callback function for the system.
+   `entities` : Matched entities for the system.
+   `world`    : Pointer to the world. */
+SystemCallback :: proc(entities: ^[dynamic]^Entity, world: ^World)
 
 add :: proc {
 	add_component,

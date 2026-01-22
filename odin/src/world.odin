@@ -6,6 +6,8 @@ import sa "core:container/small_array"
 import "core:fmt"
 
 World :: struct {
+	/* Query match approach. */
+	approach : Approach,
 	/* Registered component types. */
 	components : Components,
 	/* Registered tag types. */
@@ -15,6 +17,8 @@ World :: struct {
 	resources : Resources,
 	/* Mounted systems. */
 	systems : [dynamic]^System,
+	/* Archetypes collection of the world. */
+	archetypes : [dynamic]^Archetype,
 	/* Blocks for entities with quick lifetime. */
 	quicks : [dynamic]^Block,
 	/* Blocks for entities with dynamic lifetime. */
@@ -32,7 +36,11 @@ World :: struct {
 	/* Current inserting index in the quick lifetime buffer (last inserted index + 1). */
 	idx : int,
 	/* Indicates that the world is running. */
-	running : bool
+	running : bool,
+	/* Indicates that the world is in performing stage (runs deffered actions). */
+	performing : bool,
+	/* Deffered actions for the world. */
+	deffered : Deffered
 }
 
 /* Initializes the world.
@@ -119,6 +127,8 @@ run :: proc(world: ^World) {
 	if len(world.components) == 0 do panic("The world has no registered components.")
 	if world.running do return
 
+	perform(world)
+
 	world.running = true
 }
 
@@ -159,10 +169,16 @@ spawn :: proc(world: ^World, lifetime: Lifetime = .DYNAMIC) -> ^Entity {
    `world`  : Pointer to the world.
    `entity` : Reference to the entity. */
 despawn_entity :: proc(world: ^World, entity: ^Entity) {
-	if .BUFFERED in entity.state {
-		sa.append(&world.deleted, entity.chunk_idx)
+	if deleted(entity) do return
+	
+	if world.approach == .ARCHETYPE && world.running && !world.performing {
+		append(&world.deffered.despawning, entity)
 	} else {
-		block_delete(entity.block, entity.chunk_idx)
+		if .BUFFERED in entity.state {
+			sa.append(&world.deleted, entity.chunk_idx)
+		} else {
+			block_delete(entity.block, entity.chunk_idx)
+		}
 	}
 
 	entity.state += { .DELETED }
@@ -298,26 +314,128 @@ get_system :: #force_inline proc(world: ^World, name: string) -> (^System, bool)
 /* Progress one step of the world life. Runs all mounted systems.
    `world` : Pointer to the world. */
 progress :: proc(world: ^World) {
-	for system in world.systems do clear(&system.entities)
+	if !world.running do panic("Run the world first.")
 	
-	each(world, callback = proc(entity: ^Entity, lifetime: Lifetime, world: ^World) {
+	if world.approach == .ARCHETYPE {
 		for system in world.systems {
-			if enabled(system) && lifetime in system.lifetime {
-				if (.HAS_TAGS not_in system.state ||
-				   marker_is_subset(MAX_TAGS_COUNT, TAGS_MARKER_SIZE, entity.tags, system.tags)) &&
-				   (.HAS_COMPONENTS not_in system.state ||
-				   marker_is_subset(MAX_COMPONENTS_COUNT, COMPONENTS_MARKER_SIZE, entity.components, system.components)) {
-					/* Add pointer to entity into system collection of entities for current system call. */
-					append(&system.entities, entity)
+			if enabled(system) {
+				for archetype in world.archetypes {
+					if (.HAS_TAGS not_in system.state ||
+					   marker_is_subset(MAX_TAGS_COUNT, TAGS_MARKER_SIZE, archetype.tags, system.tags)) &&
+					   (.HAS_COMPONENTS not_in system.state ||
+					   marker_is_subset(MAX_COMPONENTS_COUNT, COMPONENTS_MARKER_SIZE, archetype.components, system.components)) {
+					   	/* Call system callback for matched archetype. */
+						system.callback(&archetype.entities, world)
+					}
 				}
 			}
 		}
-	})
 
-	for system in world.systems {
-		if enabled(system) {
-			system.callback(system.entities[:])
+		perform(world)
+	} else if world.approach == .ITERATION {
+		for system in world.systems do clear(&system.entities)
+	
+		each(world, callback = proc(entity: ^Entity, lifetime: Lifetime, world: ^World) {
+			for system in world.systems {
+				if enabled(system) && lifetime in system.lifetime {
+					if (.HAS_TAGS not_in system.state ||
+					   marker_is_subset(MAX_TAGS_COUNT, TAGS_MARKER_SIZE, entity.tags, system.tags)) &&
+					   (.HAS_COMPONENTS not_in system.state ||
+					   marker_is_subset(MAX_COMPONENTS_COUNT, COMPONENTS_MARKER_SIZE, entity.components, system.components)) {
+						/* Add pointer to entity into system collection of entities for current system call. */
+						append(&system.entities, entity)
+					}
+				}
+			}
+		})
+
+		for system in world.systems {
+			if enabled(system) {
+				system.callback(&system.entities, world)
+			}
 		}
+	}
+}
+
+/* Perform deffered actions for the world.
+   `world` : Pointer to the world. */
+perform :: proc(world: ^World) {
+	world.performing = true
+
+	/* Perform deffered despawning. */
+	for entity in world.deffered.despawning {
+		despawn_entity(world, entity)
+		archetype_remove(entity)
+	}
+
+	clear(&world.deffered.despawning)
+
+	/* Perform deffered archetyping. */
+	for entity in world.deffered.archetyping {
+		if .ARCHETYPING in entity.state && !deleted(entity) {
+			archetyping(entity)
+			entity.state -= { .ARCHETYPING }
+		}
+	}
+
+	clear(&world.deffered.archetyping)
+
+	/* We need to delete empty archetypes. */
+	archetypes := slice.filter(world.archetypes[:],
+		proc(archetype: ^Archetype) -> bool { return len(archetype.entities) == 0 })
+
+	for archetype in archetypes {
+		delete(archetype.entities)
+		delete_archetype(world, archetype)
+	}
+
+	delete(archetypes)
+
+	world.performing = false
+}
+
+/* Creates new archetype.
+   `world`      : Pointer to the world.
+   `components` : Components bitset.
+   `tags`       : Tags bitset. */
+@(private="file")
+new_archetype :: proc(world: ^World, components: [COMPONENTS_MARKER_SIZE]uint,
+	tags: [TAGS_MARKER_SIZE]uint) -> ^Archetype {
+	archetype: ^Archetype = new(Archetype)
+
+	archetype^ = { components = marker_clone(COMPONENTS_MARKER_SIZE, components),
+				   tags = marker_clone(TAGS_MARKER_SIZE, tags) }
+
+	append(&world.archetypes, archetype)
+
+	return archetype
+}
+
+/* Gets archetype by query match bitsets.
+   `world`      : Pointer to the world.
+   `components` : Components bitset.
+   `tags`       : Tags bitset.
+   `returns`    : Pointer to archetype. */
+@(private="package")
+get_archetype :: proc(world: ^World, components: [COMPONENTS_MARKER_SIZE]uint,
+	tags: [TAGS_MARKER_SIZE]uint) -> ^Archetype {
+	for archetype in world.archetypes {
+		if marker_equals(MAX_COMPONENTS_COUNT, COMPONENTS_MARKER_SIZE, archetype.components, components) &&
+		   marker_equals(MAX_TAGS_COUNT, TAGS_MARKER_SIZE, archetype.tags, tags) {
+			return archetype
+		}
+	}
+
+	return new_archetype(world, components, tags)
+}
+
+/* Deletes archetype from the world.
+   `world`     : Pointer to the world.
+   `archetype` : Pointer to the archetype. */
+@(private="package")
+delete_archetype :: proc(world: ^World, archetype: ^Archetype) {
+	if index, ok := slice.linear_search(world.archetypes[:], archetype); ok {
+		unordered_remove(&world.archetypes, index)
 	}
 }
 

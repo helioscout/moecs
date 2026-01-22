@@ -13,12 +13,13 @@ init :: proc() {
 }
 
 /* Creates new world.
-   `buffer`  : Pointer to buffer for quick lifetime entities.
-               Ensure that you don't use same buffers for different worlds.
-   `returns` : Pointer to newly created world. */
-new_world :: proc(buffer : ^[QUICK_CHUNK_SIZE]Entity = nil) -> ^World {
+   `buffer`   : Pointer to buffer for quick lifetime entities.
+                Ensure that you don't use same buffers for different worlds.
+   `approach` : Query match approach.
+   `returns`  : Pointer to newly created world. */
+new_world :: proc(buffer : ^[QUICK_CHUNK_SIZE]Entity = nil, approach: Approach = .ARCHETYPE) -> ^World {
 	world : ^World = new(World)
-	world^ = { use_quicks = buffer != nil, buffer = buffer }
+	world^ = { approach = approach, use_quicks = buffer != nil, buffer = buffer }
 	
 	append(&worlds, world)
 	world_init(world)

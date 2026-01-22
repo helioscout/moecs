@@ -52,19 +52,45 @@ marker_print :: proc(marker: [MARKER_SIZE]uint) {
 	fmt.println("--------------")
 }
 
-system1 :: proc(entities: []^ecs.Entity) {
+system1 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
+	despawned := false
+	count := 0
 	
+	for entity in entities {
+
+		if count < 100 {
+			ecs.add(entity, Position, &Position { x = 111, y = 222 })
+			count += 1
+		}
+	// 	pos, center := ecs.get(entity, Position, Center)
+
+	// 	if pos != nil do pos.x += 1
+	// 	if center != nil do center.cx += 1
+	// 	// fmt.println(pos, center)
+		if !despawned {
+			ecs.despawn(world, entity)
+			despawned = true
+		}
+	}
 }
 
-system2 :: proc(entities: []^ecs.Entity) {
-	
-}
-
-system3 :: proc(entities: []^ecs.Entity) {
+system2 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 	// for entity in entities {
 	// 	pos, center := ecs.get(entity, Position, Center)
 
-	// 	fmt.println(pos, center)
+	// 	if pos != nil do pos.x += 1
+	// 	if center != nil do center.cx += 1
+	// 	// fmt.println(pos, center)
+	// }
+}
+
+system3 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
+	// for entity in entities {
+	// 	pos, center := ecs.get(entity, Position, Center)
+
+	// 	if pos != nil do pos.x += 1
+	// 	if center != nil do center.cx += 1
+	// 	// fmt.println(pos, center)
 	// }
 }
 
@@ -74,7 +100,7 @@ main :: proc() {
 	
 	ecs.init()
 	
-	world : ^ecs.World = ecs.new_world(&entities)
+	world : ^ecs.World = ecs.new_world(&entities, .ARCHETYPE)
 
 	ecs.register(world, .COMPONENT, Position, &positions)
 	ecs.register(world, .COMPONENT, Center, &centers)
@@ -86,12 +112,10 @@ main :: proc() {
 
 	ecs.mount(world, { tags = { Tag1 }, callback = system1 })
 	ecs.mount(world, { tags = { Tag2 }, callback = system1 })
-	ecs.mount(world, { components = { Position, Center }, callback = system1 })
+	ecs.mount(world, { components = { Position, Center }, callback = system3 })
 	ecs.mount(world, { components = { Position, Center }, tags = { Tag1, Tag2 }, callback = system3})
 	ecs.mount(world, { name = "s1", components = { Position }, tags = { Tag1 }, callback = system2 })
-	ecs.mount(world, { name = "s2", components = { Position, Center, VecType }, tags = { Tag1 }, callback = system2 })
-
-	ecs.run(world)
+	ecs.mount(world, { name = "s2", components = { Center }, tags = { Tag2 }, callback = system2 })
 
 	// ecs.unmount(world, "s2")
 	// fmt.println(ecs.get(world, "s2"))
@@ -99,7 +123,7 @@ main :: proc() {
 	// fmt.printfln("marker: %b", max(uint) >> (64 - 3 % 64))
 	// fmt.println(3 % 64)
 	// fmt.println(3 / 64)
-	// fmt.printfln("Entity size: %v", size_of(ecs.Entity))
+	fmt.printfln("Entity size: %v", size_of(ecs.Entity))
 
 	// marker: [MARKER_SIZE]uint
 
@@ -170,7 +194,7 @@ main :: proc() {
 		// if center, ok := ecs.get(entity, Center); ok {
 		// 	fmt.println(center)
 		// }
-	});
+	})
 
 	// block1: ecs.QuickBlock
 	// block2: ecs.DynamicBlock
@@ -233,15 +257,17 @@ main :: proc() {
 	fmt.println(ecs.tagged(e1, Tag1))
 	fmt.println(ecs.tagged(e1, Tag1, Tag2, int))
 
-	ecs.despawn(world, e1, e2, e4, e5)
-
+	// ecs.despawn(world, e1, e2, e4, e5)
+	
 	_time = time.now()
 	fmt.printfln("-- spawning quicks ( %v )", ecs.QUICK_CHUNK_SIZE * 1000 + 3)
 
 	for i in 0..<ecs.QUICK_CHUNK_SIZE * 1000 + 3 {
-		ecs.add(ecs.spawn(world, .QUICK),
-			Position, &Position { x = 10, y = 10 },
+		e := ecs.spawn(world, .QUICK)
+		ecs.add(e,
+			// Position, &Position { x = 10, y = 10 },
 			Center, &Center { cx = 20, cy = 20 })
+		ecs.tag(e, Tag2)
 		// ecs.spawn(world, .QUICK)
 	}
 
@@ -256,10 +282,12 @@ main :: proc() {
 
 		ecs.add(e,
 			Position, &Position { x = 10, y = 10 },
-			Center, &Center { cx = 20, cy = 20 })
+			/*Center, &Center { cx = 20, cy = 20 }*/)
+		ecs.tag(e, Tag1)
 		
 		if i >= 100 && i < 105 {
-			ecs.tag(e, Tag1, Tag2)
+			ecs.add(e, Center, &Center { cx = i, cy = i + 1 })
+			ecs.tag(e, Tag2)
 		}
 		// ecs.spawn(world, .DYNAMIC)
 	}
@@ -290,10 +318,18 @@ main :: proc() {
 		pos, center := ecs.get(entity, Position, Center)
 		count += 1
 		// fmt.println(pos, center)
-	});
+	})
 
 	_duration = time.diff(_time, time.now())
 	fmt.printfln("-- ellapsed: %v, count: %v", _duration, count)
+
+	ecs.run(world)
+	fmt.println("--- world is running ---")
+	ecs.despawn(world, e1, e2, e4, e5)
+
+	for archetype in world.archetypes {
+		fmt.printfln("archetype: %v, %v, %v", len(archetype.entities), archetype.components, archetype.tags)
+	}
 
 	_time = time.now()
 	fmt.println("--- progress 100 times ---")
@@ -303,8 +339,9 @@ main :: proc() {
 	}
 
 	_duration = time.diff(_time, time.now())
+	fmt.printfln("-- ellapsed: %v ms", time.duration_milliseconds(_duration))
 	fmt.printfln("-- ellapsed: %v", _duration)
 
-	buffer: [10]byte
-	os.read(os.stdin, buffer[:])
+	// buffer: [10]byte
+	// os.read(os.stdin, buffer[:])
 }

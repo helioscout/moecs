@@ -16,9 +16,10 @@ fn void init() {
 <* Creates new world.
    @return "Pointer to newly created world."
    @param buffer : "Pointer to buffer for quick lifetime entities. Ensure that you don't use same buffers for different worlds."
+   @param approach : "Query match approach."
 *>
-fn World* new(Entity[QUICK_CHUNK_SIZE]* buffer = null) {
-	World* world = mem::new(World, { .use_quicks = buffer != null, .buffer = buffer });
+fn World* new(Entity[QUICK_CHUNK_SIZE]* buffer = null, Approach approach = ARCHETYPE) {
+	World* world = mem::new(World, { .approach = approach, .use_quicks = buffer != null, .buffer = buffer });
 	
 	worlds.push(world);
 	world.init();
