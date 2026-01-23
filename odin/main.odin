@@ -75,23 +75,23 @@ system1 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 }
 
 system2 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
-	// for entity in entities {
-	// 	pos, center := ecs.get(entity, Position, Center)
+	for entity in entities {
+		pos, center := ecs.get(entity, Position, Center)
 
-	// 	if pos != nil do pos.x += 1
-	// 	if center != nil do center.cx += 1
-	// 	// fmt.println(pos, center)
-	// }
+		if pos != nil do pos.x += 1
+		if center != nil do center.cx += 1
+		// fmt.println(pos, center)
+	}
 }
 
 system3 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
-	// for entity in entities {
-	// 	pos, center := ecs.get(entity, Position, Center)
+	for entity in entities {
+		pos, center := ecs.get(entity, Position, Center)
 
-	// 	if pos != nil do pos.x += 1
-	// 	if center != nil do center.cx += 1
-	// 	// fmt.println(pos, center)
-	// }
+		if pos != nil do pos.x += 1
+		if center != nil do center.cx += 1
+		// fmt.println(pos, center)
+	}
 }
 
 main :: proc() {
@@ -120,8 +120,8 @@ main :: proc() {
 	// ecs.unmount(world, "s2")
 	// fmt.println(ecs.get(world, "s2"))
 
+	// fmt.printfln("%b", max(uint) >> (64 - 62 % 64))
 	// fmt.printfln("marker: %b", max(uint) >> (64 - 3 % 64))
-	// fmt.println(3 % 64)
 	// fmt.println(3 / 64)
 	fmt.printfln("Entity size: %v", size_of(ecs.Entity))
 
@@ -174,7 +174,7 @@ main :: proc() {
 	fmt.println(r1)
 	fmt.println(r2)
 
-	for i in 0..<ecs.QUICK_CHUNK_SIZE * 1000 + 3 {
+	for i in 0..</*ecs.QUICK_CHUNK_SIZE * 1000*/100000 + 3 {
 		ecs.add(ecs.spawn(world, .QUICK),
 			Position, &Position { x = f64(i) + 10, y = f64(i) + 10 },
 			Center, &Center { cx = i + 20, cy = i + 20 })
@@ -260,9 +260,9 @@ main :: proc() {
 	// ecs.despawn(world, e1, e2, e4, e5)
 	
 	_time = time.now()
-	fmt.printfln("-- spawning quicks ( %v )", ecs.QUICK_CHUNK_SIZE * 1000 + 3)
+	fmt.printfln("-- spawning quicks ( %v )", /*ecs.QUICK_CHUNK_SIZE * 1000*/100000 + 3)
 
-	for i in 0..<ecs.QUICK_CHUNK_SIZE * 1000 + 3 {
+	for i in 0..</*ecs.QUICK_CHUNK_SIZE * 1000*/100000 + 3 {
 		e := ecs.spawn(world, .QUICK)
 		ecs.add(e,
 			// Position, &Position { x = 10, y = 10 },
@@ -275,9 +275,9 @@ main :: proc() {
 	fmt.printfln("-- ellapsed: %v", _duration)
 
 	_time = time.now()
-	fmt.printfln("-- spawning dynamics ( %v )", ecs.DYNAMIC_CHUNK_SIZE * 1000 + 3)
+	fmt.printfln("-- spawning dynamics ( %v )", /*ecs.DYNAMIC_CHUNK_SIZE * 1000*/500000 + 3)
 
-	for i in 0..<ecs.DYNAMIC_CHUNK_SIZE * 1000 + 3 {
+	for i in 0..</*ecs.DYNAMIC_CHUNK_SIZE * 1000*/500000 + 3 {
 		e := ecs.spawn(world, .DYNAMIC)
 
 		ecs.add(e,
@@ -296,9 +296,9 @@ main :: proc() {
 	fmt.printfln("-- ellapsed: %v", _duration)
 
 	_time = time.now()
-	fmt.printfln("-- spawning statics ( %v )", ecs.STATIC_CHUNK_SIZE * 1000 + 3)
+	fmt.printfln("-- spawning statics ( %v )", /*ecs.STATIC_CHUNK_SIZE * 1000*/300000 + 3)
 
-	for i in 0..<ecs.STATIC_CHUNK_SIZE * 1000 + 3 {
+	for i in 0..</*ecs.STATIC_CHUNK_SIZE * 1000*/300000 + 3 {
 		ecs.add(ecs.spawn(world, .STATIC),
 			Position, &Position { x = 10, y = 10 },
 			Center, &Center { cx = 20, cy = 20 })

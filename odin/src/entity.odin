@@ -45,14 +45,14 @@ add_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type, perform:
    `entity`    : Pointer to the entity.
    `$Type`     : Component type.
    `component` : Reference to the component instance." */
-set_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type) {
+set_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type) #no_bounds_check {
 	if .BUFFERED in entity.state {
 		if c, ok := &entity.world.components[Type]; ok {
 			chunk: ^[QUICK_CHUNK_SIZE]Type = cast(^[QUICK_CHUNK_SIZE]Type)c.buffer
 			chunk[entity.chunk_idx] = component^
 		}
 	} else {
-		#partial switch entity.block.lifetime {
+		switch entity.block.lifetime {
 			case .QUICK:
 				if ptr, ok := entity.block.chunks[Type]; ok {
 					chunk: ^[QUICK_CHUNK_SIZE]Type = cast(^[QUICK_CHUNK_SIZE]Type)ptr
@@ -78,14 +78,14 @@ set_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type) {
    `entity`  : Pointer to the entity.
    `$Type`   : Component type.
    `returns` : Pointer to the component and operation success. */
-get_component :: proc(entity: ^Entity, $Type: typeid) -> (^Type, bool) #optional_ok {
+get_component :: proc(entity: ^Entity, $Type: typeid) -> (^Type, bool) #no_bounds_check #optional_ok {
 	if component, ok := &get_world(entity).components[Type]; ok {
 		if marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, component.idx) {
 			if .BUFFERED in entity.state {
 				chunk: ^[QUICK_CHUNK_SIZE]Type = cast(^[QUICK_CHUNK_SIZE]Type)component.buffer
 				return &chunk[entity.chunk_idx], true
 			} else {
-				#partial switch entity.block.lifetime {
+				switch entity.block.lifetime {
 					case .QUICK:
 						if ptr, ok := entity.block.chunks[Type]; ok {
 							chunk: ^[QUICK_CHUNK_SIZE]Type = cast(^[QUICK_CHUNK_SIZE]Type)ptr

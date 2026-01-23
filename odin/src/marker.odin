@@ -8,11 +8,11 @@ package moecs
    `$size`  : Marker (array) size.
    `marker` : Bitset (marker array). */
 marker_is_all_set :: #force_inline proc($count: int, $size: uint, marker: [size]uint) -> bool #no_bounds_check {
-	for i in 0..<size - 1 {
+	for i : uint = 0; i < size - 1; i += 1 {
 		if marker[i] ~ max(uint) != 0 do return false
 	}
 
-	remaining := max(uint) >> (MARKER_BITS_COUNT - uint(count) % MARKER_BITS_COUNT)
+	remaining := uint(count) == MARKER_BITS_COUNT ? max(uint) : max(uint) >> (MARKER_BITS_COUNT - uint(count) % MARKER_BITS_COUNT)
 	
 	return marker[size - 1] & remaining == remaining
 }
@@ -22,11 +22,11 @@ marker_is_all_set :: #force_inline proc($count: int, $size: uint, marker: [size]
    `$size`  : Marker (array) size.
    `marker` : Bitset (marker array). */
 marker_is_all_unset :: #force_inline proc($count: int, $size: uint, marker: [size]uint) -> bool #no_bounds_check {
-	for i in 0..<size - 1 {
+	for i : uint = 0; i < size - 1; i += 1 {
 		if marker[i] > 0 do return false
 	}
 
-	remaining := max(uint) >> (MARKER_BITS_COUNT - uint(count) % MARKER_BITS_COUNT)
+	remaining := uint(count) == MARKER_BITS_COUNT ? max(uint) : max(uint) >> (MARKER_BITS_COUNT - uint(count) % MARKER_BITS_COUNT)
 
 	return marker[size - 1] & remaining == 0
 }
@@ -48,11 +48,11 @@ marker_is_any_set :: #force_inline proc($size: uint, marker: [size]uint) -> bool
    `marker1` : First bitset (marker array).
    `marker2` : Second bitset (marker array). */
 marker_equals :: #force_inline proc($count: int, $size: uint, marker1: [size]uint, marker2: [size]uint) -> bool #no_bounds_check {
-	for i in 0..<size - 1 {
+	for i : uint = 0; i < size - 1; i += 1 {
 		if marker1[i] != marker2[i] do return false
 	}
 
-	remaining := max(uint) >> (MARKER_BITS_COUNT - uint(count) % MARKER_BITS_COUNT)
+	remaining := uint(count) == MARKER_BITS_COUNT ? max(uint) : max(uint) >> (MARKER_BITS_COUNT - uint(count) % MARKER_BITS_COUNT)
 
 	return marker1[size - 1] & remaining == marker2[size - 1] & remaining
 }
@@ -99,7 +99,7 @@ marker_unset :: #force_inline proc($size: uint, marker: ^[size]uint, #any_int id
    `marker` : Bitset (marker array).
    `idx`    : Bit index. */
 marker_is_set :: #force_inline proc($size: uint, marker: [size]uint, #any_int idx: uint) -> bool #no_bounds_check {
-	return marker[idx / MARKER_BITS_COUNT] & (1 << (idx % MARKER_BITS_COUNT )) != 0
+	return marker[idx / MARKER_BITS_COUNT] & (1 << (idx % MARKER_BITS_COUNT)) != 0
 }
 
 /* Perform bitwise AND over all bits of two markers.

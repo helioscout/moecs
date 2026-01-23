@@ -1,6 +1,9 @@
 package moecs
 
-/* Size (items count) of the one components chunk or entities collection for each block. */
+/* Size (items count) of the one components chunk or entities collection for each block.
+   Bigger chunk size increase productivity of entities adding, less chunk size speed up
+   reading component while world runing. */
+
 /* Quick lifetime chunk size. */
 QUICK_CHUNK_SIZE   : int : 100
 /* Dynamic lifetime chunk size. */
