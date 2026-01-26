@@ -198,7 +198,7 @@ fn any[] Entity.all(&self, Allocator allocator) {
 	ComponentPointers values;
 
 	for (usz idx = 0; idx < world.components.count; idx++) {
-		Component component = world.components.types[idx];
+		Component* component = &world.components.types[idx];
 		
 		if (self.components.get(idx)) {
 			void* ptr;
@@ -236,7 +236,7 @@ macro Entity.@each(&self; @body(type, ptr)) {
 	World* world = self.get_world();
 
 	for (usz idx = 0; idx < world.components.count; idx++) {
-		Component component = world.components.types[idx];
+		Component* component = &world.components.types[idx];
 
 		if (self.components.get(idx)) {
 			void* ptr;

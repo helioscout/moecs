@@ -41,7 +41,7 @@ fn void Block.init(&self) @dynamic @private {
 	self.entities = mem::alloc(EntitiesChunk);
 
 	for (usz idx = 0; idx < self.world.components.count; idx++) {
-		Component component = self.world.components.types[idx];
+		Component* component = &self.world.components.types[idx];
 		/* Allocate memory for components chunks.					 */
 		/* It should be later casted to corresponding array pointer. */
 		self.chunks[idx] = malloc(component.size * CHUNK_SIZE);
@@ -137,7 +137,7 @@ fn void Block.absorb(&self) @dynamic @private {
 
 	/* Copy components from buffers to block chunks. */
 	for (usz idx = 0; idx < self.world.components.count; idx++) {
-		Component component = self.world.components.types[idx];
+		Component* component = &self.world.components.types[idx];
 		mem::copy(self.chunks[idx], component.buffer.ptr, component.size * self.world.idx);
 	};
 
