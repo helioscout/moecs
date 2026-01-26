@@ -5,7 +5,10 @@ import std::collections::list;
 import std::collections::bitset;
 import std::collections::elastic_array;
 
-/* Size (items count) of the one components chunk or entities collection for each block. */
+/* Size (items count) of the one components chunk or entities collection for each block.
+   Bigger chunk size increase productivity of entities adding, less chunk size speed up
+   reading component while world runing. */
+
 <* Quick lifetime chunk size. *>
 const usz QUICK_CHUNK_SIZE   = 100;
 <* Dynamic lifetime chunk size. *>
@@ -35,16 +38,16 @@ alias StaticBlocks = List { StaticBlock* };
 <* Component chunks collection for each block, key by component struct type.
    Chunk is represented as an array of component struct values ($Type[(QUICK|DYNAMIC|STATIC)_CHUNK_SIZE]).
    But is created as a pointer to allocated memory block. *>
-alias Chunks = HashMap { typeid, char* };
+alias Chunks = Elements { char*, MAX_COMPONENTS_COUNT };
 
 <* Worlds collection in the space. *>
 alias Worlds = List { World* };
 
 <* Registered components collection for each world. *>
-alias Components = HashMap { typeid, Component };
+alias Components = Elements { Component, MAX_COMPONENTS_COUNT };
 
 <* Registered tags collection for each world. *>
-alias Tags = HashMap { typeid, Tag };
+alias Tags = Elements { Tag, MAX_TAGS_COUNT };
 
 <* Registered resources collection (with values) for each world. *>
 alias Resources = HashMap { typeid, Resource };

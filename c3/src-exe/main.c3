@@ -70,11 +70,27 @@ fn void system1(Entities entities, World* world) {
 }
 
 fn void system2(Entities entities, World* world) {
-	
+	foreach (entity : entities) {
+		if (try Position* p = entity.get(Position)) {
+			p.x += 1;
+		}
+		
+		if (try Center* c = entity.get(Center)) {
+			c.cx += 1;
+		}
+	}
 }
 
 fn void system3(Entities entities, World* world) {
-	// io::printn(entities.len());
+	foreach (entity : entities) {
+		if (try Position* p = entity.get(Position)) {
+			p.x += 1;
+		}
+		
+		if (try Center* c = entity.get(Center)) {
+			c.cx += 1;
+		}
+	}
 }
 
 fn void main() {
@@ -82,6 +98,11 @@ fn void main() {
 
 	World* world = ecs::new(&entities);
 
+	io::printn((uptr)Position.typeid);
+	io::printn((uptr)Center.typeid);
+	io::printn((uptr)VecType.typeid);
+	io::printn((uptr)Tag1.typeid);
+	io::printn((uptr)Tag2.typeid);
 	io::printfn("Entity size: %s", Entity.sizeof);
 	io::printn("---------");
 	io::printn(Lifetime.QUICK);
@@ -106,10 +127,10 @@ fn void main() {
 		 .mount({ .components = { Position, Center }, .callback = &system1 })
 		 .mount({ .components = { Position, Center }, .tags = { Tag1, Tag2 }, .callback = &system3 })
 		 .mount({ .name = "s1", .components = { Position }, .tags = { Tag1 }, .callback = &system2 })
-		 .mount({ .name = "s2", .components = { Position, Center, VecType }, .tags = { Tag1 }, .callback = &system2 })
-		 .run();
+		 .mount({ .name = "s2", .components = { Position, Center, VecType }, .tags = { Tag1 }, .callback = &system2 });
+		 // .run();
 
-	for (usz i = 0; i < ecs::QUICK_CHUNK_SIZE * 1000 + 3; i++) {
+	for (usz i = 0; i < /*ecs::QUICK_CHUNK_SIZE * 1000*/100000 + 3; i++) {
 		world.spawn(QUICK)
 			.@add(Position, { .x = (double)i + 10, .y = (double)i + 20 });
 	}
@@ -242,10 +263,10 @@ fn void main() {
 	es.untag_all(Tag2, Tag1);
 	io::printn(es.tagged_all(Tag1, Tag2));
 
-	io::printfn("-- spawning dynamics ( %d ) --", ecs::DYNAMIC_CHUNK_SIZE * 1000 + 3);
+	io::printfn("-- spawning dynamics ( %d ) --", /*ecs::DYNAMIC_CHUNK_SIZE * 1000*/500000 + 3);
 	clock = clock::now();
 	
-	for (usz i = 0; i < ecs::DYNAMIC_CHUNK_SIZE * 1000 + 3; i++) {
+	for (usz i = 0; i < /*ecs::DYNAMIC_CHUNK_SIZE * 1000*/500000 + 3; i++) {
 		Entity* e7 = world.spawn(DYNAMIC);
 
 		e7.add((Position) { .x = 1, .y = 2 }).add((Center) { .cx = 1, .cy = 2 });
@@ -256,20 +277,20 @@ fn void main() {
 	duration = clock.mark();
 	io::printfn("\nEllapsed: %s", duration);
 
-	io::printfn("-- spawning quicks ( %d ) --", ecs::QUICK_CHUNK_SIZE * 1000 + 3);
+	io::printfn("-- spawning quicks ( %d ) --", /*ecs::QUICK_CHUNK_SIZE * 1000*/100000 + 3);
 	clock = clock::now();
 	
-	for (usz i = 0; i < ecs::QUICK_CHUNK_SIZE * 1000 + 3; i++) {
+	for (usz i = 0; i < /*ecs::QUICK_CHUNK_SIZE * 1000*/100000 + 3; i++) {
 		world.spawn(QUICK).add((Position) { .x = 1, .y = 2 });
 	}
 
 	duration = clock.mark();
 	io::printfn("\nEllapsed: %s", duration);
 
-	io::printfn("-- spawning statics ( %d ) --", ecs::STATIC_CHUNK_SIZE * 1000 + 3);
+	io::printfn("-- spawning statics ( %d ) --", /*ecs::STATIC_CHUNK_SIZE * 1000*/300000 + 3);
 	clock = clock::now();
 	
-	for (usz i = 0; i < ecs::STATIC_CHUNK_SIZE * 1000 + 3; i++) {
+	for (usz i = 0; i < /*ecs::STATIC_CHUNK_SIZE * 1000*/300000 + 3; i++) {
 		world.spawn(STATIC).add((Position) { .x = 1, .y = 2 });
 	}
 
@@ -363,11 +384,10 @@ fn void main() {
 	// duration = clock.mark();
 	// io::printf("\nEllapsed: %s", duration);
 
-	// world.run();
+	world.run();
 	io::printn("--- world is running ---");
 	world.despawn(e);
 	world.despawn(ed);
-	world.perform();
 
 	foreach (archetype : world.archetypes) {
 		io::printfn("archetype: %s, %s, %s", archetype.entities.len(), archetype.components.data, archetype.tags.data);

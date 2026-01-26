@@ -33,9 +33,9 @@ struct Entity {
    @return "Pointer to the entity."
 *>
 macro Entity* Entity.@add(&self, $Type, #init, bool $perform = true) {
-	if (try component = self.get_world().components.get_ref($Type.typeid)) {
-		self.@set($Type, #init);				/* Storing value in the chunk. */
-		self.components.set(component.idx);		/* Setting marker bit.		   */
+	if (try idx = self.get_world().components.index($Type.typeid)) {
+		self.@set($Type, #init);			/* Storing value in the chunk. */
+		self.components.set(idx);			/* Setting marker bit.		   */
 		if ($perform) self.archetyping();
 	}
 
@@ -84,9 +84,9 @@ macro Entity* Entity.@set(&self, $Type, #init) {
    @return "Pointer to the entity."
 *>
 macro Entity* Entity.add(&self, $component, bool $perform = true) {
-	if (try component = self.get_world().components.get_ref($typeof($component).typeid)) {
-		self.set($component);					/* Storing value in the chunk. */
-		self.components.set(component.idx);		/* Setting marker bit.		   */
+	if (try idx = self.get_world().components.index($typeof($component).typeid)) {
+		self.set($component);				/* Storing value in the chunk. */
+		self.components.set(idx);			/* Setting marker bit.		   */
 		if ($perform) self.archetyping();
 	}
 
@@ -202,19 +202,19 @@ macro any[] Entity.tget_all(&self, ...) => self.get_all(tmem, $vasplat);
 fn any[] Entity.all(&self, Allocator allocator) {
 	ComponentPointers values;
 
-	self.get_world().components.@each_ref(; typeid type, Component* c) {
-		if (self.components.get(c.idx)) {
+	foreach (&component : self.get_world().components.units) {
+		if (self.components.get(component.idx)) {
 			void* ptr;
 
 			if (self.state & ElementState.BUFFERED) {
-				ptr = (char*)c.buffer + c.size * self.chunk_idx;
-			} else if (try chunk = self.block.get_chunk(type)) {
+				ptr = (char*)component.buffer + component.size * self.chunk_idx;
+			} else if (try chunk = self.block.get_chunk(component.type)) {
 				/* If entity is not BUFFERED than it is DYNAMIC or STATIC (not QUICK), */
 				/* so we can just get pointer of the block and do math with it.		   */
-				ptr = chunk + c.size * self.chunk_idx;
+				ptr = chunk + component.size * self.chunk_idx;
 			}
 
-			if (ptr != null) values.push(any_make(ptr, type));
+			if (ptr != null) values.push(any_make(ptr, component.type));
 		}
 	};
 
@@ -235,17 +235,17 @@ macro Entity.@each(&self; @body(type, ptr)) {
 	/* If entity has no components, return. */
 	if (self.components.cardinality() == 0) return;
 
-	self.get_world().components.@each_ref(; typeid type, Component* c) {
-		if (self.components.get(c.idx)) {
+	foreach (&component : self.get_world().components.units) {
+		if (self.components.get(component.idx)) {
 			void* ptr;
 
 			if (self.state & ElementState.BUFFERED) {
-				ptr = (char*)c.buffer + c.size * self.chunk_idx;
-			} else if (try chunk = self.block.get_chunk(type)) {
-				ptr = chunk + c.size * self.chunk_idx;
+				ptr = (char*)component.buffer + component.size * self.chunk_idx;
+			} else if (try chunk = self.block.get_chunk(component.type)) {
+				ptr = chunk + component.size * self.chunk_idx;
 			}
 
-			if (ptr != null) @body(type, ptr);
+			if (ptr != null) @body(component.type, ptr);
 		}
 	};
 }
@@ -255,8 +255,8 @@ macro Entity.@each(&self; @body(type, ptr)) {
    @param perform : "Perform archetyping of the entity. You should not change this parameter (inner logic)."
 *>
 fn void Entity.remove(&self, typeid type, bool perform = true) {
-	if (try component = self.get_world().components.get_ref(type)) {
-		self.components.unset(component.idx);
+	if (try idx = self.get_world().components.index(type)) {
+		self.components.unset(idx);
 		if (perform) self.archetyping();
 	}
 }
@@ -278,8 +278,8 @@ macro void Entity.remove_all(&self, ...) {
    @return "True if entity has a component, otherwise - false."
 *>
 macro bool Entity.has(&self, $Type) {
-	if (try component = self.get_world().components.get_ref($Type.typeid)) {
-		return self.components.get(component.idx);
+	if (try idx = self.get_world().components.index($Type.typeid)) {
+		return self.components.get(idx);
 	} else {
 		return false;
 	}
@@ -294,8 +294,8 @@ fn bool Entity.has_all(&self, typeid... types) {
 	bool has = true;
 	
 	foreach (type : types) {
-		if (try component = world.components.get_ref(type)) {
-			has = has && self.components.get(component.idx);
+		if (try idx = world.components.index(type)) {
+			has = has && self.components.get(idx);
 		} else {
 			has = false;
 		}
@@ -309,8 +309,8 @@ fn bool Entity.has_all(&self, typeid... types) {
    @param perform : "Perform archetyping of the entity. You should not change this parameter (inner logic)."
 *>
 fn void Entity.tag(&self, typeid type, bool perform = true) {
-	if (try tag = self.get_world().tags.get_ref(type)) {
-		self.tags.set(tag.idx);
+	if (try idx = self.get_world().tags.index(type)) {
+		self.tags.set(idx);
 		if (perform) self.archetyping();
 	}
 }
@@ -332,8 +332,8 @@ macro void Entity.tag_all(&self, ...) {
    @param perform : "Perform archetyping of the entity. You should not change this parameter (inner logic)."
 *>
 fn void Entity.untag(&self, typeid type, bool perform = true) {
-	if (try tag = self.get_world().tags.get_ref(type)) {
-		self.tags.unset(tag.idx);
+	if (try idx = self.get_world().tags.index(type)) {
+		self.tags.unset(idx);
 		if (perform) self.archetyping();
 	}
 }
@@ -355,8 +355,8 @@ macro void Entity.untag_all(&self, ...) {
    @return "True if the entity has tag, otherwise - false."
 *>
 fn bool Entity.tagged(&self, typeid type) {
-	if (try tag = self.get_world().tags.get_ref(type)) {
-		return self.tags.get(tag.idx);
+	if (try idx = self.get_world().tags.index(type)) {
+		return self.tags.get(idx);
 	} else {
 		return false;
 	}
@@ -371,8 +371,8 @@ fn bool Entity.tagged_all(&self, typeid... types) {
 	bool tagged = true;
 	
 	foreach (type : types) {
-		if (try tag = world.tags.get_ref(type)) {
-			tagged = tagged && self.tags.get(tag.idx);
+		if (try idx = world.tags.index(type)) {
+			tagged = tagged && self.tags.get(idx);
 		} else {
 			tagged = false;
 		}

@@ -74,8 +74,6 @@ macro usz World.size_of(&self, ...) {
 
 <* Initializes the world. *>
 fn void World.init(&self) @private {
-	self.components.init(mem);
-	self.tags.init(mem);
 	self.resources.init(mem);
 	self.systems.init(mem);
 
@@ -96,8 +94,8 @@ fn void World.init(&self) @private {
    @param buffer : "Pointer to buffer for quick lifetime chunk. Ensure that you don't use same buffers for different worlds."
    @require $Type.kindof == TypeKind.STRUCT || $Type.kindof == TypeKind.DISTINCT : "Element type is not valid."
    @require element != SYSTEM : "Systems should be registered with mount method."
-   @require !(element == COMPONENT && self.components.has_key($Type.typeid)) : "Component already registered."
-   @require !(element == TAG && self.tags.has_key($Type.typeid)) : "Tag already registered."
+   @require !(element == COMPONENT && self.components.has($Type.typeid)) : "Component already registered."
+   @require !(element == TAG && self.tags.has($Type.typeid)) : "Tag already registered."
    @require !(element == RESOURCE && self.resources.has_key($Type.typeid)) : "Resource already registered."
    @require !(element != COMPONENT && buffer != null) : "You do not need a bufer for different from component element type."
    @require !(buffer != null && buffer.type != $Type[QUICK_CHUNK_SIZE].typeid) : "Buffer must have a type of array $Type[QUICK_CHUNK_SIZE]."
@@ -107,12 +105,12 @@ fn void World.init(&self) @private {
 macro World* World.register(&self, Element element, $Type, any buffer = null) {
 	switch (element) {
 		case COMPONENT:
-			self.components.set($Type.typeid, { .type = $Type.typeid, .size = $Type.sizeof, .buffer = buffer,
-				.idx = self.components.len() });
+			self.components.add($Type.typeid, { .type = $Type.typeid, .size = $Type.sizeof, .buffer = buffer,
+				.idx = self.components.count });
 			/* We must disbale quick lifetime for this world when no buffer provided. */
 			if (buffer == null) self.use_quicks = false;
 		case TAG:
-			self.tags.set($Type.typeid, { .type = $Type.typeid, .idx = self.tags.len() });
+			self.tags.add($Type.typeid, { .type = $Type.typeid, .idx = self.tags.count });
 		case RESOURCE:
 			self.resources.set($Type.typeid, { .type = $Type.typeid, .value = mem::new($Type, {}) });
 		case SYSTEM: break;
@@ -135,8 +133,8 @@ fn World* World.mount(&self, SystemDefinition definition) {
 
 	if (definition.components.len > 0) {
 		foreach (type : definition.components) {
-			if (try component = self.components.get_ref(type)) {
-				system.components.set(component.idx);
+			if (try idx = self.components.index(type)) {
+				system.components.set(idx);
 			}
 		}
 
@@ -145,8 +143,8 @@ fn World* World.mount(&self, SystemDefinition definition) {
 
 	if (definition.tags.len > 0) {
 		foreach (type : definition.tags) {
-			if (try tag = self.tags.get_ref(type)) {
-				system.tags.set(tag.idx);
+			if (try idx = self.tags.index(type)) {
+				system.tags.set(idx);
 			}
 		}
 

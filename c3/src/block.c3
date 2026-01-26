@@ -34,17 +34,14 @@ struct Block (BlockGene) {
 	usz idx;
 }
 
-<* Initializes the block.
-   @require !self.chunks.is_initialized() : "Block was already initialized."
-*>
+<* Initializes the block. *>
 fn void Block.init(&self) @dynamic @private {
 	self.entities = mem::alloc(EntitiesChunk);
-	self.chunks.init(mem);
 
-	self.world.components.@each_ref(; typeid type, Component* c) {
+	foreach (&component : self.world.components.units) {
 		/* Allocate memory for components chunks.					 */
 		/* It should be later casted to corresponding array pointer. */
-		self.chunks.set(type, malloc(c.size * CHUNK_SIZE));
+		self.chunks.add(component.type, malloc(component.size * CHUNK_SIZE));
 	};
 }
 
@@ -138,8 +135,8 @@ fn void Block.absorb(&self) @dynamic @private {
 	mem::copy(self.entities, self.world.buffer, Entity.sizeof * self.world.idx);
 
 	/* Copy components from buffers to block chunks. */
-	self.world.components.@each_ref(; typeid type, Component* c) {
-		mem::copy(self.chunks.get(type)!!, c.buffer.ptr, c.size * self.world.idx);
+	foreach (&component : self.world.components.units) {
+		mem::copy(self.chunks.get(component.type)!!, component.buffer.ptr, component.size * self.world.idx);
 	};
 
 	/* Step through all copied entities. */
