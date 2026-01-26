@@ -98,11 +98,11 @@ fn void main() {
 
 	World* world = ecs::new(&entities);
 
-	io::printn((uptr)Position.typeid);
-	io::printn((uptr)Center.typeid);
-	io::printn((uptr)VecType.typeid);
-	io::printn((uptr)Tag1.typeid);
-	io::printn((uptr)Tag2.typeid);
+	// io::printn((uptr)Position.typeid);
+	// io::printn((uptr)Center.typeid);
+	// io::printn((uptr)VecType.typeid);
+	// io::printn((uptr)Tag1.typeid);
+	// io::printn((uptr)Tag2.typeid);
 	io::printfn("Entity size: %s", Entity.sizeof);
 	io::printn("---------");
 	io::printn(Lifetime.QUICK);

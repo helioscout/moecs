@@ -23,8 +23,10 @@ struct Block (BlockGene) {
 	Lifetime lifetime;
 	<* Entities chunk (collection) for the block. *>
 	EntitiesChunk* entities;
-	<* Component chunks collection for the block. *>
-	Chunks chunks;
+	<* Component chunks collection for the block.
+	   Chunk is represented as an array of component struct values ($Type[(QUICK|DYNAMIC|STATIC)_CHUNK_SIZE]).
+	   But is created as a pointer to allocated memory block. *>
+	char*[moecs::MAX_COMPONENTS_COUNT] chunks;
 	<* Deleted (freed) rows in the dynamic lifetime block. *>
 	Indexes deleted;
 	<* Occupied (used) rows in the quick lifetime block. *>
@@ -38,10 +40,11 @@ struct Block (BlockGene) {
 fn void Block.init(&self) @dynamic @private {
 	self.entities = mem::alloc(EntitiesChunk);
 
-	foreach (&component : self.world.components.units) {
+	for (usz idx = 0; idx < self.world.components.count; idx++) {
+		Component component = self.world.components.types[idx];
 		/* Allocate memory for components chunks.					 */
 		/* It should be later casted to corresponding array pointer. */
-		self.chunks.add(component.type, malloc(component.size * CHUNK_SIZE));
+		self.chunks[idx] = malloc(component.size * CHUNK_SIZE);
 	};
 }
 
@@ -58,13 +61,11 @@ fn Lifetime Block.get_lifetime(&self) @inline @dynamic @private {
 	return self.lifetime;
 }
 
-<* Gets component chunk of specified type.
-   @param type : "Component type id."
+<* Gets component chunk of specified type index.
+   @param idx : "Component type index."
    @return "Pointer to the component chunk."
 *>
-fn char*? Block.get_chunk(&self, typeid type) @inline @dynamic @private {
-	return self.chunks.get(type);
-}
+fn char* Block.get_chunk(&self, usz idx) @inline @dynamic @private => self.chunks[idx];
 
 <* Checks for existence of free rows (places to insert new entities/components).
    For quick lifetime blocks it equals to totally free block (self.free()).
@@ -135,8 +136,9 @@ fn void Block.absorb(&self) @dynamic @private {
 	mem::copy(self.entities, self.world.buffer, Entity.sizeof * self.world.idx);
 
 	/* Copy components from buffers to block chunks. */
-	foreach (&component : self.world.components.units) {
-		mem::copy(self.chunks.get(component.type)!!, component.buffer.ptr, component.size * self.world.idx);
+	for (usz idx = 0; idx < self.world.components.count; idx++) {
+		Component component = self.world.components.types[idx];
+		mem::copy(self.chunks[idx], component.buffer.ptr, component.size * self.world.idx);
 	};
 
 	/* Step through all copied entities. */
@@ -214,7 +216,7 @@ interface BlockGene {
 	fn void 	absorb();
 	fn World*	get_world();
 	fn Lifetime get_lifetime();
-	fn char*?	get_chunk(typeid type);
+	fn char*	get_chunk(usz idx);
 	fn void		delete(usz idx);
 	fn EntitiesIterator iter();
 	fn bool		next(EntitiesIterator* iter);

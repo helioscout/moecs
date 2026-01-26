@@ -48,27 +48,24 @@ macro Entity* Entity.@add(&self, $Type, #init, bool $perform = true) {
    @return "Pointer to the entity."
 *>
 macro Entity* Entity.@set(&self, $Type, #init) {
-	if (self.state & ElementState.BUFFERED) {
-		if (try component = self.world.components.get_ref($Type.typeid)) {
+	if (try component = self.get_world().components.get($Type.typeid)) {
+		if (self.state & ElementState.BUFFERED) {
 			$Type[QUICK_CHUNK_SIZE]* chunk = ($Type[QUICK_CHUNK_SIZE]*)component.buffer;
 			(*chunk)[self.chunk_idx] = #init;
-		}
-	} else {
-		switch (self.block.get_lifetime()) {
-			case QUICK: {
-				if (try chunk = ($Type[QUICK_CHUNK_SIZE]*)self.block.get_chunk($Type)) {
+		} else {
+			switch (self.block.get_lifetime()) {
+				case QUICK: {
+					$Type[QUICK_CHUNK_SIZE]* chunk = ($Type[QUICK_CHUNK_SIZE]*)self.block.get_chunk(component.idx);
 					(*chunk)[self.chunk_idx] = #init;
 				}
-			}
 
-			case DYNAMIC: {
-				if (try chunk = ($Type[DYNAMIC_CHUNK_SIZE]*)self.block.get_chunk($Type)) {
+				case DYNAMIC: {
+					$Type[DYNAMIC_CHUNK_SIZE]* chunk = ($Type[DYNAMIC_CHUNK_SIZE]*)self.block.get_chunk(component.idx);
 					(*chunk)[self.chunk_idx] = #init;
 				}
-			}
 
-			case STATIC: {
-				if (try chunk = ($Type[STATIC_CHUNK_SIZE]*)self.block.get_chunk($Type)) {
+				case STATIC: {
+					$Type[STATIC_CHUNK_SIZE]* chunk = ($Type[STATIC_CHUNK_SIZE]*)self.block.get_chunk(component.idx);
 					(*chunk)[self.chunk_idx] = #init;
 				}
 			}
@@ -98,27 +95,27 @@ macro Entity* Entity.add(&self, $component, bool $perform = true) {
    @return "Pointer to the entity."
 *>
 macro Entity* Entity.set(&self, $component) {
-	if (self.state & ElementState.BUFFERED) {
-		if (try component = self.world.components.get_ref($typeof($component).typeid)) {
+	if (try component = self.get_world().components.get($typeof($component).typeid)) {
+		if (self.state & ElementState.BUFFERED) {
 			$typeof($component)[QUICK_CHUNK_SIZE]* chunk = ($typeof($component)[QUICK_CHUNK_SIZE]*)component.buffer;
 			(*chunk)[self.chunk_idx] = $component;
-		}
-	} else {
-		switch (self.block.get_lifetime()) {
-			case QUICK: {
-				if (try chunk = ($typeof($component)[QUICK_CHUNK_SIZE]*)self.block.get_chunk($typeof($component))) {
+		} else {
+			switch (self.block.get_lifetime()) {
+				case QUICK: {
+					$typeof($component)[QUICK_CHUNK_SIZE]* chunk =
+						($typeof($component)[QUICK_CHUNK_SIZE]*)self.block.get_chunk(component.idx);
 					(*chunk)[self.chunk_idx] = $component;
 				}
-			}
 
-			case DYNAMIC: {
-				if (try chunk = ($typeof($component)[DYNAMIC_CHUNK_SIZE]*)self.block.get_chunk($typeof($component))) {
+				case DYNAMIC: {
+					$typeof($component)[DYNAMIC_CHUNK_SIZE]* chunk =
+						($typeof($component)[DYNAMIC_CHUNK_SIZE]*)self.block.get_chunk(component.idx);
 					(*chunk)[self.chunk_idx] = $component;
 				}
-			}
 
-			case STATIC: {
-				if (try chunk = ($typeof($component)[STATIC_CHUNK_SIZE]*)self.block.get_chunk($typeof($component))) {
+				case STATIC: {
+					$typeof($component)[STATIC_CHUNK_SIZE]* chunk =
+						($typeof($component)[STATIC_CHUNK_SIZE]*)self.block.get_chunk(component.idx);
 					(*chunk)[self.chunk_idx] = $component;
 				}
 			}
@@ -134,7 +131,7 @@ macro Entity* Entity.set(&self, $component) {
    @return? NOT_FOUND : "Component was not found (added)."
 *>
 macro void*? Entity.get(&self, $Type) {
-	if (try component = self.get_world().components.get_ref($Type.typeid)) {
+	if (try component = self.get_world().components.get($Type.typeid)) {
 		if (self.components.get(component.idx)) {
 			if (self.state & ElementState.BUFFERED) {
 				$Type[QUICK_CHUNK_SIZE]* chunk = ($Type[QUICK_CHUNK_SIZE]*)component.buffer;
@@ -142,21 +139,18 @@ macro void*? Entity.get(&self, $Type) {
 			} else {
 				switch (self.block.get_lifetime()) {
 					case QUICK: {
-						if (try chunk = ($Type[QUICK_CHUNK_SIZE]*)self.block.get_chunk($Type)) {
-							return &(*chunk)[self.chunk_idx];
-						}
+						$Type[QUICK_CHUNK_SIZE]* chunk = ($Type[QUICK_CHUNK_SIZE]*)self.block.get_chunk(component.idx);
+						return &(*chunk)[self.chunk_idx];
 					}
 
 					case DYNAMIC: {
-						if (try chunk = ($Type[DYNAMIC_CHUNK_SIZE]*)self.block.get_chunk($Type)) {
-							return &(*chunk)[self.chunk_idx];
-						}
+						$Type[DYNAMIC_CHUNK_SIZE]* chunk = ($Type[DYNAMIC_CHUNK_SIZE]*)self.block.get_chunk(component.idx);
+						return &(*chunk)[self.chunk_idx];
 					}
 
 					case STATIC: {
-						if (try chunk = ($Type[STATIC_CHUNK_SIZE]*)self.block.get_chunk($Type)) {
-							return &(*chunk)[self.chunk_idx];
-						}
+						$Type[STATIC_CHUNK_SIZE]* chunk = ($Type[STATIC_CHUNK_SIZE]*)self.block.get_chunk(component.idx);
+						return &(*chunk)[self.chunk_idx];
 					}
 				}
 			}
@@ -200,15 +194,19 @@ macro any[] Entity.tget_all(&self, ...) => self.get_all(tmem, $vasplat);
    @return "Slice of any with pointers to all component values."
 *>
 fn any[] Entity.all(&self, Allocator allocator) {
+	World* world = self.get_world();
 	ComponentPointers values;
 
-	foreach (&component : self.get_world().components.units) {
-		if (self.components.get(component.idx)) {
+	for (usz idx = 0; idx < world.components.count; idx++) {
+		Component component = world.components.types[idx];
+		
+		if (self.components.get(idx)) {
 			void* ptr;
 
 			if (self.state & ElementState.BUFFERED) {
 				ptr = (char*)component.buffer + component.size * self.chunk_idx;
-			} else if (try chunk = self.block.get_chunk(component.type)) {
+			} else {
+				char* chunk = self.block.get_chunk(idx);
 				/* If entity is not BUFFERED than it is DYNAMIC or STATIC (not QUICK), */
 				/* so we can just get pointer of the block and do math with it.		   */
 				ptr = chunk + component.size * self.chunk_idx;
@@ -235,13 +233,18 @@ macro Entity.@each(&self; @body(type, ptr)) {
 	/* If entity has no components, return. */
 	if (self.components.cardinality() == 0) return;
 
-	foreach (&component : self.get_world().components.units) {
-		if (self.components.get(component.idx)) {
+	World* world = self.get_world();
+
+	for (usz idx = 0; idx < world.components.count; idx++) {
+		Component component = world.components.types[idx];
+
+		if (self.components.get(idx)) {
 			void* ptr;
 
 			if (self.state & ElementState.BUFFERED) {
 				ptr = (char*)component.buffer + component.size * self.chunk_idx;
-			} else if (try chunk = self.block.get_chunk(component.type)) {
+			} else {
+				char* chunk = self.block.get_chunk(idx);
 				ptr = chunk + component.size * self.chunk_idx;
 			}
 

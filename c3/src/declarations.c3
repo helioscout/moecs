@@ -35,11 +35,6 @@ alias DynamicBlocks = List { DynamicBlock* };
 <* Static (lifetime) blocks collection for each world. *>
 alias StaticBlocks = List { StaticBlock* };
 
-<* Component chunks collection for each block, key by component struct type.
-   Chunk is represented as an array of component struct values ($Type[(QUICK|DYNAMIC|STATIC)_CHUNK_SIZE]).
-   But is created as a pointer to allocated memory block. *>
-alias Chunks = Elements { char*, MAX_COMPONENTS_COUNT };
-
 <* Worlds collection in the space. *>
 alias Worlds = List { World* };
 
