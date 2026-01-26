@@ -33,9 +33,9 @@ Entity :: struct {
    `perform`   : Perform archetyping of the entity.
 				 You should not change this parameter (inner logic). */
 add_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type, perform: bool = true) {
-	if c, ok := &get_world(entity).components[Type]; ok {
+	if idx, ok := component_index(&get_world(entity).components, Type); ok {
 		set_component(entity, Type, component)					/* Storing value in the chunk. */
-		marker_set(COMPONENTS_MARKER_SIZE, &entity.components, c.idx)	/* Setting marker bit. */
+		marker_set(COMPONENTS_MARKER_SIZE, &entity.components, idx)		/* Setting marker bit. */
 
 		if perform do archetyping(entity)
 	}
@@ -46,30 +46,24 @@ add_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type, perform:
    `$Type`     : Component type.
    `component` : Reference to the component instance." */
 set_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type) #no_bounds_check {
-	if .BUFFERED in entity.state {
-		if c, ok := &entity.world.components[Type]; ok {
+	if c, ok := components_get(&get_world(entity).components, Type); ok {
+		if .BUFFERED in entity.state {
 			chunk: ^[QUICK_CHUNK_SIZE]Type = cast(^[QUICK_CHUNK_SIZE]Type)c.buffer
 			chunk[entity.chunk_idx] = component^
-		}
-	} else {
-		switch entity.block.lifetime {
-			case .QUICK:
-				if ptr, ok := entity.block.chunks[Type]; ok {
-					chunk: ^[QUICK_CHUNK_SIZE]Type = cast(^[QUICK_CHUNK_SIZE]Type)ptr
+		} else {
+			switch entity.block.lifetime {
+				case .QUICK:
+					chunk: ^[QUICK_CHUNK_SIZE]Type = cast(^[QUICK_CHUNK_SIZE]Type)entity.block.chunks[c.idx]
 					chunk[entity.chunk_idx] = component^
-				}
 
-			case .DYNAMIC:
-				if ptr, ok := entity.block.chunks[Type]; ok {
-					chunk: ^[DYNAMIC_CHUNK_SIZE]Type = cast(^[DYNAMIC_CHUNK_SIZE]Type)ptr
+				case .DYNAMIC:
+					chunk: ^[DYNAMIC_CHUNK_SIZE]Type = cast(^[DYNAMIC_CHUNK_SIZE]Type)entity.block.chunks[c.idx]
 					chunk[entity.chunk_idx] = component^
-				}
 
-			case .STATIC:
-				if ptr, ok := entity.block.chunks[Type]; ok {
-					chunk: ^[STATIC_CHUNK_SIZE]Type = cast(^[STATIC_CHUNK_SIZE]Type)ptr
+				case .STATIC:
+					chunk: ^[STATIC_CHUNK_SIZE]Type = cast(^[STATIC_CHUNK_SIZE]Type)entity.block.chunks[c.idx]
 					chunk[entity.chunk_idx] = component^
-				}
+			}
 		}
 	}
 }
@@ -79,7 +73,7 @@ set_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type) #no_boun
    `$Type`   : Component type.
    `returns` : Pointer to the component and operation success. */
 get_component :: proc(entity: ^Entity, $Type: typeid) -> (^Type, bool) #no_bounds_check #optional_ok {
-	if component, ok := &get_world(entity).components[Type]; ok {
+	if component, ok := components_get(&get_world(entity).components, Type); ok {
 		if marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, component.idx) {
 			if .BUFFERED in entity.state {
 				chunk: ^[QUICK_CHUNK_SIZE]Type = cast(^[QUICK_CHUNK_SIZE]Type)component.buffer
@@ -87,22 +81,16 @@ get_component :: proc(entity: ^Entity, $Type: typeid) -> (^Type, bool) #no_bound
 			} else {
 				switch entity.block.lifetime {
 					case .QUICK:
-						if ptr, ok := entity.block.chunks[Type]; ok {
-							chunk: ^[QUICK_CHUNK_SIZE]Type = cast(^[QUICK_CHUNK_SIZE]Type)ptr
-							return &chunk[entity.chunk_idx], true
-						}
+						chunk: ^[QUICK_CHUNK_SIZE]Type = cast(^[QUICK_CHUNK_SIZE]Type)entity.block.chunks[component.idx]
+						return &chunk[entity.chunk_idx], true
 
 					case .DYNAMIC:
-						if ptr, ok := entity.block.chunks[Type]; ok {
-							chunk: ^[DYNAMIC_CHUNK_SIZE]Type = cast(^[DYNAMIC_CHUNK_SIZE]Type)ptr
-							return &chunk[entity.chunk_idx], true
-						}
+						chunk: ^[DYNAMIC_CHUNK_SIZE]Type = cast(^[DYNAMIC_CHUNK_SIZE]Type)entity.block.chunks[component.idx]
+						return &chunk[entity.chunk_idx], true
 
 					case .STATIC:
-						if ptr, ok := entity.block.chunks[Type]; ok {
-							chunk: ^[STATIC_CHUNK_SIZE]Type = cast(^[STATIC_CHUNK_SIZE]Type)ptr
-							return &chunk[entity.chunk_idx], true
-						}
+						chunk: ^[STATIC_CHUNK_SIZE]Type = cast(^[STATIC_CHUNK_SIZE]Type)entity.block.chunks[component.idx]
+						return &chunk[entity.chunk_idx], true
 				}
 			}
 		}
@@ -117,8 +105,8 @@ get_component :: proc(entity: ^Entity, $Type: typeid) -> (^Type, bool) #no_bound
    `perform` : Perform archetyping of the entity.
 			   You should not change this parameter (inner logic). */
 remove_component :: proc(entity: ^Entity, type: typeid, perform: bool = true) {
-	if component, ok := &get_world(entity).components[type]; ok {
-		marker_unset(COMPONENTS_MARKER_SIZE, &entity.components, component.idx)
+	if idx, ok := component_index(&get_world(entity).components, type); ok {
+		marker_unset(COMPONENTS_MARKER_SIZE, &entity.components, idx)
 
 		if perform do archetyping(entity)
 	}
@@ -138,8 +126,8 @@ remove_components :: proc(entity: ^Entity, types: ..typeid) {
    `type`    : Component type.
    `returns` : True if entity has a component, otherwise - false. */
 has_component :: proc(entity: ^Entity, type: typeid) -> bool {
-	if component, ok := &get_world(entity).components[type]; ok {
-		return marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, component.idx)
+	if idx, ok := component_index(&get_world(entity).components, type); ok {
+		return marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, idx)
 	} else {
 		return false
 	}
@@ -154,8 +142,8 @@ has_components :: proc(entity: ^Entity, types: ..typeid) -> bool {
 	has := true
 
 	for type in types {
-		if component, ok := &world.components[type]; ok {
-			has &&= marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, component.idx)
+		if idx, ok := component_index(&world.components, type); ok {
+			has &&= marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, idx)
 		} else {
 			has = false
 		}
@@ -170,8 +158,8 @@ has_components :: proc(entity: ^Entity, types: ..typeid) -> bool {
    `perform` : Perform archetyping of the entity.
 			   You should not change this parameter (inner logic). */
 set_tag :: proc(entity: ^Entity, type: typeid, perform: bool = true) {
-	if tag, ok := &get_world(entity).tags[type]; ok {
-		marker_set(TAGS_MARKER_SIZE, &entity.tags, tag.idx)
+	if idx, ok := tag_index(&get_world(entity).tags, type); ok {
+		marker_set(TAGS_MARKER_SIZE, &entity.tags, idx)
 
 		if perform do archetyping(entity)
 	}
@@ -184,8 +172,8 @@ set_tags :: proc(entity: ^Entity, types: ..typeid) {
 	world: ^World = get_world(entity)
 
 	for type in types {
-		if tag, ok := &world.tags[type]; ok {
-			marker_set(TAGS_MARKER_SIZE, &entity.tags, tag.idx)
+		if idx, ok := tag_index(&world.tags, type); ok {
+			marker_set(TAGS_MARKER_SIZE, &entity.tags, idx)
 		}
 	}
 	
@@ -198,8 +186,8 @@ set_tags :: proc(entity: ^Entity, types: ..typeid) {
    `perform` : Perform archetyping of the entity.
 			   You should not change this parameter (inner logic). */
 unset_tag :: proc(entity: ^Entity, type: typeid, perform: bool = true) {
-	if tag, ok := &get_world(entity).tags[type]; ok {
-		marker_unset(TAGS_MARKER_SIZE, &entity.tags, tag.idx)
+	if idx, ok := tag_index(&get_world(entity).tags, type); ok {
+		marker_unset(TAGS_MARKER_SIZE, &entity.tags, idx)
 	}
 	
 	if perform do archetyping(entity)
@@ -212,8 +200,8 @@ unset_tags :: proc(entity: ^Entity, types: ..typeid) {
 	world: ^World = get_world(entity)
 
 	for type in types {
-		if tag, ok := &world.tags[type]; ok {
-			marker_unset(TAGS_MARKER_SIZE, &entity.tags, tag.idx)
+		if idx, ok := tag_index(&world.tags, type); ok {
+			marker_unset(TAGS_MARKER_SIZE, &entity.tags, idx)
 		}
 	}
 
@@ -225,8 +213,8 @@ unset_tags :: proc(entity: ^Entity, types: ..typeid) {
    `type`    : Tag type.
    `returns` : True if the entity has tag, otherwise - false. */
 has_tag :: proc(entity: ^Entity, type: typeid) -> bool {
-	if tag, ok := &get_world(entity).tags[type]; ok {
-		return marker_is_set(TAGS_MARKER_SIZE, entity.tags, tag.idx)
+	if idx, ok := tag_index(&get_world(entity).tags, type); ok {
+		return marker_is_set(TAGS_MARKER_SIZE, entity.tags, idx)
 	} else {
 		return false
 	}
@@ -241,8 +229,8 @@ has_tags :: proc(entity: ^Entity, types: ..typeid) -> bool {
 	has := true
 
 	for type in types {
-		if tag, ok := &world.tags[type]; ok {
-			has &&= marker_is_set(TAGS_MARKER_SIZE, entity.tags, tag.idx)
+		if idx, ok := tag_index(&world.tags, type); ok {
+			has &&= marker_is_set(TAGS_MARKER_SIZE, entity.tags, idx)
 		} else {
 			has = false
 		}

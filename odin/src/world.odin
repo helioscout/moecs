@@ -59,11 +59,11 @@ register :: proc(world: ^World, element: Element, $Type: typeid, buffer : rawptr
 
 	#partial switch element {
 		case .COMPONENT:
-			world.components[Type] = { type = Type, size = size_of(Type), buffer = buffer,
-				idx = len(world.components) }
+			components_add(&world.components, Type, { type = Type, size = size_of(Type), buffer = buffer,
+				idx = world.components.count })
 			if buffer == nil do world.use_quicks = false
 		case .TAG:
-			world.tags[Type] = { type = Type, idx = len(world.tags) }
+			tags_add(&world.tags, Type, { type = Type, idx = world.tags.count })
 		case .RESOURCE:
 			world.resources[Type] = { type = Type, value = new(Type) }
 	}
@@ -85,8 +85,8 @@ mount :: proc(world: ^World, definition: SystemDefinition) {
 
 	if len(definition.components) > 0 {
 		for type in definition.components {
-			if component, ok := world.components[type]; ok {
-				marker_set(COMPONENTS_MARKER_SIZE, &system.components, component.idx)
+			if idx, ok := component_index(&world.components, type); ok {
+				marker_set(COMPONENTS_MARKER_SIZE, &system.components, idx)
 			}
 		}
 
@@ -95,8 +95,8 @@ mount :: proc(world: ^World, definition: SystemDefinition) {
 
 	if len(definition.tags) > 0 {
 		for type in definition.tags {
-			if tag, ok := world.tags[type]; ok {
-				marker_set(TAGS_MARKER_SIZE, &system.tags, tag.idx)
+			if idx, ok := tag_index(&world.tags, type); ok {
+				marker_set(TAGS_MARKER_SIZE, &system.tags, idx)
 			}
 		}
 
@@ -124,7 +124,7 @@ unmount :: proc(world: ^World, name: string) {
    World must has at least one registered component, but can has no tags, resources.
    `world` : Pointer to the world. */
 run :: proc(world: ^World) {
-	if len(world.components) == 0 do panic("The world has no registered components.")
+	if world.components.count == 0 do panic("The world has no registered components.")
 	if world.running do return
 
 	perform(world)

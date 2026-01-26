@@ -25,17 +25,6 @@ MAX_TAGS_COUNT       : int : 128
 /* Size of quick lifetime marker (array of bitset). */
 @(private) QUICK_MARKER_SIZE : uint : (uint(QUICK_CHUNK_SIZE) + MARKER_BITS_COUNT - 1) / MARKER_BITS_COUNT
 
-/* Component chunks collection for each block, key by component struct type.
-   Chunk is represented as an array of component struct values ($Type[(QUICK|DYNAMIC|STATIC)_CHUNK_SIZE]).
-   But is created as a pointer to allocated memory block. */
-@(private) Chunks :: map[typeid]rawptr
-
-/* Registered components collection for each world. */
-@(private) Components :: map[typeid]Component
-
-/* Registered tags collection for each world. */
-@(private) Tags :: map[typeid]Tag
-
 /* Registered resources collection (with values) for each world. */
 @(private) Resources :: map[typeid]Resource
 

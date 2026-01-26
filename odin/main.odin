@@ -120,6 +120,11 @@ main :: proc() {
 	// ecs.unmount(world, "s2")
 	// fmt.println(ecs.get(world, "s2"))
 
+	// fmt.println(transmute(u64)typeid_of(Position))
+	// fmt.println(transmute(u64)typeid_of(Center))
+	// fmt.println(transmute(u64)typeid_of(VecType))
+	// fmt.println(transmute(u64)typeid_of(Tag1))
+	// fmt.println(transmute(u64)typeid_of(Tag2))
 	// fmt.printfln("%b", max(uint) >> (64 - 62 % 64))
 	// fmt.printfln("marker: %b", max(uint) >> (64 - 3 % 64))
 	// fmt.println(3 / 64)

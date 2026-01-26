@@ -16,8 +16,10 @@ Block :: struct {
 	/* Entities collection (chunk) for the block.
 	   The index of the entity corresponds to the index of its components in each chunk. */
 	entities : []Entity,
-	/* Component chunks collection for the block. */
-	chunks : Chunks,
+	/* Component chunks collection for the block.
+	   Chunk is represented as an array of component struct values ($Type[(QUICK|DYNAMIC|STATIC)_CHUNK_SIZE]).
+	   But is created as a pointer to allocated memory block. */
+	chunks : [MAX_COMPONENTS_COUNT]rawptr,
 	/* Deleted (freed) rows in the dynamic lifetime block. */
 	deleted : sa.Small_Array(DYNAMIC_CHUNK_SIZE, int),
 	/* Occupied (used) rows in the quick lifetime block. */
@@ -34,14 +36,15 @@ Block :: struct {
 block_init :: proc(block: ^Block) {
 	block.entities = make([]Entity, block.size)
 
-	for type, &component in block.world.components {
+	for idx := 0; idx < block.world.components.count; idx += 1 {
+		component: ^Component = &block.world.components.types[idx]
 		/* Allocate memory for components chunks.					 */
 		/* It should be later casted to corresponding array pointer. */
 		ptr, err := mem.alloc(component.size * block.size)
 
 		if err != .None do panic(fmt.tprintf("Chunk memory allocation error: %v", err))
 
-		block.chunks[type] = ptr
+		block.chunks[idx] = ptr
 	}
 }
 
@@ -119,8 +122,9 @@ block_absorb :: proc(block: ^Block) {
 	copy(block.entities[0:block.world.idx], block.world.buffer[0:block.world.idx])
 
 	/* Copy components from buffers to block chunks. */
-	for type, &component in block.world.components {
-		mem.copy(block.chunks[type], component.buffer, component.size * block.world.idx)
+	for idx := 0; idx < block.world.components.count; idx += 1 {
+		component: ^Component = &block.world.components.types[idx]
+		mem.copy(block.chunks[idx], component.buffer, component.size * block.world.idx)
 	}
 
 	/* Step through all copied entities. */
