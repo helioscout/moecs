@@ -1,6 +1,7 @@
 package moecs
 
 import "core:fmt"
+import "core:mem"
 
 /* Entity type. */
 Entity :: struct {
@@ -47,24 +48,10 @@ add_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type, perform:
    `component` : Reference to the component instance." */
 set_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type) #no_bounds_check {
 	if c, ok := components_get(&get_world(entity).components, Type); ok {
-		if .BUFFERED in entity.state {
-			chunk: ^[QUICK_CHUNK_SIZE]Type = cast(^[QUICK_CHUNK_SIZE]Type)c.buffer
-			chunk[entity.chunk_idx] = component^
-		} else {
-			switch entity.block.lifetime {
-				case .QUICK:
-					chunk: ^[QUICK_CHUNK_SIZE]Type = cast(^[QUICK_CHUNK_SIZE]Type)entity.block.chunks[c.idx]
-					chunk[entity.chunk_idx] = component^
+		ptr: rawptr = c.buffer if .BUFFERED in entity.state else entity.block.chunks[c.idx]
+		cell: ^Type = mem.ptr_offset(cast(^Type)ptr, entity.chunk_idx)
 
-				case .DYNAMIC:
-					chunk: ^[DYNAMIC_CHUNK_SIZE]Type = cast(^[DYNAMIC_CHUNK_SIZE]Type)entity.block.chunks[c.idx]
-					chunk[entity.chunk_idx] = component^
-
-				case .STATIC:
-					chunk: ^[STATIC_CHUNK_SIZE]Type = cast(^[STATIC_CHUNK_SIZE]Type)entity.block.chunks[c.idx]
-					chunk[entity.chunk_idx] = component^
-			}
-		}
+		cell^ = component^
 	}
 }
 
@@ -75,24 +62,8 @@ set_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type) #no_boun
 get_component :: proc(entity: ^Entity, $Type: typeid) -> (^Type, bool) #no_bounds_check #optional_ok {
 	if component, ok := components_get(&get_world(entity).components, Type); ok {
 		if marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, component.idx) {
-			if .BUFFERED in entity.state {
-				chunk: ^[QUICK_CHUNK_SIZE]Type = cast(^[QUICK_CHUNK_SIZE]Type)component.buffer
-				return &chunk[entity.chunk_idx], true
-			} else {
-				switch entity.block.lifetime {
-					case .QUICK:
-						chunk: ^[QUICK_CHUNK_SIZE]Type = cast(^[QUICK_CHUNK_SIZE]Type)entity.block.chunks[component.idx]
-						return &chunk[entity.chunk_idx], true
-
-					case .DYNAMIC:
-						chunk: ^[DYNAMIC_CHUNK_SIZE]Type = cast(^[DYNAMIC_CHUNK_SIZE]Type)entity.block.chunks[component.idx]
-						return &chunk[entity.chunk_idx], true
-
-					case .STATIC:
-						chunk: ^[STATIC_CHUNK_SIZE]Type = cast(^[STATIC_CHUNK_SIZE]Type)entity.block.chunks[component.idx]
-						return &chunk[entity.chunk_idx], true
-				}
-			}
+			ptr: rawptr = component.buffer if .BUFFERED in entity.state else entity.block.chunks[component.idx]
+			return mem.ptr_offset(cast(^Type)ptr, entity.chunk_idx), true
 		}
 	}
 
