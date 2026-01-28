@@ -1,5 +1,7 @@
 package moecs
 
+import "core:slice"
+
 /* Component elment type description. */
 @(private="package")
 Component :: struct {
@@ -10,7 +12,9 @@ Component :: struct {
 	/* Type size for allocations. */
 	size : int,
 	/* Pointer to buffer for quick lifetime chunk, must be provided from the main app. */
-	buffer : rawptr
+	buffer : rawptr,
+	/* Component offset (position) in the storage. */
+	offset : int
 }
 
 /* Registered component types collection for each world. */
@@ -23,14 +27,16 @@ Components :: struct {
 	/* Instances of concrete component type. */
 	types : [MAX_COMPONENTS_COUNT]Component,
 	/* Component types count (last index + 1). */
-	count : int
+	count : int,
+	/* Total size in bytes of all components. */
+	size : int
 }
 
 /* Gets index of component type.
    `components` : Component types collection.
    `type`       : Component type. */
 @(private="package")
-component_index :: proc(components: ^Components, type: typeid) -> (int, bool) {
+component_index :: proc(components: ^Components, type: typeid) -> (int, bool) #optional_ok {
 	id: u64 = transmute(u64)type
 
 	for i := 0; i < components.count; i += 1 {
@@ -51,6 +57,7 @@ components_add :: proc(components: ^Components, type: typeid, component: Compone
 
 	components.ids[components.count] = transmute(u64)type
 	components.types[components.count] = component
+	components.size += component.size
 
 	components.count += 1
 }
@@ -59,7 +66,7 @@ components_add :: proc(components: ^Components, type: typeid, component: Compone
    `components` : Component types collection.
    `type`       : Component type. */
 @(private="package")
-components_get :: proc(components: ^Components, type: typeid) -> (^Component, bool) {
+components_get :: proc(components: ^Components, type: typeid) -> (^Component, bool) #optional_ok {
 	if idx, ok := component_index(components, type); ok {
 		return &components.types[idx], true
 	} else {
@@ -75,4 +82,25 @@ components_get :: proc(components: ^Components, type: typeid) -> (^Component, bo
 components_has :: proc(components: ^Components, type: typeid) -> bool {
 	_, ok := component_index(components, type)
 	return ok
+}
+
+/* Adjust component types for efficient access, sort, calculate offsets.
+   `components` : Component types collection. */
+@(private="package")
+components_adjust :: proc(components: ^Components) {
+	types: []Component = slice.clone(components.types[:components.count])
+
+	slice.sort(components.ids[:components.count])
+
+	for component in types {
+		idx := component_index(components, component.type)
+		components.types[idx] = component
+		components.types[idx].idx = idx
+	}
+
+	components.types[0].offset = 0
+
+	for i in 1..<components.count {
+		components.types[i].offset = components.types[i - 1].offset + components.types[i - 1].size
+	}
 }

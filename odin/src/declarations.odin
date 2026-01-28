@@ -5,7 +5,7 @@ package moecs
    reading component while world runing. */
 
 /* Quick lifetime chunk size. */
-QUICK_CHUNK_SIZE   : int : 100
+QUICK_CHUNK_SIZE   : int : 500
 /* Dynamic lifetime chunk size. */
 DYNAMIC_CHUNK_SIZE : int : 500
 /* Static lifetime chunk size. */
@@ -71,7 +71,9 @@ ElementState :: enum {
 	/* System has components in the match query. */
 	HAS_COMPONENTS,
 	/* Entity should be re-archetyped at deffered (perform) stage. */
-	ARCHETYPING
+	ARCHETYPING,
+	/* Entity should be despawned at deffered (perform) stage. */
+	DESPAWNING
 }
 
 /* Query match approach of slection entities for the systems. */
@@ -89,7 +91,7 @@ Approach :: enum {
 @(private) Deffered :: struct {
 	/* Despawning entities. We need to keep them in the archetypes till end of the current progress step,
 	   otherwise iterators inside systems code can lead to bugs, as they iterate over collections of
-	   the archetypes which we need to delete entities from. Entities will be marked as DELETED but
+	   the archetypes which we need to delete entities from. Entities will be marked as DESPAWNING but
 	   despawned (deleted from the block) at performing stage. Also, a new entity can be written in place
 	   of a deleted entity, then bugs are inevitable since the reference to the deleted entity will
 	   continue to be stored in the archetype collection. */

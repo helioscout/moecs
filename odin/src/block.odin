@@ -16,10 +16,12 @@ Block :: struct {
 	/* Entities collection (chunk) for the block.
 	   The index of the entity corresponds to the index of its components in each chunk. */
 	entities : []Entity,
-	/* Component chunks collection for the block.
-	   Chunk is represented as an array of component struct values ($Type[(QUICK|DYNAMIC|STATIC)_CHUNK_SIZE]).
+	/* Component chunks collection for the quick block.
+	   Chunk is represented as an array of component struct values ($Type[QUICK_CHUNK_SIZE]).
 	   But is created as a pointer to allocated memory block. */
 	chunks : [MAX_COMPONENTS_COUNT]rawptr,
+	/* Storage for dynamic and static components. */
+	storage: rawptr,
 	/* Deleted (freed) rows in the dynamic lifetime block. */
 	deleted : sa.Small_Array(DYNAMIC_CHUNK_SIZE, int),
 	/* Occupied (used) rows in the quick lifetime block. */
@@ -36,15 +38,23 @@ Block :: struct {
 block_init :: proc(block: ^Block) {
 	block.entities = make([]Entity, block.size)
 
-	for idx := 0; idx < block.world.components.count; idx += 1 {
-		component: ^Component = &block.world.components.types[idx]
-		/* Allocate memory for components chunks.					 */
-		/* It should be later casted to corresponding array pointer. */
-		ptr, err := mem.alloc(component.size * block.size)
+	if block.lifetime == .QUICK {
+		for idx := 0; idx < block.world.components.count; idx += 1 {
+			component: ^Component = &block.world.components.types[idx]
+			/* Allocate memory for components chunks.					 */
+			/* It should be later casted to corresponding array pointer. */
+			ptr, err := mem.alloc(component.size * block.size)
 
-		if err != .None do panic(fmt.tprintf("Chunk memory allocation error: %v", err))
+			if err != .None do panic(fmt.tprintf("Chunk memory allocation error: %v", err))
 
-		block.chunks[idx] = ptr
+			block.chunks[idx] = ptr
+		}
+	} else {
+		ptr, err := mem.alloc(block.world.components.size * block.size)
+
+		if err != .None do panic(fmt.tprintf("Storage memory allocation error: %v", err))
+		
+		block.storage = ptr
 	}
 }
 
@@ -68,7 +78,7 @@ block_has_free_rows :: proc(block: ^Block) -> bool {
 block_is_full :: proc(block: ^Block) -> bool {
 	switch block.lifetime {
 		/* Even if one row is occupied, quick lifetime block can't be used for insert. */
-		case .QUICK:   return marker_is_any_set(QUICK_MARKER_SIZE, block.occupied)
+		case .QUICK:   return marker_is_any_set(QUICK_CHUNK_SIZE, QUICK_MARKER_SIZE, block.occupied)
 		case .DYNAMIC: return block.idx == DYNAMIC_CHUNK_SIZE && sa.len(block.deleted) == 0
 		case .STATIC:  return block.idx == STATIC_CHUNK_SIZE
 	}

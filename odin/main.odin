@@ -13,6 +13,17 @@ Center :: struct {
 	cx, cy : int
 }
 
+Health :: struct {
+	hp: u8
+}
+
+Rotation :: struct {
+	angle: int,
+	rad: f32
+}
+
+Velocity :: distinct [1]f32
+
 Resource1 :: struct {
 	enabled : bool
 }
@@ -31,6 +42,9 @@ entities  : [ecs.QUICK_CHUNK_SIZE]ecs.Entity
 positions : [ecs.QUICK_CHUNK_SIZE]Position
 centers   : [ecs.QUICK_CHUNK_SIZE]Center
 vectors   : [ecs.QUICK_CHUNK_SIZE]VecType
+healths   : [ecs.QUICK_CHUNK_SIZE]Health
+rotations : [ecs.QUICK_CHUNK_SIZE]Rotation
+velocities: [ecs.QUICK_CHUNK_SIZE]Velocity
 
 count : uint = 0
 
@@ -76,7 +90,11 @@ system1 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 
 system2 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 	for entity in entities {
-		pos, center := ecs.get(entity, Position, Center)
+		pos, center, vec, health, vel, rot := ecs.get(entity, Position, Center, VecType, Health, Velocity, Rotation)
+		// pos, center, vec, health, vel := ecs.get(entity, Position, Center, VecType, Health, Velocity)
+		// pos, center, vec, health := ecs.get(entity, Position, Center, VecType, Health)
+		// pos, center, vec := ecs.get(entity, Position, Center, VecType)
+		// pos, center := ecs.get(entity, Position, Center)
 
 		if pos != nil do pos.x += 1
 		if center != nil do center.cx += 1
@@ -86,7 +104,11 @@ system2 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 
 system3 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 	for entity in entities {
-		pos, center := ecs.get(entity, Position, Center)
+		pos, center, vec, health, vel, rot := ecs.get(entity, Position, Center, VecType, Health, Velocity, Rotation)
+		// pos, center, vec, health, vel := ecs.get(entity, Position, Center, VecType, Health, Velocity)
+		// pos, center, vec, health := ecs.get(entity, Position, Center, VecType, Health)
+		// pos, center, vec := ecs.get(entity, Position, Center, VecType)
+		// pos, center := ecs.get(entity, Position, Center)
 
 		if pos != nil do pos.x += 1
 		if center != nil do center.cx += 1
@@ -105,6 +127,9 @@ main :: proc() {
 	ecs.register(world, .COMPONENT, Position, &positions)
 	ecs.register(world, .COMPONENT, Center, &centers)
 	ecs.register(world, .COMPONENT, VecType, &vectors)
+	ecs.register(world, .COMPONENT, Health, &healths)
+	ecs.register(world, .COMPONENT, Rotation, &rotations)
+	ecs.register(world, .COMPONENT, Velocity, &velocities)
 	ecs.register(world, .RESOURCE, Resource1)
 	ecs.register(world, .RESOURCE, Resource2)
 	ecs.register(world, .TAG, Tag1)
@@ -116,6 +141,8 @@ main :: proc() {
 	ecs.mount(world, { components = { Position, Center }, tags = { Tag1, Tag2 }, callback = system3})
 	ecs.mount(world, { name = "s1", components = { Position }, tags = { Tag1 }, callback = system2 })
 	ecs.mount(world, { name = "s2", components = { Center }, tags = { Tag2 }, callback = system2 })
+	ecs.run(world)
+	fmt.println("--- world is running ---")
 
 	// ecs.unmount(world, "s2")
 	// fmt.println(ecs.get(world, "s2"))
@@ -137,6 +164,7 @@ main :: proc() {
 	// ecs.marker_set(MARKER_SIZE, &marker, 7)
 	// ecs.marker_set(MARKER_SIZE, &marker, 63)
 	// ecs.marker_set(MARKER_SIZE, &marker, 129)
+	// fmt.printfln("is any set: %v", ecs.marker_is_any_set(MAX_COUNT, MARKER_SIZE, marker))
 	// marker_print(marker)
 	// fmt.printfln("is 5-th bit set: %v", ecs.marker_is_set(MARKER_SIZE, marker, 4))
 	// fmt.printfln("is 64-th bit set: %v", ecs.marker_is_set(MARKER_SIZE, marker, 63))
@@ -165,7 +193,58 @@ main :: proc() {
 		
 	// resource1 : ^Resource1 = ecs.get_resource(world, Resource1)
 	// resource1.enabled = true
-	
+
+	_time = time.now()
+	fmt.println("-- spawning quicks, buffered (10000 iterations) --")
+
+	for i in 0..<10000 {
+		for i in 0..<ecs.QUICK_CHUNK_SIZE {
+			ecs.add(ecs.spawn(world, .QUICK),
+				Position, &Position { x = f64(i) + 10, y = f64(i) + 10 },
+				Center, &Center { cx = i + 20, cy = i + 20 },
+				Health, &Health { hp = 30 },
+				Rotation, &Rotation { angle = 90 },
+				Velocity, &Velocity { 50 })
+		}
+
+		ecs.each(world, { .QUICK }, callback = proc(entity: ^ecs.Entity, lifetime: ecs.Lifetime, world: ^ecs.World) {
+			ecs.despawn(world, entity)
+		})
+
+		// fmt.printfln("-- before: %v", len(world.deffered.despawning))
+		ecs.perform(world)
+		// fmt.println(world.deleted)
+		// fmt.printfln("-- after: %v", len(world.deffered.despawning))
+	}
+
+	_duration = time.diff(_time, time.now())
+	fmt.printfln("-- ellapsed: %v", _duration)
+	fmt.printfln("-- quick blocks count: %v", len(world.quicks))
+
+	_time = time.now()
+	fmt.println("-- spawning dynamics (10000 iterations) --")
+
+	for i in 0..<10000 {
+		for i in 0..<ecs.QUICK_CHUNK_SIZE {
+			ecs.add(ecs.spawn(world, .DYNAMIC),
+				Position, &Position { x = f64(i) + 10, y = f64(i) + 10 },
+				Center, &Center { cx = i + 20, cy = i + 20 },
+				Health, &Health { hp = 30 },
+				Rotation, &Rotation { angle = 90 },
+				Velocity, &Velocity { 50 })
+		}
+
+		ecs.each(world, { .DYNAMIC }, callback = proc(entity: ^ecs.Entity, lifetime: ecs.Lifetime, world: ^ecs.World) {
+			ecs.despawn(world, entity)
+		})
+
+		ecs.perform(world)
+	}
+
+	_duration = time.diff(_time, time.now())
+	fmt.printfln("-- ellapsed: %v", _duration)
+	fmt.printfln("-- dynamic blocks count: %v", len(world.dynamics))
+
 	ecs.set(world,
 		Resource1, Resource1 { enabled = true },
 		Resource2, Resource2 { count = 10 })
@@ -182,7 +261,10 @@ main :: proc() {
 	for i in 0..</*ecs.QUICK_CHUNK_SIZE * 1000*/100000 + 3 {
 		ecs.add(ecs.spawn(world, .QUICK),
 			Position, &Position { x = f64(i) + 10, y = f64(i) + 10 },
-			Center, &Center { cx = i + 20, cy = i + 20 })
+			Center, &Center { cx = i + 20, cy = i + 20 },
+			Health, &Health { hp = 30 },
+			Rotation, &Rotation { angle = 90 },
+			Velocity, &Velocity { 50 })
 		// ecs.spawn(world, .QUICK)
 	}
 
@@ -271,7 +353,10 @@ main :: proc() {
 		e := ecs.spawn(world, .QUICK)
 		ecs.add(e,
 			// Position, &Position { x = 10, y = 10 },
-			Center, &Center { cx = 20, cy = 20 })
+			Center, &Center { cx = 20, cy = 20 },
+			Health, &Health { hp = 30 },
+			Rotation, &Rotation { angle = 90 },
+			Velocity, &Velocity { 50 })
 		ecs.tag(e, Tag2)
 		// ecs.spawn(world, .QUICK)
 	}
@@ -287,6 +372,9 @@ main :: proc() {
 
 		ecs.add(e,
 			Position, &Position { x = 10, y = 10 },
+			Health, &Health { hp = 30 },
+			Rotation, &Rotation { angle = 90 },
+			Velocity, &Velocity { 50 }
 			/*Center, &Center { cx = 20, cy = 20 }*/)
 		ecs.tag(e, Tag1)
 		
@@ -306,7 +394,10 @@ main :: proc() {
 	for i in 0..</*ecs.STATIC_CHUNK_SIZE * 1000*/300000 + 3 {
 		ecs.add(ecs.spawn(world, .STATIC),
 			Position, &Position { x = 10, y = 10 },
-			Center, &Center { cx = 20, cy = 20 })
+			Center, &Center { cx = 20, cy = 20 },
+			Health, &Health { hp = 30 },
+			Rotation, &Rotation { angle = 90 },
+			Velocity, &Velocity { 50 })
 		// ecs.spawn(world, .STATIC)
 	}
 
@@ -328,8 +419,8 @@ main :: proc() {
 	_duration = time.diff(_time, time.now())
 	fmt.printfln("-- ellapsed: %v, count: %v", _duration, count)
 
-	ecs.run(world)
-	fmt.println("--- world is running ---")
+	// ecs.run(world)
+	// fmt.println("--- world is running ---")
 	ecs.despawn(world, e1, e2, e4, e5)
 
 	for archetype in world.archetypes {

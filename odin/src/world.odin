@@ -32,7 +32,7 @@ World :: struct {
 	/* Buffer for quick life time entities, must be provided from the main app. */
 	buffer : ^[QUICK_CHUNK_SIZE]Entity,
 	/* Deleted (freed) rows in the quick lifetime buffer. */
-	deleted: sa.Small_Array(QUICK_CHUNK_SIZE, int),
+	deleted : sa.Small_Array(QUICK_CHUNK_SIZE, int),
 	/* Current inserting index in the quick lifetime buffer (last inserted index + 1). */
 	idx : int,
 	/* Indicates that the world is running. */
@@ -127,7 +127,7 @@ run :: proc(world: ^World) {
 	if world.components.count == 0 do panic("The world has no registered components.")
 	if world.running do return
 
-	perform(world)
+	components_adjust(&world.components)
 
 	world.running = true
 }
@@ -138,6 +138,8 @@ run :: proc(world: ^World) {
    `returns`  : Pointer to new entity.
 */
 spawn :: proc(world: ^World, lifetime: Lifetime = .DYNAMIC) -> ^Entity {
+	if !world.running do panic("Run the world first.")
+
 	entity: ^Entity = ---
 
 	switch lifetime {
@@ -173,15 +175,16 @@ despawn_entity :: proc(world: ^World, entity: ^Entity) {
 	
 	if world.approach == .ARCHETYPE && world.running && !world.performing {
 		append(&world.deffered.despawning, entity)
+		entity.state += { .DESPAWNING }
 	} else {
 		if .BUFFERED in entity.state {
 			sa.append(&world.deleted, entity.chunk_idx)
 		} else {
 			block_delete(entity.block, entity.chunk_idx)
 		}
-	}
 
-	entity.state += { .DELETED }
+		entity.state += { .DELETED }
+	}
 }
 
 /* Despawns entities from the world.

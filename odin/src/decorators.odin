@@ -1,6 +1,8 @@
 #+private
 package moecs
 
+import "core:mem"
+
 /* Adds 2 components to the entity by type and instance (initializer).
    If entity already has a component it will be replaced by new one.
    `entity`     : Pointer to the entity.
@@ -1546,10 +1548,45 @@ get_2_components :: #force_inline proc(entity: ^Entity,
    `$TypeN`   : N-th component type. */
 get_3_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, $Type2: typeid, $Type3: typeid) ->
-	(c1: ^Type1, c2: ^Type2, c3: ^Type3) {
-	c1 = get_component(entity, Type1)
-	c2 = get_component(entity, Type2)
-	c3 = get_component(entity, Type3)
+	(c1: ^Type1, c2: ^Type2, c3: ^Type3) #no_bounds_check {
+	world: ^World = get_world(entity)
+	buffered := .BUFFERED in entity.state
+
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+
+	if buffered || entity.block.lifetime == .QUICK {
+		for i := 0; i < world.components.count; i += 1 {
+			id := world.components.ids[i]
+			ptr: rawptr = world.components.types[i].buffer if buffered else entity.block.chunks[i]
+
+			if id == id1 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c1 = mem.ptr_offset(cast(^Type1)ptr, entity.chunk_idx)
+			} else if id == id2 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c2 = mem.ptr_offset(cast(^Type2)ptr, entity.chunk_idx)
+			} else if id == id3 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c3 = mem.ptr_offset(cast(^Type3)ptr, entity.chunk_idx)
+			}
+		}
+	} else {
+		storage: ^u8 = cast(^u8)entity.block.storage
+		chunk_offset := world.components.size * entity.chunk_idx
+
+		for i := 0; i < world.components.count; i += 1 {
+			id := world.components.ids[i]
+			offset := world.components.types[i].offset
+
+			if id == id1 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c1 = cast(^Type1)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id2 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c2 = cast(^Type2)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id3 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c3 = cast(^Type3)mem.ptr_offset(storage, chunk_offset + offset)
+			}
+		}
+	}
+
 	return
 }
 
@@ -1558,11 +1595,50 @@ get_3_components :: #force_inline proc(entity: ^Entity,
    `$TypeN`   : N-th component type. */
 get_4_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, $Type2: typeid, $Type3: typeid, $Type4: typeid) ->
-	(c1: ^Type1, c2: ^Type2, c3: ^Type3, c4: ^Type4) {
-	c1 = get_component(entity, Type1)
-	c2 = get_component(entity, Type2)
-	c3 = get_component(entity, Type3)
-	c4 = get_component(entity, Type4)
+	(c1: ^Type1, c2: ^Type2, c3: ^Type3, c4: ^Type4) #no_bounds_check {
+	world: ^World = get_world(entity)
+	buffered := .BUFFERED in entity.state
+
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+
+	if buffered || entity.block.lifetime == .QUICK {
+		for i := 0; i < world.components.count; i += 1 {
+			id := world.components.ids[i]
+			ptr: rawptr = world.components.types[i].buffer if buffered else entity.block.chunks[i]
+
+			if id == id1 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c1 = mem.ptr_offset(cast(^Type1)ptr, entity.chunk_idx)
+			} else if id == id2 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c2 = mem.ptr_offset(cast(^Type2)ptr, entity.chunk_idx)
+			} else if id == id3 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c3 = mem.ptr_offset(cast(^Type3)ptr, entity.chunk_idx)
+			} else if id == id4 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c4 = mem.ptr_offset(cast(^Type4)ptr, entity.chunk_idx)
+			}
+		}
+	} else {
+		storage: ^u8 = cast(^u8)entity.block.storage
+		chunk_offset := world.components.size * entity.chunk_idx
+
+		for i := 0; i < world.components.count; i += 1 {
+			id := world.components.ids[i]
+			offset := world.components.types[i].offset
+
+			if id == id1 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c1 = cast(^Type1)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id2 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c2 = cast(^Type2)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id3 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c3 = cast(^Type3)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id4 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c4 = cast(^Type4)mem.ptr_offset(storage, chunk_offset + offset)
+			}
+		}
+	}
+
 	return
 }
 
@@ -1571,12 +1647,55 @@ get_4_components :: #force_inline proc(entity: ^Entity,
    `$TypeN`   : N-th component type. */
 get_5_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, $Type2: typeid, $Type3: typeid, $Type4: typeid, $Type5: typeid) ->
-	(c1: ^Type1, c2: ^Type2, c3: ^Type3, c4: ^Type4, c5: ^Type5) {
-	c1 = get_component(entity, Type1)
-	c2 = get_component(entity, Type2)
-	c3 = get_component(entity, Type3)
-	c4 = get_component(entity, Type4)
-	c5 = get_component(entity, Type5)
+	(c1: ^Type1, c2: ^Type2, c3: ^Type3, c4: ^Type4, c5: ^Type5) #no_bounds_check {
+	world: ^World = get_world(entity)
+	buffered := .BUFFERED in entity.state
+
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+
+	if buffered || entity.block.lifetime == .QUICK {
+		for i := 0; i < world.components.count; i += 1 {
+			id := world.components.ids[i]
+			ptr: rawptr = world.components.types[i].buffer if buffered else entity.block.chunks[i]
+
+			if id == id1 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c1 = mem.ptr_offset(cast(^Type1)ptr, entity.chunk_idx)
+			} else if id == id2 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c2 = mem.ptr_offset(cast(^Type2)ptr, entity.chunk_idx)
+			} else if id == id3 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c3 = mem.ptr_offset(cast(^Type3)ptr, entity.chunk_idx)
+			} else if id == id4 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c4 = mem.ptr_offset(cast(^Type4)ptr, entity.chunk_idx)
+			} else if id == id5 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c5 = mem.ptr_offset(cast(^Type5)ptr, entity.chunk_idx)
+			}
+		}
+	} else {
+		storage: ^u8 = cast(^u8)entity.block.storage
+		chunk_offset := world.components.size * entity.chunk_idx
+
+		for i := 0; i < world.components.count; i += 1 {
+			id := world.components.ids[i]
+			offset := world.components.types[i].offset
+
+			if id == id1 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c1 = cast(^Type1)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id2 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c2 = cast(^Type2)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id3 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c3 = cast(^Type3)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id4 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c4 = cast(^Type4)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id5 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c5 = cast(^Type5)mem.ptr_offset(storage, chunk_offset + offset)
+			}
+		}
+	}
+	
 	return
 }
 
@@ -1585,13 +1704,60 @@ get_5_components :: #force_inline proc(entity: ^Entity,
    `$TypeN`   : N-th component type. */
 get_6_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, $Type2: typeid, $Type3: typeid, $Type4: typeid, $Type5: typeid, $Type6: typeid) ->
-	(c1: ^Type1, c2: ^Type2, c3: ^Type3, c4: ^Type4, c5: ^Type5, c6: ^Type6) {
-	c1 = get_component(entity, Type1)
-	c2 = get_component(entity, Type2)
-	c3 = get_component(entity, Type3)
-	c4 = get_component(entity, Type4)
-	c5 = get_component(entity, Type5)
-	c6 = get_component(entity, Type6)
+	(c1: ^Type1, c2: ^Type2, c3: ^Type3, c4: ^Type4, c5: ^Type5, c6: ^Type6) #no_bounds_check {
+	world: ^World = get_world(entity)
+	buffered := .BUFFERED in entity.state
+
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+
+	if buffered || entity.block.lifetime == .QUICK {
+		for i := 0; i < world.components.count; i += 1 {
+			id := world.components.ids[i]
+			ptr: rawptr = world.components.types[i].buffer if buffered else entity.block.chunks[i]
+
+			if id == id1 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c1 = mem.ptr_offset(cast(^Type1)ptr, entity.chunk_idx)
+			} else if id == id2 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c2 = mem.ptr_offset(cast(^Type2)ptr, entity.chunk_idx)
+			} else if id == id3 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c3 = mem.ptr_offset(cast(^Type3)ptr, entity.chunk_idx)
+			} else if id == id4 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c4 = mem.ptr_offset(cast(^Type4)ptr, entity.chunk_idx)
+			} else if id == id5 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c5 = mem.ptr_offset(cast(^Type5)ptr, entity.chunk_idx)
+			} else if id == id6 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c6 = mem.ptr_offset(cast(^Type6)ptr, entity.chunk_idx)
+			}
+		}
+	} else {
+		storage: ^u8 = cast(^u8)entity.block.storage
+		chunk_offset := world.components.size * entity.chunk_idx
+
+		for i := 0; i < world.components.count; i += 1 {
+			id := world.components.ids[i]
+			offset := world.components.types[i].offset
+
+			if id == id1 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c1 = cast(^Type1)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id2 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c2 = cast(^Type2)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id3 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c3 = cast(^Type3)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id4 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c4 = cast(^Type4)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id5 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c5 = cast(^Type5)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id6 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c6 = cast(^Type6)mem.ptr_offset(storage, chunk_offset + offset)
+			}
+		}
+	}
+	
 	return
 }
 
@@ -1602,14 +1768,65 @@ get_7_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, $Type2: typeid, $Type3: typeid, $Type4: typeid, $Type5: typeid, $Type6: typeid,
 	$Type7: typeid) ->
 	(c1: ^Type1, c2: ^Type2, c3: ^Type3, c4: ^Type4, c5: ^Type5, c6: ^Type6,
-	c7: ^Type7) {
-	c1 = get_component(entity, Type1)
-	c2 = get_component(entity, Type2)
-	c3 = get_component(entity, Type3)
-	c4 = get_component(entity, Type4)
-	c5 = get_component(entity, Type5)
-	c6 = get_component(entity, Type6)
-	c7 = get_component(entity, Type7)
+	c7: ^Type7) #no_bounds_check {
+	world: ^World = get_world(entity)
+	buffered := .BUFFERED in entity.state
+
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+
+	if buffered || entity.block.lifetime == .QUICK {
+		for i := 0; i < world.components.count; i += 1 {
+			id := world.components.ids[i]
+			ptr: rawptr = world.components.types[i].buffer if buffered else entity.block.chunks[i]
+
+			if id == id1 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c1 = mem.ptr_offset(cast(^Type1)ptr, entity.chunk_idx)
+			} else if id == id2 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c2 = mem.ptr_offset(cast(^Type2)ptr, entity.chunk_idx)
+			} else if id == id3 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c3 = mem.ptr_offset(cast(^Type3)ptr, entity.chunk_idx)
+			} else if id == id4 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c4 = mem.ptr_offset(cast(^Type4)ptr, entity.chunk_idx)
+			} else if id == id5 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c5 = mem.ptr_offset(cast(^Type5)ptr, entity.chunk_idx)
+			} else if id == id6 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c6 = mem.ptr_offset(cast(^Type6)ptr, entity.chunk_idx)
+			} else if id == id7 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c7 = mem.ptr_offset(cast(^Type7)ptr, entity.chunk_idx)
+			}
+		}
+	} else {
+		storage: ^u8 = cast(^u8)entity.block.storage
+		chunk_offset := world.components.size * entity.chunk_idx
+
+		for i := 0; i < world.components.count; i += 1 {
+			id := world.components.ids[i]
+			offset := world.components.types[i].offset
+
+			if id == id1 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c1 = cast(^Type1)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id2 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c2 = cast(^Type2)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id3 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c3 = cast(^Type3)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id4 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c4 = cast(^Type4)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id5 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c5 = cast(^Type5)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id6 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c6 = cast(^Type6)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id7 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c7 = cast(^Type7)mem.ptr_offset(storage, chunk_offset + offset)
+			}
+		}
+	}
+	
 	return
 }
 
@@ -1620,15 +1837,70 @@ get_8_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, $Type2: typeid, $Type3: typeid, $Type4: typeid, $Type5: typeid, $Type6: typeid,
 	$Type7: typeid, $Type8: typeid) ->
 	(c1: ^Type1, c2: ^Type2, c3: ^Type3, c4: ^Type4, c5: ^Type5, c6: ^Type6,
-	c7: ^Type7, c8: ^Type8) {
-	c1 = get_component(entity, Type1)
-	c2 = get_component(entity, Type2)
-	c3 = get_component(entity, Type3)
-	c4 = get_component(entity, Type4)
-	c5 = get_component(entity, Type5)
-	c6 = get_component(entity, Type6)
-	c7 = get_component(entity, Type7)
-	c8 = get_component(entity, Type8)
+	c7: ^Type7, c8: ^Type8) #no_bounds_check {
+	world: ^World = get_world(entity)
+	buffered := .BUFFERED in entity.state
+
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+
+	if buffered || entity.block.lifetime == .QUICK {
+		for i := 0; i < world.components.count; i += 1 {
+			id := world.components.ids[i]
+			ptr: rawptr = world.components.types[i].buffer if buffered else entity.block.chunks[i]
+
+			if id == id1 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c1 = mem.ptr_offset(cast(^Type1)ptr, entity.chunk_idx)
+			} else if id == id2 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c2 = mem.ptr_offset(cast(^Type2)ptr, entity.chunk_idx)
+			} else if id == id3 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c3 = mem.ptr_offset(cast(^Type3)ptr, entity.chunk_idx)
+			} else if id == id4 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c4 = mem.ptr_offset(cast(^Type4)ptr, entity.chunk_idx)
+			} else if id == id5 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c5 = mem.ptr_offset(cast(^Type5)ptr, entity.chunk_idx)
+			} else if id == id6 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c6 = mem.ptr_offset(cast(^Type6)ptr, entity.chunk_idx)
+			} else if id == id7 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c7 = mem.ptr_offset(cast(^Type7)ptr, entity.chunk_idx)
+			} else if id == id8 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c8 = mem.ptr_offset(cast(^Type8)ptr, entity.chunk_idx)
+			}
+		}
+	} else {
+		storage: ^u8 = cast(^u8)entity.block.storage
+		chunk_offset := world.components.size * entity.chunk_idx
+
+		for i := 0; i < world.components.count; i += 1 {
+			id := world.components.ids[i]
+			offset := world.components.types[i].offset
+
+			if id == id1 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c1 = cast(^Type1)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id2 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c2 = cast(^Type2)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id3 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c3 = cast(^Type3)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id4 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c4 = cast(^Type4)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id5 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c5 = cast(^Type5)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id6 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c6 = cast(^Type6)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id7 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c7 = cast(^Type7)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id8 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c8 = cast(^Type8)mem.ptr_offset(storage, chunk_offset + offset)
+			}
+		}
+	}
+	
 	return
 }
 
@@ -1639,16 +1911,75 @@ get_9_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, $Type2: typeid, $Type3: typeid, $Type4: typeid, $Type5: typeid, $Type6: typeid,
 	$Type7: typeid, $Type8: typeid, $Type9: typeid) ->
 	(c1: ^Type1, c2: ^Type2, c3: ^Type3, c4: ^Type4, c5: ^Type5, c6: ^Type6,
-	c7: ^Type7, c8: ^Type8, c9: ^Type9) {
-	c1 = get_component(entity, Type1)
-	c2 = get_component(entity, Type2)
-	c3 = get_component(entity, Type3)
-	c4 = get_component(entity, Type4)
-	c5 = get_component(entity, Type5)
-	c6 = get_component(entity, Type6)
-	c7 = get_component(entity, Type7)
-	c8 = get_component(entity, Type8)
-	c9 = get_component(entity, Type9)
+	c7: ^Type7, c8: ^Type8, c9: ^Type9) #no_bounds_check {
+	world: ^World = get_world(entity)
+	buffered := .BUFFERED in entity.state
+
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+	id9: u64 = transmute(u64)typeid_of(Type9)
+
+	if buffered || entity.block.lifetime == .QUICK {
+		for i := 0; i < world.components.count; i += 1 {
+			id := world.components.ids[i]
+			ptr: rawptr = world.components.types[i].buffer if buffered else entity.block.chunks[i]
+
+			if id == id1 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c1 = mem.ptr_offset(cast(^Type1)ptr, entity.chunk_idx)
+			} else if id == id2 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c2 = mem.ptr_offset(cast(^Type2)ptr, entity.chunk_idx)
+			} else if id == id3 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c3 = mem.ptr_offset(cast(^Type3)ptr, entity.chunk_idx)
+			} else if id == id4 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c4 = mem.ptr_offset(cast(^Type4)ptr, entity.chunk_idx)
+			} else if id == id5 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c5 = mem.ptr_offset(cast(^Type5)ptr, entity.chunk_idx)
+			} else if id == id6 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c6 = mem.ptr_offset(cast(^Type6)ptr, entity.chunk_idx)
+			} else if id == id7 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c7 = mem.ptr_offset(cast(^Type7)ptr, entity.chunk_idx)
+			} else if id == id8 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c8 = mem.ptr_offset(cast(^Type8)ptr, entity.chunk_idx)
+			} else if id == id9 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c9 = mem.ptr_offset(cast(^Type9)ptr, entity.chunk_idx)
+			}
+		}
+	} else {
+		storage: ^u8 = cast(^u8)entity.block.storage
+		chunk_offset := world.components.size * entity.chunk_idx
+
+		for i := 0; i < world.components.count; i += 1 {
+			id := world.components.ids[i]
+			offset := world.components.types[i].offset
+
+			if id == id1 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c1 = cast(^Type1)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id2 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c2 = cast(^Type2)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id3 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c3 = cast(^Type3)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id4 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c4 = cast(^Type4)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id5 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c5 = cast(^Type5)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id6 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c6 = cast(^Type6)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id7 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c7 = cast(^Type7)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id8 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c8 = cast(^Type8)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id9 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c9 = cast(^Type9)mem.ptr_offset(storage, chunk_offset + offset)
+			}
+		}
+	}
+	
 	return
 }
 
@@ -1659,17 +1990,80 @@ get_10_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, $Type2: typeid, $Type3: typeid, $Type4: typeid, $Type5: typeid, $Type6: typeid,
 	$Type7: typeid, $Type8: typeid, $Type9: typeid, $Type10: typeid) ->
 	(c1: ^Type1, c2: ^Type2, c3: ^Type3, c4: ^Type4, c5: ^Type5, c6: ^Type6,
-	c7: ^Type7, c8: ^Type8, c9: ^Type9, c10: ^Type10) {
-	c1 = get_component(entity, Type1)
-	c2 = get_component(entity, Type2)
-	c3 = get_component(entity, Type3)
-	c4 = get_component(entity, Type4)
-	c5 = get_component(entity, Type5)
-	c6 = get_component(entity, Type6)
-	c7 = get_component(entity, Type7)
-	c8 = get_component(entity, Type8)
-	c9 = get_component(entity, Type9)
-	c10 = get_component(entity, Type10)
+	c7: ^Type7, c8: ^Type8, c9: ^Type9, c10: ^Type10) #no_bounds_check {
+	world: ^World = get_world(entity)
+	buffered := .BUFFERED in entity.state
+
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+	id9: u64 = transmute(u64)typeid_of(Type9)
+	id10: u64 = transmute(u64)typeid_of(Type10)
+
+	if buffered || entity.block.lifetime == .QUICK {
+		for i := 0; i < world.components.count; i += 1 {
+			id := world.components.ids[i]
+			ptr: rawptr = world.components.types[i].buffer if buffered else entity.block.chunks[i]
+
+			if id == id1 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c1 = mem.ptr_offset(cast(^Type1)ptr, entity.chunk_idx)
+			} else if id == id2 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c2 = mem.ptr_offset(cast(^Type2)ptr, entity.chunk_idx)
+			} else if id == id3 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c3 = mem.ptr_offset(cast(^Type3)ptr, entity.chunk_idx)
+			} else if id == id4 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c4 = mem.ptr_offset(cast(^Type4)ptr, entity.chunk_idx)
+			} else if id == id5 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c5 = mem.ptr_offset(cast(^Type5)ptr, entity.chunk_idx)
+			} else if id == id6 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c6 = mem.ptr_offset(cast(^Type6)ptr, entity.chunk_idx)
+			} else if id == id7 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c7 = mem.ptr_offset(cast(^Type7)ptr, entity.chunk_idx)
+			} else if id == id8 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c8 = mem.ptr_offset(cast(^Type8)ptr, entity.chunk_idx)
+			} else if id == id9 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c9 = mem.ptr_offset(cast(^Type9)ptr, entity.chunk_idx)
+			} else if id == id10 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c10 = mem.ptr_offset(cast(^Type10)ptr, entity.chunk_idx)
+			}
+		}
+	} else {
+		storage: ^u8 = cast(^u8)entity.block.storage
+		chunk_offset := world.components.size * entity.chunk_idx
+
+		for i := 0; i < world.components.count; i += 1 {
+			id := world.components.ids[i]
+			offset := world.components.types[i].offset
+
+			if id == id1 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c1 = cast(^Type1)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id2 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c2 = cast(^Type2)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id3 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c3 = cast(^Type3)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id4 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c4 = cast(^Type4)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id5 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c5 = cast(^Type5)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id6 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c6 = cast(^Type6)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id7 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c7 = cast(^Type7)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id8 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c8 = cast(^Type8)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id9 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c9 = cast(^Type9)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id10 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c10 = cast(^Type10)mem.ptr_offset(storage, chunk_offset + offset)
+			}
+		}
+	}
+	
 	return
 }
 
@@ -1680,18 +2074,85 @@ get_11_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, $Type2: typeid, $Type3: typeid, $Type4: typeid, $Type5: typeid, $Type6: typeid,
 	$Type7: typeid, $Type8: typeid, $Type9: typeid, $Type10: typeid, $Type11: typeid) ->
 	(c1: ^Type1, c2: ^Type2, c3: ^Type3, c4: ^Type4, c5: ^Type5, c6: ^Type6,
-	c7: ^Type7, c8: ^Type8, c9: ^Type9, c10: ^Type10, c11: ^Type11) {
-	c1 = get_component(entity, Type1)
-	c2 = get_component(entity, Type2)
-	c3 = get_component(entity, Type3)
-	c4 = get_component(entity, Type4)
-	c5 = get_component(entity, Type5)
-	c6 = get_component(entity, Type6)
-	c7 = get_component(entity, Type7)
-	c8 = get_component(entity, Type8)
-	c9 = get_component(entity, Type9)
-	c10 = get_component(entity, Type10)
-	c11 = get_component(entity, Type11)
+	c7: ^Type7, c8: ^Type8, c9: ^Type9, c10: ^Type10, c11: ^Type11) #no_bounds_check {
+	world: ^World = get_world(entity)
+	buffered := .BUFFERED in entity.state
+
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+	id9: u64 = transmute(u64)typeid_of(Type9)
+	id10: u64 = transmute(u64)typeid_of(Type10)
+	id11: u64 = transmute(u64)typeid_of(Type11)
+
+	if buffered || entity.block.lifetime == .QUICK {
+		for i := 0; i < world.components.count; i += 1 {
+			id := world.components.ids[i]
+			ptr: rawptr = world.components.types[i].buffer if buffered else entity.block.chunks[i]
+
+			if id == id1 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c1 = mem.ptr_offset(cast(^Type1)ptr, entity.chunk_idx)
+			} else if id == id2 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c2 = mem.ptr_offset(cast(^Type2)ptr, entity.chunk_idx)
+			} else if id == id3 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c3 = mem.ptr_offset(cast(^Type3)ptr, entity.chunk_idx)
+			} else if id == id4 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c4 = mem.ptr_offset(cast(^Type4)ptr, entity.chunk_idx)
+			} else if id == id5 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c5 = mem.ptr_offset(cast(^Type5)ptr, entity.chunk_idx)
+			} else if id == id6 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c6 = mem.ptr_offset(cast(^Type6)ptr, entity.chunk_idx)
+			} else if id == id7 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c7 = mem.ptr_offset(cast(^Type7)ptr, entity.chunk_idx)
+			} else if id == id8 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c8 = mem.ptr_offset(cast(^Type8)ptr, entity.chunk_idx)
+			} else if id == id9 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c9 = mem.ptr_offset(cast(^Type9)ptr, entity.chunk_idx)
+			} else if id == id10 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c10 = mem.ptr_offset(cast(^Type10)ptr, entity.chunk_idx)
+			} else if id == id11 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c11 = mem.ptr_offset(cast(^Type11)ptr, entity.chunk_idx)
+			}
+		}
+	} else {
+		storage: ^u8 = cast(^u8)entity.block.storage
+		chunk_offset := world.components.size * entity.chunk_idx
+
+		for i := 0; i < world.components.count; i += 1 {
+			id := world.components.ids[i]
+			offset := world.components.types[i].offset
+
+			if id == id1 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c1 = cast(^Type1)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id2 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c2 = cast(^Type2)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id3 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c3 = cast(^Type3)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id4 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c4 = cast(^Type4)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id5 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c5 = cast(^Type5)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id6 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c6 = cast(^Type6)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id7 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c7 = cast(^Type7)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id8 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c8 = cast(^Type8)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id9 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c9 = cast(^Type9)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id10 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c10 = cast(^Type10)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id11 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c11 = cast(^Type11)mem.ptr_offset(storage, chunk_offset + offset)
+			}
+		}
+	}
+	
 	return
 }
 
@@ -1702,19 +2163,90 @@ get_12_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, $Type2: typeid, $Type3: typeid, $Type4: typeid, $Type5: typeid, $Type6: typeid,
 	$Type7: typeid, $Type8: typeid, $Type9: typeid, $Type10: typeid, $Type11: typeid, $Type12: typeid) ->
 	(c1: ^Type1, c2: ^Type2, c3: ^Type3, c4: ^Type4, c5: ^Type5, c6: ^Type6,
-	c7: ^Type7, c8: ^Type8, c9: ^Type9, c10: ^Type10, c11: ^Type11, c12: ^Type12) {
-	c1 = get_component(entity, Type1)
-	c2 = get_component(entity, Type2)
-	c3 = get_component(entity, Type3)
-	c4 = get_component(entity, Type4)
-	c5 = get_component(entity, Type5)
-	c6 = get_component(entity, Type6)
-	c7 = get_component(entity, Type7)
-	c8 = get_component(entity, Type8)
-	c9 = get_component(entity, Type9)
-	c10 = get_component(entity, Type10)
-	c11 = get_component(entity, Type11)
-	c12 = get_component(entity, Type12)
+	c7: ^Type7, c8: ^Type8, c9: ^Type9, c10: ^Type10, c11: ^Type11, c12: ^Type12) #no_bounds_check {
+	world: ^World = get_world(entity)
+	buffered := .BUFFERED in entity.state
+
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+	id9: u64 = transmute(u64)typeid_of(Type9)
+	id10: u64 = transmute(u64)typeid_of(Type10)
+	id11: u64 = transmute(u64)typeid_of(Type11)
+	id12: u64 = transmute(u64)typeid_of(Type12)
+
+	if buffered || entity.block.lifetime == .QUICK {
+		for i := 0; i < world.components.count; i += 1 {
+			id := world.components.ids[i]
+			ptr: rawptr = world.components.types[i].buffer if buffered else entity.block.chunks[i]
+
+			if id == id1 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c1 = mem.ptr_offset(cast(^Type1)ptr, entity.chunk_idx)
+			} else if id == id2 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c2 = mem.ptr_offset(cast(^Type2)ptr, entity.chunk_idx)
+			} else if id == id3 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c3 = mem.ptr_offset(cast(^Type3)ptr, entity.chunk_idx)
+			} else if id == id4 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c4 = mem.ptr_offset(cast(^Type4)ptr, entity.chunk_idx)
+			} else if id == id5 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c5 = mem.ptr_offset(cast(^Type5)ptr, entity.chunk_idx)
+			} else if id == id6 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c6 = mem.ptr_offset(cast(^Type6)ptr, entity.chunk_idx)
+			} else if id == id7 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c7 = mem.ptr_offset(cast(^Type7)ptr, entity.chunk_idx)
+			} else if id == id8 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c8 = mem.ptr_offset(cast(^Type8)ptr, entity.chunk_idx)
+			} else if id == id9 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c9 = mem.ptr_offset(cast(^Type9)ptr, entity.chunk_idx)
+			} else if id == id10 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c10 = mem.ptr_offset(cast(^Type10)ptr, entity.chunk_idx)
+			} else if id == id11 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c11 = mem.ptr_offset(cast(^Type11)ptr, entity.chunk_idx)
+			} else if id == id12 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c12 = mem.ptr_offset(cast(^Type12)ptr, entity.chunk_idx)
+			}
+		}
+	} else {
+		storage: ^u8 = cast(^u8)entity.block.storage
+		chunk_offset := world.components.size * entity.chunk_idx
+
+		for i := 0; i < world.components.count; i += 1 {
+			id := world.components.ids[i]
+			offset := world.components.types[i].offset
+
+			if id == id1 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c1 = cast(^Type1)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id2 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c2 = cast(^Type2)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id3 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c3 = cast(^Type3)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id4 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c4 = cast(^Type4)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id5 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c5 = cast(^Type5)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id6 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c6 = cast(^Type6)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id7 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c7 = cast(^Type7)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id8 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c8 = cast(^Type8)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id9 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c9 = cast(^Type9)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id10 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c10 = cast(^Type10)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id11 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c11 = cast(^Type11)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id12 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c12 = cast(^Type12)mem.ptr_offset(storage, chunk_offset + offset)
+			}
+		}
+	}
+	
 	return
 }
 
@@ -1727,20 +2259,95 @@ get_13_components :: #force_inline proc(entity: ^Entity,
 	$Type13: typeid) ->
 	(c1: ^Type1, c2: ^Type2, c3: ^Type3, c4: ^Type4, c5: ^Type5, c6: ^Type6,
 	c7: ^Type7, c8: ^Type8, c9: ^Type9, c10: ^Type10, c11: ^Type11, c12: ^Type12,
-	c13: ^Type13) {
-	c1 = get_component(entity, Type1)
-	c2 = get_component(entity, Type2)
-	c3 = get_component(entity, Type3)
-	c4 = get_component(entity, Type4)
-	c5 = get_component(entity, Type5)
-	c6 = get_component(entity, Type6)
-	c7 = get_component(entity, Type7)
-	c8 = get_component(entity, Type8)
-	c9 = get_component(entity, Type9)
-	c10 = get_component(entity, Type10)
-	c11 = get_component(entity, Type11)
-	c12 = get_component(entity, Type12)
-	c13 = get_component(entity, Type13)
+	c13: ^Type13) #no_bounds_check {
+	world: ^World = get_world(entity)
+	buffered := .BUFFERED in entity.state
+
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+	id9: u64 = transmute(u64)typeid_of(Type9)
+	id10: u64 = transmute(u64)typeid_of(Type10)
+	id11: u64 = transmute(u64)typeid_of(Type11)
+	id12: u64 = transmute(u64)typeid_of(Type12)
+	id13: u64 = transmute(u64)typeid_of(Type13)
+
+	if buffered || entity.block.lifetime == .QUICK {
+		for i := 0; i < world.components.count; i += 1 {
+			id := world.components.ids[i]
+			ptr: rawptr = world.components.types[i].buffer if buffered else entity.block.chunks[i]
+
+			if id == id1 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c1 = mem.ptr_offset(cast(^Type1)ptr, entity.chunk_idx)
+			} else if id == id2 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c2 = mem.ptr_offset(cast(^Type2)ptr, entity.chunk_idx)
+			} else if id == id3 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c3 = mem.ptr_offset(cast(^Type3)ptr, entity.chunk_idx)
+			} else if id == id4 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c4 = mem.ptr_offset(cast(^Type4)ptr, entity.chunk_idx)
+			} else if id == id5 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c5 = mem.ptr_offset(cast(^Type5)ptr, entity.chunk_idx)
+			} else if id == id6 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c6 = mem.ptr_offset(cast(^Type6)ptr, entity.chunk_idx)
+			} else if id == id7 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c7 = mem.ptr_offset(cast(^Type7)ptr, entity.chunk_idx)
+			} else if id == id8 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c8 = mem.ptr_offset(cast(^Type8)ptr, entity.chunk_idx)
+			} else if id == id9 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c9 = mem.ptr_offset(cast(^Type9)ptr, entity.chunk_idx)
+			} else if id == id10 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c10 = mem.ptr_offset(cast(^Type10)ptr, entity.chunk_idx)
+			} else if id == id11 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c11 = mem.ptr_offset(cast(^Type11)ptr, entity.chunk_idx)
+			} else if id == id12 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c12 = mem.ptr_offset(cast(^Type12)ptr, entity.chunk_idx)
+			} else if id == id13 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c13 = mem.ptr_offset(cast(^Type13)ptr, entity.chunk_idx)
+			}
+		}
+	} else {
+		storage: ^u8 = cast(^u8)entity.block.storage
+		chunk_offset := world.components.size * entity.chunk_idx
+
+		for i := 0; i < world.components.count; i += 1 {
+			id := world.components.ids[i]
+			offset := world.components.types[i].offset
+
+			if id == id1 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c1 = cast(^Type1)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id2 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c2 = cast(^Type2)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id3 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c3 = cast(^Type3)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id4 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c4 = cast(^Type4)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id5 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c5 = cast(^Type5)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id6 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c6 = cast(^Type6)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id7 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c7 = cast(^Type7)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id8 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c8 = cast(^Type8)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id9 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c9 = cast(^Type9)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id10 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c10 = cast(^Type10)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id11 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c11 = cast(^Type11)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id12 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c12 = cast(^Type12)mem.ptr_offset(storage, chunk_offset + offset)
+			} else if id == id13 && marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, i) {
+				c13 = cast(^Type13)mem.ptr_offset(storage, chunk_offset + offset)
+			}
+		}
+	}
+	
 	return
 }
 

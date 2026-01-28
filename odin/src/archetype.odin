@@ -1,6 +1,8 @@
 #+private
 package moecs
 
+import "core:fmt"
+
 /* Archetype for components/tags configuration. */
 Archetype :: struct {
 	/* Components marker, each set bit specifies that the component exists in the archetype. */
@@ -19,5 +21,7 @@ archetype_remove :: #force_inline proc(entity: ^Entity) {
 		if len(entity.archetype.entities) > 0 && entity.arch_idx < len(entity.archetype.entities) {
 			entity.archetype.entities[entity.arch_idx].arch_idx = entity.arch_idx
 		}
+
+		entity.archetype = nil
 	}
 }

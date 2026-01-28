@@ -47,11 +47,22 @@ add_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type, perform:
    `$Type`     : Component type.
    `component` : Reference to the component instance." */
 set_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type) #no_bounds_check {
-	if c, ok := components_get(&get_world(entity).components, Type); ok {
-		ptr: rawptr = c.buffer if .BUFFERED in entity.state else entity.block.chunks[c.idx]
-		cell: ^Type = mem.ptr_offset(cast(^Type)ptr, entity.chunk_idx)
+	world: ^World = get_world(entity)
 
-		cell^ = component^
+	if c, ok := components_get(&world.components, Type); ok {
+		buffered := .BUFFERED in entity.state
+
+		if buffered || entity.block.lifetime == .QUICK {
+			ptr: rawptr = c.buffer if buffered else entity.block.chunks[c.idx]
+			cell: ^Type = mem.ptr_offset(cast(^Type)ptr, entity.chunk_idx)
+
+			cell^ = component^
+		} else {
+			ptr := mem.ptr_offset(cast(^u8)entity.block.storage, world.components.size * entity.chunk_idx + c.offset)
+			cell: ^Type = cast(^Type)ptr
+
+			cell^ = component^
+		}
 	}
 }
 
@@ -59,11 +70,20 @@ set_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type) #no_boun
    `entity`  : Pointer to the entity.
    `$Type`   : Component type.
    `returns` : Pointer to the component and operation success. */
-get_component :: proc(entity: ^Entity, $Type: typeid) -> (^Type, bool) #no_bounds_check #optional_ok {
-	if component, ok := components_get(&get_world(entity).components, Type); ok {
-		if marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, component.idx) {
-			ptr: rawptr = component.buffer if .BUFFERED in entity.state else entity.block.chunks[component.idx]
-			return mem.ptr_offset(cast(^Type)ptr, entity.chunk_idx), true
+get_component :: #force_inline proc(entity: ^Entity, $Type: typeid) -> (^Type, bool) #no_bounds_check #optional_ok {
+	world: ^World = get_world(entity)
+
+	if c, ok := components_get(&world.components, Type); ok {
+		if marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, c.idx) {
+			buffered := .BUFFERED in entity.state
+
+			if buffered || entity.block.lifetime == .QUICK {
+				ptr: rawptr = c.buffer if buffered else entity.block.chunks[c.idx]
+				return mem.ptr_offset(cast(^Type)ptr, entity.chunk_idx), true
+			} else {
+				ptr := mem.ptr_offset(cast(^u8)entity.block.storage, world.components.size * entity.chunk_idx + c.offset)
+				return cast(^Type)ptr, true
+			}
 		}
 	}
 
@@ -216,10 +236,16 @@ deleted :: #force_inline proc(entity: ^Entity) -> bool {
 	return .DELETED in entity.state
 }
 
+/* Checks if the entity is being despawned at the perform stage.
+   `returns` : True if entity will be despawned, otherwise - false. */
+despawning :: #force_inline proc(entity: ^Entity) -> bool {
+	return .DESPAWNING in entity.state
+}
+
 /* Gets parent world reference.
    `entity`  : Pointer to the entity.
    `returns` : Reference to the world. */
-@(private="file")
+@(private="package")
 get_world :: #force_inline proc(entity: ^Entity) -> ^World {
 	return .BUFFERED in entity.state ? entity.world : entity.block.world
 }
@@ -243,11 +269,9 @@ archetyping :: proc(entity: ^Entity) {
 
 	archetype_remove(entity)
 
-	if marker_is_all_unset(MAX_COMPONENTS_COUNT, COMPONENTS_MARKER_SIZE, entity.components) &&
-	   marker_is_all_unset(MAX_TAGS_COUNT, TAGS_MARKER_SIZE, entity.tags) {
-		/* If entity has no components and no tags, clear reference to archetype. */
-		entity.archetype = nil
-	} else {
+	/* If entity has components or tags, bind archetype to it. */
+	if marker_is_any_set(MAX_COMPONENTS_COUNT, COMPONENTS_MARKER_SIZE, entity.components) ||
+	   marker_is_any_set(MAX_TAGS_COUNT, TAGS_MARKER_SIZE, entity.tags) {
 		/* Find appropriate archetype or new one. */
 		archetype := get_archetype(world, entity.components, entity.tags)
 

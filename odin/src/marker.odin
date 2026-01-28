@@ -1,4 +1,4 @@
-#+private
+// #+private
 package moecs
 
 /* Bits enumeration starts from 0. */
@@ -32,14 +32,17 @@ marker_is_all_unset :: #force_inline proc($count: int, $size: uint, marker: [siz
 }
 
 /* Checks if any of bits in the marker are set to 1.
+   `$count` : Whole marker bits count.
    `$size`  : Marker (array) size.
    `marker` : Bitset (marker array). */
-marker_is_any_set :: #force_inline proc($size: uint, marker: [size]uint) -> bool #no_bounds_check {
-	for i in 0..<size {
+marker_is_any_set :: #force_inline proc($count: int, $size: uint, marker: [size]uint) -> bool #no_bounds_check {
+	for i : uint = 0; i < size - 1; i += 1 {
 		if marker[i] > 0 do return true
 	}
 
-	return false
+	remaining := uint(count) == MARKER_BITS_COUNT ? max(uint) : max(uint) >> (MARKER_BITS_COUNT - uint(count) % MARKER_BITS_COUNT)
+
+	return marker[size - 1] & remaining > 0
 }
 
 /* Checks if all the bits of two markers are equal.
