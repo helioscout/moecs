@@ -19,22 +19,10 @@ World :: struct {
 	systems : [dynamic]^System,
 	/* Archetypes collection of the world. */
 	archetypes : [dynamic]^Archetype,
-	/* Blocks for entities with quick lifetime. */
-	quicks : [dynamic]^Block,
 	/* Blocks for entities with dynamic lifetime. */
 	dynamics : [dynamic]^Block,
 	/* Blocks for entities with static lifetime. */
 	statics : [dynamic]^Block,
-	/* Defines that world uses quick lifetime (default: true).
-	   If at least one component is registered without a buffer it will be set to false.
-	   If disabled than all attempts to create quick lifetime entites will fail. */
-	use_quicks : bool,
-	/* Buffer for quick life time entities, must be provided from the main app. */
-	buffer : ^[QUICK_CHUNK_SIZE]Entity,
-	/* Deleted (freed) rows in the quick lifetime buffer. */
-	deleted : sa.Small_Array(QUICK_CHUNK_SIZE, int),
-	/* Current inserting index in the quick lifetime buffer (last inserted index + 1). */
-	idx : int,
 	/* Indicates that the world is running. */
 	running : bool,
 	/* Indicates that the world is in performing stage (runs deffered actions). */
@@ -52,16 +40,14 @@ world_init :: proc(world: ^World) {
 /* Registers element type for the world.
    `world`   : Pointer to the world.
    `element` : World element kind.
-   `$Type`   : Element (component/tag/resource) type.
-   `buffer`  : Pointer to buffer for quick lifetime chunk. Ensure that you don't use same buffers for different worlds.*/
-register :: proc(world: ^World, element: Element, $Type: typeid, buffer : rawptr = nil) {
+   `$Type`   : Element (component/tag/resource) type. */
+register :: proc(world: ^World, element: Element, $Type: typeid) {
 	if world.running do return
 
 	#partial switch element {
 		case .COMPONENT:
-			components_add(&world.components, Type, { type = Type, size = size_of(Type), buffer = buffer,
+			components_add(&world.components, Type, { type = Type, size = size_of(Type),
 				idx = world.components.count })
-			if buffer == nil do world.use_quicks = false
 		case .TAG:
 			tags_add(&world.tags, Type, { type = Type, idx = world.tags.count })
 		case .RESOURCE:
@@ -81,7 +67,7 @@ mount :: proc(world: ^World, definition: SystemDefinition) {
 	system : ^System = new(System)
 
 	system^ = { name = definition.name, state = { .ENABLED }, callback = definition.callback,
-				lifetime = card(definition.lifetime) == 0 ? { .QUICK, .DYNAMIC, .STATIC } : definition.lifetime }
+				lifetime = card(definition.lifetime) == 0 ? { .DYNAMIC, .STATIC } : definition.lifetime }
 
 	if len(definition.components) > 0 {
 		for type in definition.components {
@@ -140,29 +126,7 @@ run :: proc(world: ^World) {
 spawn :: proc(world: ^World, lifetime: Lifetime = .DYNAMIC) -> ^Entity {
 	if !world.running do panic("Run the world first.")
 
-	entity: ^Entity = ---
-
-	switch lifetime {
-		case .QUICK: {
-			if !world.use_quicks do panic("Quick lifetime was disabled, you should provide entity and components buffers.")
-
-			if sa.len(world.deleted) == 0 && world.idx == QUICK_CHUNK_SIZE {
-			    /* If buffers are full we must flush them to free quick block. */
-			    block_absorb(get_free_block(world, .QUICK))
-				/* And reset current inserting index. */
-				world.idx = 0
-			}
-
-			idx := pop_free_index(world)	/* Here we increase inserting index. */
-			
-			/* state has BUFFERED is a sign that entity is in the quick lifetime buffer, not a real block.		  */
-			/* But chunk_idx will not change when flushed. We need assign world reference for access the buffer. */
-			world.buffer[idx] = Entity { state = { .BUFFERED }, world = world, chunk_idx = idx }
-			entity = &world.buffer[idx]
-		}
-			
-		case .DYNAMIC, .STATIC: entity = block_insert(get_sparse_block(world, lifetime))
-	}
+	entity: ^Entity = block_insert(get_sparse_block(world, lifetime))
 
 	return entity
 }
@@ -177,12 +141,7 @@ despawn_entity :: proc(world: ^World, entity: ^Entity) {
 		append(&world.deffered.despawning, entity)
 		entity.state += { .DESPAWNING }
 	} else {
-		if .BUFFERED in entity.state {
-			sa.append(&world.deleted, entity.chunk_idx)
-		} else {
-			block_delete(entity.block, entity.chunk_idx)
-		}
-
+		block_delete(entity.block, entity.chunk_idx)
 		entity.state += { .DELETED }
 	}
 }
@@ -203,9 +162,6 @@ new_block :: proc(world: ^World, lifetime: Lifetime) -> ^Block {
 	block: ^Block = new(Block)
 	
 	switch lifetime {
-		case .QUICK:
-			block^ = { lifetime = .QUICK, world = world, size = QUICK_CHUNK_SIZE }
-			append(&world.quicks, block)
 		case .DYNAMIC:
 			block^ = { lifetime = .DYNAMIC, world = world, size = DYNAMIC_CHUNK_SIZE }
 			append(&world.dynamics, block)
@@ -248,25 +204,8 @@ set_resource :: proc(world: ^World, $Type: typeid, resource: Type) -> bool {
    `world`    : Pointer to the world.
    `lifetime` : Entities lifetime flag.
 */
-each :: proc(world: ^World, lifetime: bit_set[Lifetime; u8] = { .QUICK, .DYNAMIC, .STATIC },
+each :: proc(world: ^World, lifetime: bit_set[Lifetime; u8] = { .DYNAMIC, .STATIC },
 	callback: IteratorCallback) #no_bounds_check {
-	if .QUICK in lifetime && world.use_quicks {
-		/* Iterate entities in the buffer. */
-		for idx in 0..<world.idx {
-			if !slice.contains(sa.slice(&world.deleted), idx) {		/* Omit deleted entities. */
-				callback(&world.buffer[idx], .QUICK, world)
-			}
-		}
-
-		for block in world.quicks {
-			for idx in 0..<block.idx {
-				if marker_is_set(QUICK_MARKER_SIZE, block.occupied, idx) {
-					callback(&block.entities[idx], .QUICK, world)
-				}
-			}
-		}
-	}
-
 	if .DYNAMIC in lifetime {
 		for block in world.dynamics {
 			for idx in 0..<block.idx {
@@ -443,7 +382,7 @@ delete_archetype :: proc(world: ^World, archetype: ^Archetype) {
 }
 
 /* Gets the reference to block that is available to insert new entities,
-   has free rows or newly created one. Quick lifetime blocks can't be sparsed.
+   has free rows or newly created one.
    `world`    : Pointer to the world.
    `lifetime` : Block lifetime.
    `returns`  : Pointer to available block. */
@@ -478,30 +417,11 @@ get_free_block :: proc(world: ^World, lifetime: Lifetime) -> ^Block {
    `lifetime` : Block lifetime.
    `returns`  : Pointer to free block. */
 @(private="file")
-get_blocks :: proc(world: ^World, lifetime: Lifetime) -> ^[dynamic]^Block {
+get_blocks :: #force_inline proc(world: ^World, lifetime: Lifetime) -> ^[dynamic]^Block {
 	switch lifetime {
-		case .QUICK:   return &world.quicks
 		case .DYNAMIC: return &world.dynamics
 		case .STATIC:  return &world.statics
 	}
 
 	return nil
-}
-
-/* Returns index of the first free to insert (last deleted) row in the quick lifetime buffer.
-   `world`   : Pointer to the world.
-   `returns` : Index of the row to insert.
-*/
-@(private="file")
-pop_free_index :: proc(world: ^World) -> int {
-	idx: int = ---
-	
-	if sa.len(world.deleted) == 0 {
-		idx = world.idx
-		world.idx += 1
-	} else {
-		idx = sa.pop_back(&world.deleted)
-	}
-
-	return idx
 }

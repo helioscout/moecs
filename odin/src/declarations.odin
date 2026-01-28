@@ -4,8 +4,6 @@ package moecs
    Bigger chunk size increase productivity of entities adding, less chunk size speed up
    reading component while world runing. */
 
-/* Quick lifetime chunk size. */
-QUICK_CHUNK_SIZE   : int : 500
 /* Dynamic lifetime chunk size. */
 DYNAMIC_CHUNK_SIZE : int : 500
 /* Static lifetime chunk size. */
@@ -22,25 +20,18 @@ MAX_TAGS_COUNT       : int : 128
 @(private) COMPONENTS_MARKER_SIZE : uint : (uint(MAX_COMPONENTS_COUNT) + MARKER_BITS_COUNT - 1) / MARKER_BITS_COUNT
 /* Size of tags marker (array of bitset). */
 @(private) TAGS_MARKER_SIZE : uint : (uint(MAX_TAGS_COUNT) + MARKER_BITS_COUNT - 1) / MARKER_BITS_COUNT
-/* Size of quick lifetime marker (array of bitset). */
-@(private) QUICK_MARKER_SIZE : uint : (uint(QUICK_CHUNK_SIZE) + MARKER_BITS_COUNT - 1) / MARKER_BITS_COUNT
 
 /* Registered resources collection (with values) for each world. */
 @(private) Resources :: map[typeid]Resource
 
 /* Entities/blocks lifetime. */
 Lifetime :: enum u8 {
-	/* Entities that exist for a very short period of time (a few dozen frames).
-	   Such blocks will use occupied (used) marker bitset to define that block is free to insert.
-	   Insertion should be performed as memory copy operation of whole chunk from static/stack memory,
-	   buffers where chunks would be filled enough during entites (components) adding. */
-	QUICK   = 0b00000001,
 	/* Entities whose lifespan is not defined or determined in advance (from one frame to app exit).
 	   Such blocks will reuse freed after deletion rows to insert new entities. */
-	DYNAMIC = 0b00000010,
+	DYNAMIC = 0b00000001,
 	/* Immortal entities that will exist until the end of the application.
 	   Such blocks are simply created when necessary, since entities cannot be despawn. */
-	STATIC  = 0b00000100
+	STATIC  = 0b00000010
 }
 
 /* Kinds of elements that the world can consist of. */
@@ -60,8 +51,6 @@ Element :: enum {
 
 /* The state flags for an element (entity or system). */
 ElementState :: enum {
-	/* Entity is stored in quick lifetime buffer. */
-	BUFFERED,
 	/* Entity has been deleted. */
 	DELETED,
 	/* System is enabled. */

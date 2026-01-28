@@ -11,8 +11,6 @@ Component :: struct {
 	idx : int,
 	/* Type size for allocations. */
 	size : int,
-	/* Pointer to buffer for quick lifetime chunk, must be provided from the main app. */
-	buffer : rawptr,
 	/* Component offset (position) in the storage. */
 	offset : int
 }

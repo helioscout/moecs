@@ -16,18 +16,15 @@ Block :: struct {
 	/* Entities collection (chunk) for the block.
 	   The index of the entity corresponds to the index of its components in each chunk. */
 	entities : []Entity,
-	/* Component chunks collection for the quick block.
-	   Chunk is represented as an array of component struct values ($Type[QUICK_CHUNK_SIZE]).
-	   But is created as a pointer to allocated memory block. */
-	chunks : [MAX_COMPONENTS_COUNT]rawptr,
-	/* Storage for dynamic and static components. */
-	storage: rawptr,
+	/* Component chunks collection for the block.
+	   Chunk is represented as a block in memory with sequentially recorded component's values.
+	   The order (offset of each component) is defined in Components collection.
+	   A pointer to allocated memory block. */
+	chunks : rawptr,
 	/* Deleted (freed) rows in the dynamic lifetime block. */
 	deleted : sa.Small_Array(DYNAMIC_CHUNK_SIZE, int),
-	/* Occupied (used) rows in the quick lifetime block. */
-	occupied : [QUICK_MARKER_SIZE]uint,
 	/* Current inserting index in the block (last inserted index + 1).
-	   If it equals ChunkSize than new block should be inserted to the world. */
+	   If it equals chunk size than new block should be inserted to the world. */
 	idx : int,
 	/* Block chunk size dependent on lifetime. */
 	size : int
@@ -38,33 +35,16 @@ Block :: struct {
 block_init :: proc(block: ^Block) {
 	block.entities = make([]Entity, block.size)
 
-	if block.lifetime == .QUICK {
-		for idx := 0; idx < block.world.components.count; idx += 1 {
-			component: ^Component = &block.world.components.types[idx]
-			/* Allocate memory for components chunks.					 */
-			/* It should be later casted to corresponding array pointer. */
-			ptr, err := mem.alloc(component.size * block.size)
-
-			if err != .None do panic(fmt.tprintf("Chunk memory allocation error: %v", err))
-
-			block.chunks[idx] = ptr
-		}
-	} else {
-		ptr, err := mem.alloc(block.world.components.size * block.size)
-
-		if err != .None do panic(fmt.tprintf("Storage memory allocation error: %v", err))
-		
-		block.storage = ptr
-	}
+	ptr, err := mem.alloc(block.world.components.size * block.size)
+	if err != .None do panic(fmt.tprintf("Storage memory allocation error: %v", err))
+	block.chunks = ptr
 }
 
 /* Checks for existence of free rows (places to insert new entities/components).
-   For quick lifetime blocks it equals to totally free block (block_is_free()).
    `block` : Reference to the block. */
 @(private="package")
 block_has_free_rows :: proc(block: ^Block) -> bool {
 	switch block.lifetime {
-		case .QUICK:   return marker_is_all_unset(QUICK_CHUNK_SIZE, QUICK_MARKER_SIZE, block.occupied)
 		case .DYNAMIC: return block.idx < DYNAMIC_CHUNK_SIZE || sa.len(block.deleted) > 0
 		case .STATIC:  return block.idx < STATIC_CHUNK_SIZE
 	}
@@ -77,8 +57,6 @@ block_has_free_rows :: proc(block: ^Block) -> bool {
 @(private="package")
 block_is_full :: proc(block: ^Block) -> bool {
 	switch block.lifetime {
-		/* Even if one row is occupied, quick lifetime block can't be used for insert. */
-		case .QUICK:   return marker_is_any_set(QUICK_CHUNK_SIZE, QUICK_MARKER_SIZE, block.occupied)
 		case .DYNAMIC: return block.idx == DYNAMIC_CHUNK_SIZE && sa.len(block.deleted) == 0
 		case .STATIC:  return block.idx == STATIC_CHUNK_SIZE
 	}
@@ -91,8 +69,7 @@ block_is_full :: proc(block: ^Block) -> bool {
 @(private="package")
 block_is_free :: proc(block: ^Block) -> bool {
 	switch block.lifetime {
-		case .QUICK:   return marker_is_all_unset(QUICK_CHUNK_SIZE, QUICK_MARKER_SIZE, block.occupied)
-		case .DYNAMIC: return block.idx == 0 || sa.len(block.deleted) == block.idx - 1
+		case .DYNAMIC: return block.idx == 0 || sa.len(block.deleted) == block.idx
 		case .STATIC:  return block.idx == 0
 	}
 
@@ -117,41 +94,9 @@ block_insert :: proc(block: ^Block) -> ^Entity {
 @(private="package")
 block_delete :: proc(block: ^Block, idx: int) {
 	switch block.lifetime {
-		case .QUICK:   marker_unset(QUICK_MARKER_SIZE, &block.occupied, idx)
 		case .DYNAMIC: sa.append(&block.deleted, idx)
 		case .STATIC:  panic("Static entities can't be deleted.")
 	}
-}
-
-/* Flush all chunks from the buffers into this block.
-   Only quick lifetime block can absorb chunks from the buffer.*/
-@(private="package")
-block_absorb :: proc(block: ^Block) {
-	/* block.world.idx - count of buffered entities.      */
-	/* Copy buffered entities to the block's collection. */
-	copy(block.entities[0:block.world.idx], block.world.buffer[0:block.world.idx])
-
-	/* Copy components from buffers to block chunks. */
-	for idx := 0; idx < block.world.components.count; idx += 1 {
-		component: ^Component = &block.world.components.types[idx]
-		mem.copy(block.chunks[idx], component.buffer, component.size * block.world.idx)
-	}
-
-	/* Step through all copied entities. */
-	for i in 0..<block.world.idx {
-		block.entities[i].block = block				/* Change container to the block. */
-		block.entities[i].state -= { .BUFFERED }	/* Unset entity BUFFERED state.   */
-		marker_set(QUICK_MARKER_SIZE, &block.occupied, i)	/* Set occupied marker for entity index. */
-	}
-
-	/* If buffer is not full, we need unset occupied marker for its rest. */
-	if block.world.idx < block.size {
-		for i in block.world.idx..<block.size {					/* block.size here will be */
-			marker_unset(QUICK_MARKER_SIZE, &block.occupied, i) /* QUICK_CHUNK_SIZE btw.   */
-		}
-	}
-	
-	block.idx = block.world.idx
 }
 
 /* Iterate to the next alive (not deleted) entity in the block.
@@ -164,8 +109,7 @@ block_iter :: #force_inline proc(block: ^Block, iter: ^EntitiesIterator) -> bool
 	idx := iter.entity == nil ? 0 : iter.idx + 1
 
 	for idx < block.idx {
-		if block.lifetime == .QUICK   && !marker_is_set(QUICK_MARKER_SIZE, block.occupied, idx) ||
-		   block.lifetime == .DYNAMIC && slice.contains(sa.slice(&block.deleted), idx) {
+		if block.lifetime == .DYNAMIC && slice.contains(sa.slice(&block.deleted), idx) {
 			idx += 1
 		} else {
 			iter.entity = &block.entities[idx] 
@@ -186,8 +130,6 @@ block_pop_free_index :: proc(block: ^Block) -> int {
 	idx: int = ---
 
 	switch block.lifetime {
-		/* Quick blocks can be only completely filled and reused when they are totally free. */
-		case .QUICK: idx = 0
 		case .DYNAMIC:
 			if sa.len(block.deleted) == 0 {
 				idx = block.idx

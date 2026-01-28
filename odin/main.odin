@@ -38,19 +38,7 @@ VecType :: distinct [2]f32
 Tag1 :: distinct int
 Tag2 :: distinct int
 
-entities  : [ecs.QUICK_CHUNK_SIZE]ecs.Entity
-positions : [ecs.QUICK_CHUNK_SIZE]Position
-centers   : [ecs.QUICK_CHUNK_SIZE]Center
-vectors   : [ecs.QUICK_CHUNK_SIZE]VecType
-healths   : [ecs.QUICK_CHUNK_SIZE]Health
-rotations : [ecs.QUICK_CHUNK_SIZE]Rotation
-velocities: [ecs.QUICK_CHUNK_SIZE]Velocity
-
 count : uint = 0
-
-// test :: proc(block: ecs.Block($ChunkSize)) {
-// 	fmt.println(len(block.entities))
-// }
 
 MAX_COUNT :: 130
 BITS_COUNT : uint : size_of(uint) * 8
@@ -81,7 +69,7 @@ system1 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 	// 	if pos != nil do pos.x += 1
 	// 	if center != nil do center.cx += 1
 	// 	// fmt.println(pos, center)
-		if !despawned {
+		if !despawned && !ecs.is_static(entity) {
 			ecs.despawn(world, entity)
 			despawned = true
 		}
@@ -122,14 +110,14 @@ main :: proc() {
 	
 	ecs.init()
 	
-	world : ^ecs.World = ecs.new_world(&entities, .ARCHETYPE)
+	world : ^ecs.World = ecs.new_world(.ARCHETYPE)
 
-	ecs.register(world, .COMPONENT, Position, &positions)
-	ecs.register(world, .COMPONENT, Center, &centers)
-	ecs.register(world, .COMPONENT, VecType, &vectors)
-	ecs.register(world, .COMPONENT, Health, &healths)
-	ecs.register(world, .COMPONENT, Rotation, &rotations)
-	ecs.register(world, .COMPONENT, Velocity, &velocities)
+	ecs.register(world, .COMPONENT, Position)
+	ecs.register(world, .COMPONENT, Center)
+	ecs.register(world, .COMPONENT, VecType)
+	ecs.register(world, .COMPONENT, Health)
+	ecs.register(world, .COMPONENT, Rotation)
+	ecs.register(world, .COMPONENT, Velocity)
 	ecs.register(world, .RESOURCE, Resource1)
 	ecs.register(world, .RESOURCE, Resource2)
 	ecs.register(world, .TAG, Tag1)
@@ -194,56 +182,56 @@ main :: proc() {
 	// resource1 : ^Resource1 = ecs.get_resource(world, Resource1)
 	// resource1.enabled = true
 
-	_time = time.now()
-	fmt.println("-- spawning quicks, buffered (10000 iterations) --")
+	// _time = time.now()
+	// fmt.println("-- spawning dynamics (100000 iterations by 500 entities) --")
 
-	for i in 0..<10000 {
-		for i in 0..<ecs.QUICK_CHUNK_SIZE {
-			ecs.add(ecs.spawn(world, .QUICK),
-				Position, &Position { x = f64(i) + 10, y = f64(i) + 10 },
-				Center, &Center { cx = i + 20, cy = i + 20 },
-				Health, &Health { hp = 30 },
-				Rotation, &Rotation { angle = 90 },
-				Velocity, &Velocity { 50 })
-		}
+	// for i in 0..<100000 {
+	// 	for i in 0..<500 {
+	// 		ecs.add(ecs.spawn(world, .DYNAMIC),
+	// 			Position, &Position { x = f64(i) + 10, y = f64(i) + 10 },
+	// 			Center, &Center { cx = i + 20, cy = i + 20 },
+	// 			Health, &Health { hp = 30 },
+	// 			Rotation, &Rotation { angle = 90 },
+	// 			Velocity, &Velocity { 50 })
+	// 	}
 
-		ecs.each(world, { .QUICK }, callback = proc(entity: ^ecs.Entity, lifetime: ecs.Lifetime, world: ^ecs.World) {
-			ecs.despawn(world, entity)
-		})
+	// 	ecs.each(world, { .DYNAMIC }, callback = proc(entity: ^ecs.Entity, lifetime: ecs.Lifetime, world: ^ecs.World) {
+	// 		ecs.despawn(world, entity)
+	// 	})
 
-		// fmt.printfln("-- before: %v", len(world.deffered.despawning))
-		ecs.perform(world)
-		// fmt.println(world.deleted)
-		// fmt.printfln("-- after: %v", len(world.deffered.despawning))
-	}
+	// 	// fmt.printfln("-- before: %v", len(world.deffered.despawning))
+	// 	ecs.perform(world)
+	// 	// fmt.println(world.deleted)
+	// 	// fmt.printfln("-- after: %v", len(world.deffered.despawning))
+	// }
 
-	_duration = time.diff(_time, time.now())
-	fmt.printfln("-- ellapsed: %v", _duration)
-	fmt.printfln("-- quick blocks count: %v", len(world.quicks))
+	// _duration = time.diff(_time, time.now())
+	// fmt.printfln("-- ellapsed: %v", _duration)
+	// fmt.printfln("-- dynamic blocks count: %v", len(world.dynamics))
 
-	_time = time.now()
-	fmt.println("-- spawning dynamics (10000 iterations) --")
+	// _time = time.now()
+	// fmt.println("-- spawning statics (1000 iterations by 500 entities) --")
 
-	for i in 0..<10000 {
-		for i in 0..<ecs.QUICK_CHUNK_SIZE {
-			ecs.add(ecs.spawn(world, .DYNAMIC),
-				Position, &Position { x = f64(i) + 10, y = f64(i) + 10 },
-				Center, &Center { cx = i + 20, cy = i + 20 },
-				Health, &Health { hp = 30 },
-				Rotation, &Rotation { angle = 90 },
-				Velocity, &Velocity { 50 })
-		}
+	// for i in 0..<1000 {
+	// 	for i in 0..<500 {
+	// 		ecs.add(ecs.spawn(world, .STATIC),
+	// 			Position, &Position { x = f64(i) + 10, y = f64(i) + 10 },
+	// 			Center, &Center { cx = i + 20, cy = i + 20 },
+	// 			Health, &Health { hp = 30 },
+	// 			Rotation, &Rotation { angle = 90 },
+	// 			Velocity, &Velocity { 50 })
+	// 	}
 
-		ecs.each(world, { .DYNAMIC }, callback = proc(entity: ^ecs.Entity, lifetime: ecs.Lifetime, world: ^ecs.World) {
-			ecs.despawn(world, entity)
-		})
+	// 	// ecs.each(world, { .STATIC }, callback = proc(entity: ^ecs.Entity, lifetime: ecs.Lifetime, world: ^ecs.World) {
+	// 	// 	ecs.despawn(world, entity)
+	// 	// })
 
-		ecs.perform(world)
-	}
+	// 	// ecs.perform(world)
+	// }
 
-	_duration = time.diff(_time, time.now())
-	fmt.printfln("-- ellapsed: %v", _duration)
-	fmt.printfln("-- dynamic blocks count: %v", len(world.dynamics))
+	// _duration = time.diff(_time, time.now())
+	// fmt.printfln("-- ellapsed: %v", _duration)
+	// fmt.printfln("-- static blocks count: %v", len(world.statics))
 
 	ecs.set(world,
 		Resource1, Resource1 { enabled = true },
@@ -258,17 +246,14 @@ main :: proc() {
 	fmt.println(r1)
 	fmt.println(r2)
 
-	for i in 0..</*ecs.QUICK_CHUNK_SIZE * 1000*/100000 + 3 {
-		ecs.add(ecs.spawn(world, .QUICK),
+	for i in 0..<100000 + 3 {
+		ecs.add(ecs.spawn(world, .STATIC),
 			Position, &Position { x = f64(i) + 10, y = f64(i) + 10 },
 			Center, &Center { cx = i + 20, cy = i + 20 },
 			Health, &Health { hp = 30 },
 			Rotation, &Rotation { angle = 90 },
 			Velocity, &Velocity { 50 })
-		// ecs.spawn(world, .QUICK)
 	}
-
-	fmt.println(len(world.quicks))
 
 	ecs.each(world, callback = proc(entity: ^ecs.Entity, lifetime: ecs.Lifetime, world: ^ecs.World) {
 		pos, center := ecs.get(entity, Position, Center)
@@ -283,20 +268,12 @@ main :: proc() {
 		// }
 	})
 
-	// block1: ecs.QuickBlock
-	// block2: ecs.DynamicBlock
-	// block3: ecs.StaticBlock
-
-	// test(block1)
-	// test(block2)
-	// test(block3)
-
 	e1 : ^ecs.Entity = ecs.spawn(world, .DYNAMIC)
 	e2 : ^ecs.Entity = ecs.spawn(world, .DYNAMIC)
 	e3 : ^ecs.Entity = ecs.spawn(world, .STATIC)
 
-	e4 := ecs.spawn(world, .QUICK)
-	e5 := ecs.spawn(world, .QUICK)
+	e4 := ecs.spawn(world, .DYNAMIC)
+	e5 := ecs.spawn(world, .STATIC)
 
 	ecs.add(e5, Position, &Position { x = 3, y = 4 })
 	// ecs.add(e4, Position, &Position { x = 1, y = 2 })
@@ -347,10 +324,10 @@ main :: proc() {
 	// ecs.despawn(world, e1, e2, e4, e5)
 	
 	_time = time.now()
-	fmt.printfln("-- spawning quicks ( %v )", /*ecs.QUICK_CHUNK_SIZE * 1000*/100000 + 3)
+	fmt.printfln("-- spawning dynamics ( %v )", 100000 + 3)
 
-	for i in 0..</*ecs.QUICK_CHUNK_SIZE * 1000*/100000 + 3 {
-		e := ecs.spawn(world, .QUICK)
+	for i in 0..<100000 + 3 {
+		e := ecs.spawn(world, .DYNAMIC)
 		ecs.add(e,
 			// Position, &Position { x = 10, y = 10 },
 			Center, &Center { cx = 20, cy = 20 },
@@ -358,16 +335,15 @@ main :: proc() {
 			Rotation, &Rotation { angle = 90 },
 			Velocity, &Velocity { 50 })
 		ecs.tag(e, Tag2)
-		// ecs.spawn(world, .QUICK)
 	}
 
 	_duration = time.diff(_time, time.now())
 	fmt.printfln("-- ellapsed: %v", _duration)
 
 	_time = time.now()
-	fmt.printfln("-- spawning dynamics ( %v )", /*ecs.DYNAMIC_CHUNK_SIZE * 1000*/500000 + 3)
+	fmt.printfln("-- spawning dynamics ( %v )", 500000 + 3)
 
-	for i in 0..</*ecs.DYNAMIC_CHUNK_SIZE * 1000*/500000 + 3 {
+	for i in 0..<500000 + 3 {
 		e := ecs.spawn(world, .DYNAMIC)
 
 		ecs.add(e,
@@ -389,9 +365,9 @@ main :: proc() {
 	fmt.printfln("-- ellapsed: %v", _duration)
 
 	_time = time.now()
-	fmt.printfln("-- spawning statics ( %v )", /*ecs.STATIC_CHUNK_SIZE * 1000*/300000 + 3)
+	fmt.printfln("-- spawning statics ( %v )", 300000 + 3)
 
-	for i in 0..</*ecs.STATIC_CHUNK_SIZE * 1000*/300000 + 3 {
+	for i in 0..<300000 + 3 {
 		ecs.add(ecs.spawn(world, .STATIC),
 			Position, &Position { x = 10, y = 10 },
 			Center, &Center { cx = 20, cy = 20 },
@@ -421,7 +397,7 @@ main :: proc() {
 
 	// ecs.run(world)
 	// fmt.println("--- world is running ---")
-	ecs.despawn(world, e1, e2, e4, e5)
+	ecs.despawn(world, e1, e2, e4)
 
 	for archetype in world.archetypes {
 		fmt.printfln("archetype: %v, %v, %v", len(archetype.entities), archetype.components, archetype.tags)

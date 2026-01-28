@@ -11,13 +11,8 @@ Entity :: struct {
 	components : [COMPONENTS_MARKER_SIZE]uint,
 	/* Tags marker, each set bit specifies that the tag exists in the entity. */
 	tags : [TAGS_MARKER_SIZE]uint,
-	using container: struct #raw_union {
-		/* Reference to the parent block interface. Use only if stae has not BUFFERED flag. */
-		block : ^Block,
-		/* Reference to the parent world.
-		   If active (state has BUFFERED flag) than entity is in the quick lifetime buffer, not a real block. */
-		world : ^World,
-	},
+	/* Reference to the parent block. */
+	block : ^Block,
 	/* The index of the entity in the collection (chunk index for its components). */
 	chunk_idx : int,
 	/* Archetype reference which entity belongs to. Is nill for entities without components/tags. */
@@ -34,7 +29,7 @@ Entity :: struct {
    `perform`   : Perform archetyping of the entity.
 				 You should not change this parameter (inner logic). */
 add_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type, perform: bool = true) {
-	if idx, ok := component_index(&get_world(entity).components, Type); ok {
+	if idx, ok := component_index(&entity.block.world.components, Type); ok {
 		set_component(entity, Type, component)					/* Storing value in the chunk. */
 		marker_set(COMPONENTS_MARKER_SIZE, &entity.components, idx)		/* Setting marker bit. */
 
@@ -47,22 +42,11 @@ add_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type, perform:
    `$Type`     : Component type.
    `component` : Reference to the component instance." */
 set_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type) #no_bounds_check {
-	world: ^World = get_world(entity)
-
-	if c, ok := components_get(&world.components, Type); ok {
-		buffered := .BUFFERED in entity.state
-
-		if buffered || entity.block.lifetime == .QUICK {
-			ptr: rawptr = c.buffer if buffered else entity.block.chunks[c.idx]
-			cell: ^Type = mem.ptr_offset(cast(^Type)ptr, entity.chunk_idx)
-
-			cell^ = component^
-		} else {
-			ptr := mem.ptr_offset(cast(^u8)entity.block.storage, world.components.size * entity.chunk_idx + c.offset)
-			cell: ^Type = cast(^Type)ptr
-
-			cell^ = component^
-		}
+	if c, ok := components_get(&entity.block.world.components, Type); ok {
+		ptr := mem.ptr_offset(cast(^u8)entity.block.chunks,
+			entity.block.world.components.size * entity.chunk_idx + c.offset)
+		cell: ^Type = cast(^Type)ptr
+		cell^ = component^
 	}
 }
 
@@ -71,19 +55,11 @@ set_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type) #no_boun
    `$Type`   : Component type.
    `returns` : Pointer to the component and operation success. */
 get_component :: #force_inline proc(entity: ^Entity, $Type: typeid) -> (^Type, bool) #no_bounds_check #optional_ok {
-	world: ^World = get_world(entity)
-
-	if c, ok := components_get(&world.components, Type); ok {
+	if c, ok := components_get(&entity.block.world.components, Type); ok {
 		if marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, c.idx) {
-			buffered := .BUFFERED in entity.state
-
-			if buffered || entity.block.lifetime == .QUICK {
-				ptr: rawptr = c.buffer if buffered else entity.block.chunks[c.idx]
-				return mem.ptr_offset(cast(^Type)ptr, entity.chunk_idx), true
-			} else {
-				ptr := mem.ptr_offset(cast(^u8)entity.block.storage, world.components.size * entity.chunk_idx + c.offset)
-				return cast(^Type)ptr, true
-			}
+			ptr := mem.ptr_offset(cast(^u8)entity.block.chunks,
+				entity.block.world.components.size * entity.chunk_idx + c.offset)
+			return cast(^Type)ptr, true
 		}
 	}
 
@@ -96,7 +72,7 @@ get_component :: #force_inline proc(entity: ^Entity, $Type: typeid) -> (^Type, b
    `perform` : Perform archetyping of the entity.
 			   You should not change this parameter (inner logic). */
 remove_component :: proc(entity: ^Entity, type: typeid, perform: bool = true) {
-	if idx, ok := component_index(&get_world(entity).components, type); ok {
+	if idx, ok := component_index(&entity.block.world.components, type); ok {
 		marker_unset(COMPONENTS_MARKER_SIZE, &entity.components, idx)
 
 		if perform do archetyping(entity)
@@ -117,7 +93,7 @@ remove_components :: proc(entity: ^Entity, types: ..typeid) {
    `type`    : Component type.
    `returns` : True if entity has a component, otherwise - false. */
 has_component :: proc(entity: ^Entity, type: typeid) -> bool {
-	if idx, ok := component_index(&get_world(entity).components, type); ok {
+	if idx, ok := component_index(&entity.block.world.components, type); ok {
 		return marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, idx)
 	} else {
 		return false
@@ -129,11 +105,10 @@ has_component :: proc(entity: ^Entity, type: typeid) -> bool {
    `types`   : Companent types.
    `returns` : True if entity has all components, otherwise - false. */
 has_components :: proc(entity: ^Entity, types: ..typeid) -> bool {
-	world: ^World = get_world(entity)
 	has := true
 
 	for type in types {
-		if idx, ok := component_index(&world.components, type); ok {
+		if idx, ok := component_index(&entity.block.world.components, type); ok {
 			has &&= marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, idx)
 		} else {
 			has = false
@@ -149,7 +124,7 @@ has_components :: proc(entity: ^Entity, types: ..typeid) -> bool {
    `perform` : Perform archetyping of the entity.
 			   You should not change this parameter (inner logic). */
 set_tag :: proc(entity: ^Entity, type: typeid, perform: bool = true) {
-	if idx, ok := tag_index(&get_world(entity).tags, type); ok {
+	if idx, ok := tag_index(&entity.block.world.tags, type); ok {
 		marker_set(TAGS_MARKER_SIZE, &entity.tags, idx)
 
 		if perform do archetyping(entity)
@@ -160,10 +135,8 @@ set_tag :: proc(entity: ^Entity, type: typeid, perform: bool = true) {
    `entity`  : Pointer to the entity.
    `types`   : Tag types. */
 set_tags :: proc(entity: ^Entity, types: ..typeid) {
-	world: ^World = get_world(entity)
-
 	for type in types {
-		if idx, ok := tag_index(&world.tags, type); ok {
+		if idx, ok := tag_index(&entity.block.world.tags, type); ok {
 			marker_set(TAGS_MARKER_SIZE, &entity.tags, idx)
 		}
 	}
@@ -177,7 +150,7 @@ set_tags :: proc(entity: ^Entity, types: ..typeid) {
    `perform` : Perform archetyping of the entity.
 			   You should not change this parameter (inner logic). */
 unset_tag :: proc(entity: ^Entity, type: typeid, perform: bool = true) {
-	if idx, ok := tag_index(&get_world(entity).tags, type); ok {
+	if idx, ok := tag_index(&entity.block.world.tags, type); ok {
 		marker_unset(TAGS_MARKER_SIZE, &entity.tags, idx)
 	}
 	
@@ -188,10 +161,8 @@ unset_tag :: proc(entity: ^Entity, type: typeid, perform: bool = true) {
    `entity`  : Pointer to the entity.
    `types`   : Tag types. */
 unset_tags :: proc(entity: ^Entity, types: ..typeid) {
-	world: ^World = get_world(entity)
-
 	for type in types {
-		if idx, ok := tag_index(&world.tags, type); ok {
+		if idx, ok := tag_index(&entity.block.world.tags, type); ok {
 			marker_unset(TAGS_MARKER_SIZE, &entity.tags, idx)
 		}
 	}
@@ -204,7 +175,7 @@ unset_tags :: proc(entity: ^Entity, types: ..typeid) {
    `type`    : Tag type.
    `returns` : True if the entity has tag, otherwise - false. */
 has_tag :: proc(entity: ^Entity, type: typeid) -> bool {
-	if idx, ok := tag_index(&get_world(entity).tags, type); ok {
+	if idx, ok := tag_index(&entity.block.world.tags, type); ok {
 		return marker_is_set(TAGS_MARKER_SIZE, entity.tags, idx)
 	} else {
 		return false
@@ -216,11 +187,10 @@ has_tag :: proc(entity: ^Entity, type: typeid) -> bool {
    `types`   : Tag types.
    `returns` : True if entity is tagged with all types, otherwise - false. */
 has_tags :: proc(entity: ^Entity, types: ..typeid) -> bool {
-	world: ^World = get_world(entity)
 	has := true
 
 	for type in types {
-		if idx, ok := tag_index(&world.tags, type); ok {
+		if idx, ok := tag_index(&entity.block.world.tags, type); ok {
 			has &&= marker_is_set(TAGS_MARKER_SIZE, entity.tags, idx)
 		} else {
 			has = false
@@ -231,30 +201,38 @@ has_tags :: proc(entity: ^Entity, types: ..typeid) -> bool {
 }
 
 /* Checks if the entity has been deleted.
+   `entity`  : Pointer to the entity.
    `returns` : True if entity is deleted, otherwise - false. */
 deleted :: #force_inline proc(entity: ^Entity) -> bool {
 	return .DELETED in entity.state
 }
 
 /* Checks if the entity is being despawned at the perform stage.
+   `entity`  : Pointer to the entity.
    `returns` : True if entity will be despawned, otherwise - false. */
 despawning :: #force_inline proc(entity: ^Entity) -> bool {
 	return .DESPAWNING in entity.state
 }
 
-/* Gets parent world reference.
+/* Checks if the entity belongs to dynamic lifetime block.
    `entity`  : Pointer to the entity.
-   `returns` : Reference to the world. */
-@(private="package")
-get_world :: #force_inline proc(entity: ^Entity) -> ^World {
-	return .BUFFERED in entity.state ? entity.world : entity.block.world
+   `returns` : True if entity is dynamic, otherwise - false. */
+is_dynamic :: #force_inline proc(entity: ^Entity) -> bool {
+	return entity.block.lifetime == .DYNAMIC
+}
+
+/* Checks if the entity belongs to static lifetime block.
+   `entity`  : Pointer to the entity.
+   `returns` : True if entity is static, otherwise - false. */
+is_static :: #force_inline proc(entity: ^Entity) -> bool {
+	return entity.block.lifetime == .DYNAMIC
 }
 
 /* Bind the entity to appropriate archetype.
    `entity` : Pointer to the entity. */
 @(private="package")
 archetyping :: proc(entity: ^Entity) {
-	world : = get_world(entity)
+	world : = entity.block.world
 
 	if world.approach != .ARCHETYPE do return
 
