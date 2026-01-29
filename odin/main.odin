@@ -83,10 +83,18 @@ system2 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 		// pos, center, vec, health := ecs.get(entity, Position, Center, VecType, Health)
 		// pos, center, vec := ecs.get(entity, Position, Center, VecType)
 		// pos, center := ecs.get(entity, Position, Center)
+		// pos := ecs.get(entity, Position)
 
-		if pos != nil do pos.x += 1
-		if center != nil do center.cx += 1
+		pos.x += 1
+		center.cx += 1
 		// fmt.println(pos, center)
+
+		// ecs.set(entity,
+		// 	Position, &Position { x = 10, y = 10 },
+		// 	Center, &Center { cx = 20, cy = 20 },
+		// 	Health, &Health { hp = 30 },
+		// 	Rotation, &Rotation { angle = 90 },
+		// 	Velocity, &Velocity { 50 })
 	}
 }
 
@@ -97,10 +105,18 @@ system3 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 		// pos, center, vec, health := ecs.get(entity, Position, Center, VecType, Health)
 		// pos, center, vec := ecs.get(entity, Position, Center, VecType)
 		// pos, center := ecs.get(entity, Position, Center)
+		// pos := ecs.get(entity, Position)
 
-		if pos != nil do pos.x += 1
-		if center != nil do center.cx += 1
+		pos.x += 1
+		center.cx += 1
 		// fmt.println(pos, center)
+
+		// ecs.set(entity,
+		// 	Position, &Position { x = 10, y = 10 },
+		// 	Center, &Center { cx = 20, cy = 20 },
+		// 	Health, &Health { hp = 30 },
+		// 	Rotation, &Rotation { angle = 90 },
+		// 	Velocity, &Velocity { 50 })
 	}
 }
 

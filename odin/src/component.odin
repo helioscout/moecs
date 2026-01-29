@@ -34,7 +34,7 @@ Components :: struct {
    `components` : Component types collection.
    `type`       : Component type. */
 @(private="package")
-component_index :: proc(components: ^Components, type: typeid) -> (int, bool) #optional_ok {
+component_index :: #force_inline proc(components: ^Components, type: typeid) -> (int, bool) #optional_ok {
 	id: u64 = transmute(u64)type
 
 	for i := 0; i < components.count; i += 1 {
@@ -64,7 +64,7 @@ components_add :: proc(components: ^Components, type: typeid, component: Compone
    `components` : Component types collection.
    `type`       : Component type. */
 @(private="package")
-components_get :: proc(components: ^Components, type: typeid) -> (^Component, bool) #optional_ok {
+components_get :: #force_inline proc(components: ^Components, type: typeid) -> (^Component, bool) #optional_ok {
 	if idx, ok := component_index(components, type); ok {
 		return &components.types[idx], true
 	} else {
@@ -77,7 +77,7 @@ components_get :: proc(components: ^Components, type: typeid) -> (^Component, bo
    `type`       : Component type.
    `returns`    : True if type was found, otherwise - false. */
 @(private="package")
-components_has :: proc(components: ^Components, type: typeid) -> bool {
+components_has :: #force_inline proc(components: ^Components, type: typeid) -> bool {
 	_, ok := component_index(components, type)
 	return ok
 }

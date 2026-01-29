@@ -54,7 +54,7 @@ set_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type) #no_boun
    `entity`  : Pointer to the entity.
    `$Type`   : Component type.
    `returns` : Pointer to the component and operation success. */
-get_component :: #force_inline proc(entity: ^Entity, $Type: typeid) -> (^Type, bool) #no_bounds_check #optional_ok {
+get_component_mut :: #force_inline proc(entity: ^Entity, $Type: typeid) -> (^Type, bool) #no_bounds_check #optional_ok {
 	if c, ok := components_get(&entity.block.world.components, Type); ok {
 		if marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, c.idx) {
 			ptr := mem.ptr_offset(cast(^u8)entity.block.chunks,
@@ -64,6 +64,24 @@ get_component :: #force_inline proc(entity: ^Entity, $Type: typeid) -> (^Type, b
 	}
 
 	return nil, false
+}
+
+/* Gets component value by its type.
+   `entity`  : Pointer to the entity.
+   `$Type`   : Component type.
+   `returns` : Component value and operation success. */
+get_component :: #force_inline proc(entity: ^Entity, $Type: typeid) -> (Type, bool) #no_bounds_check #optional_ok {
+	component: Type = ---
+	
+	if c, ok := components_get(&entity.block.world.components, Type); ok {
+		if marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, c.idx) {
+			ptr := mem.ptr_offset(cast(^u8)entity.block.chunks,
+				entity.block.world.components.size * entity.chunk_idx + c.offset)
+			mem.copy_non_overlapping(&component, ptr, size_of(Type))
+		}
+	}
+
+	return component, false
 }
 
 /* Removes component from entity by its type.

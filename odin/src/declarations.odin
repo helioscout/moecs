@@ -123,15 +123,7 @@ add :: proc {
 	add_10_components,
 	add_11_components,
 	add_12_components,
-	add_13_components,
-	add_14_components,
-	add_15_components,
-	add_16_components,
-	add_17_components,
-	add_18_components,
-	add_19_components,
-	add_20_components,
-	add_21_components
+	add_13_components
 }
 
 set :: proc {
@@ -149,14 +141,6 @@ set :: proc {
 	set_11_components,
 	set_12_components,
 	set_13_components,
-	set_14_components,
-	set_15_components,
-	set_16_components,
-	set_17_components,
-	set_18_components,
-	set_19_components,
-	set_20_components,
-	set_21_components,
 	set_2_resources,
 	set_3_resources,
 	set_4_resources,
@@ -168,15 +152,7 @@ set :: proc {
 	set_10_resources,
 	set_11_resources,
 	set_12_resources,
-	set_13_resources,
-	set_14_resources,
-	set_15_resources,
-	set_16_resources,
-	set_17_resources,
-	set_18_resources,
-	set_19_resources,
-	set_20_resources,
-	set_21_resources
+	set_13_resources
 }
 
 get :: proc {
@@ -195,14 +171,6 @@ get :: proc {
 	get_11_components,
 	get_12_components,
 	get_13_components,
-	get_14_components,
-	get_15_components,
-	get_16_components,
-	get_17_components,
-	get_18_components,
-	get_19_components,
-	get_20_components,
-	get_21_components,
 	get_2_resources,
 	get_3_resources,
 	get_4_resources,
@@ -214,15 +182,23 @@ get :: proc {
 	get_10_resources,
 	get_11_resources,
 	get_12_resources,
-	get_13_resources,
-	get_14_resources,
-	get_15_resources,
-	get_16_resources,
-	get_17_resources,
-	get_18_resources,
-	get_19_resources,
-	get_20_resources,
-	get_21_resources
+	get_13_resources
+}
+
+get_mut :: proc {
+	get_component_mut,
+	get_2_components_mut,
+	get_3_components_mut,
+	get_4_components_mut,
+	get_5_components_mut,
+	get_6_components_mut,
+	get_7_components_mut,
+	get_8_components_mut,
+	get_9_components_mut,
+	get_10_components_mut,
+	get_11_components_mut,
+	get_12_components_mut,
+	get_13_components_mut
 }
 
 remove :: proc {
