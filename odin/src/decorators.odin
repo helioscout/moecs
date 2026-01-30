@@ -486,9 +486,9 @@ set_13_components :: #force_inline proc(entity: ^Entity,
 /* Sets 2 resources values by their types.
    `world`     : Pointer to the world.
    `$TypeN`    : N-th resource type.
-   `resourceN` : N-th resource value (will be copied into storage). */
+   `resourceN` : Reference to N-th resource value (will be copied into storage). */
 set_2_resources :: #force_inline proc(world: ^World,
-	$Type1: typeid, resource1: Type1, $Type2: typeid, resource2: Type2) {
+	$Type1: typeid, resource1: ^Type1, $Type2: typeid, resource2: ^Type2) {
 	set_resource(world, Type1, resource1)
 	set_resource(world, Type2, resource2)
 }
@@ -496,10 +496,10 @@ set_2_resources :: #force_inline proc(world: ^World,
 /* Sets 3 resources values by their types.
    `world`     : Pointer to the world.
    `$TypeN`    : N-th resource type.
-   `resourceN` : N-th resource value (will be copied into storage). */
+   `resourceN` : Reference to N-th resource value (will be copied into storage). */
 set_3_resources :: #force_inline proc(world: ^World,
-	$Type1: typeid, resource1: Type1, $Type2: typeid, resource2: Type2,
-	$Type3: typeid, resource3: Type3) {
+	$Type1: typeid, resource1: ^Type1, $Type2: typeid, resource2: ^Type2,
+	$Type3: typeid, resource3: ^Type3) {
 	set_resource(world, Type1, resource1)
 	set_resource(world, Type2, resource2)
 	set_resource(world, Type3, resource3)
@@ -508,10 +508,10 @@ set_3_resources :: #force_inline proc(world: ^World,
 /* Sets 4 resources values by their types.
    `world`     : Pointer to the world.
    `$TypeN`    : N-th resource type.
-   `resourceN` : N-th resource value (will be copied into storage). */
+   `resourceN` : Reference to N-th resource value (will be copied into storage). */
 set_4_resources :: #force_inline proc(world: ^World,
-	$Type1: typeid, resource1: Type1, $Type2: typeid, resource2: Type2,
-	$Type3: typeid, resource3: Type3, $Type4: typeid, resource4: Type4) {
+	$Type1: typeid, resource1: ^Type1, $Type2: typeid, resource2: ^Type2,
+	$Type3: typeid, resource3: ^Type3, $Type4: typeid, resource4: ^Type4) {
 	set_resource(world, Type1, resource1)
 	set_resource(world, Type2, resource2)
 	set_resource(world, Type3, resource3)
@@ -521,11 +521,11 @@ set_4_resources :: #force_inline proc(world: ^World,
 /* Sets 5 resources values by their types.
    `world`     : Pointer to the world.
    `$TypeN`    : N-th resource type.
-   `resourceN` : N-th resource value (will be copied into storage). */
+   `resourceN` : Reference to N-th resource value (will be copied into storage). */
 set_5_resources :: #force_inline proc(world: ^World,
-	$Type1: typeid, resource1: Type1, $Type2: typeid, resource2: Type2,
-	$Type3: typeid, resource3: Type3, $Type4: typeid, resource4: Type4,
-	$Type5: typeid, resource5: Type5) {
+	$Type1: typeid, resource1: ^Type1, $Type2: typeid, resource2: ^Type2,
+	$Type3: typeid, resource3: ^Type3, $Type4: typeid, resource4: ^Type4,
+	$Type5: typeid, resource5: ^Type5) {
 	set_resource(world, Type1, resource1)
 	set_resource(world, Type2, resource2)
 	set_resource(world, Type3, resource3)
@@ -536,11 +536,11 @@ set_5_resources :: #force_inline proc(world: ^World,
 /* Sets 6 resources values by their types.
    `world`     : Pointer to the world.
    `$TypeN`    : N-th resource type.
-   `resourceN` : N-th resource value (will be copied into storage). */
+   `resourceN` : Reference to N-th resource value (will be copied into storage). */
 set_6_resources :: #force_inline proc(world: ^World,
-	$Type1: typeid, resource1: Type1, $Type2: typeid, resource2: Type2,
-	$Type3: typeid, resource3: Type3, $Type4: typeid, resource4: Type4,
-	$Type5: typeid, resource5: Type5, $Type6: typeid, resource6: Type6) {
+	$Type1: typeid, resource1: ^Type1, $Type2: typeid, resource2: ^Type2,
+	$Type3: typeid, resource3: ^Type3, $Type4: typeid, resource4: ^Type4,
+	$Type5: typeid, resource5: ^Type5, $Type6: typeid, resource6: ^Type6) {
 	set_resource(world, Type1, resource1)
 	set_resource(world, Type2, resource2)
 	set_resource(world, Type3, resource3)
@@ -552,12 +552,12 @@ set_6_resources :: #force_inline proc(world: ^World,
 /* Sets 7 resources values by their types.
    `world`     : Pointer to the world.
    `$TypeN`    : N-th resource type.
-   `resourceN` : N-th resource value (will be copied into storage). */
+   `resourceN` : Reference to N-th resource value (will be copied into storage). */
 set_7_resources :: #force_inline proc(world: ^World,
-	$Type1: typeid, resource1: Type1, $Type2: typeid, resource2: Type2,
-	$Type3: typeid, resource3: Type3, $Type4: typeid, resource4: Type4,
-	$Type5: typeid, resource5: Type5, $Type6: typeid, resource6: Type6,
-	$Type7: typeid, resource7: Type7) {
+	$Type1: typeid, resource1: ^Type1, $Type2: typeid, resource2: ^Type2,
+	$Type3: typeid, resource3: ^Type3, $Type4: typeid, resource4: ^Type4,
+	$Type5: typeid, resource5: ^Type5, $Type6: typeid, resource6: ^Type6,
+	$Type7: typeid, resource7: ^Type7) {
 	set_resource(world, Type1, resource1)
 	set_resource(world, Type2, resource2)
 	set_resource(world, Type3, resource3)
@@ -570,12 +570,12 @@ set_7_resources :: #force_inline proc(world: ^World,
 /* Sets 8 resources values by their types.
    `world`     : Pointer to the world.
    `$TypeN`    : N-th resource type.
-   `resourceN` : N-th resource value (will be copied into storage). */
+   `resourceN` : Reference to N-th resource value (will be copied into storage). */
 set_8_resources :: #force_inline proc(world: ^World,
-	$Type1: typeid, resource1: Type1, $Type2: typeid, resource2: Type2,
-	$Type3: typeid, resource3: Type3, $Type4: typeid, resource4: Type4,
-	$Type5: typeid, resource5: Type5, $Type6: typeid, resource6: Type6,
-	$Type7: typeid, resource7: Type7, $Type8: typeid, resource8: Type8) {
+	$Type1: typeid, resource1: ^Type1, $Type2: typeid, resource2: ^Type2,
+	$Type3: typeid, resource3: ^Type3, $Type4: typeid, resource4: ^Type4,
+	$Type5: typeid, resource5: ^Type5, $Type6: typeid, resource6: ^Type6,
+	$Type7: typeid, resource7: ^Type7, $Type8: typeid, resource8: ^Type8) {
 	set_resource(world, Type1, resource1)
 	set_resource(world, Type2, resource2)
 	set_resource(world, Type3, resource3)
@@ -589,13 +589,13 @@ set_8_resources :: #force_inline proc(world: ^World,
 /* Sets 9 resources values by their types.
    `world`     : Pointer to the world.
    `$TypeN`    : N-th resource type.
-   `resourceN` : N-th resource value (will be copied into storage). */
+   `resourceN` : Reference to N-th resource value (will be copied into storage). */
 set_9_resources :: #force_inline proc(world: ^World,
-	$Type1: typeid, resource1: Type1, $Type2: typeid, resource2: Type2,
-	$Type3: typeid, resource3: Type3, $Type4: typeid, resource4: Type4,
-	$Type5: typeid, resource5: Type5, $Type6: typeid, resource6: Type6,
-	$Type7: typeid, resource7: Type7, $Type8: typeid, resource8: Type8,
-	$Type9: typeid, resource9: Type9) {
+	$Type1: typeid, resource1: ^Type1, $Type2: typeid, resource2: ^Type2,
+	$Type3: typeid, resource3: ^Type3, $Type4: typeid, resource4: ^Type4,
+	$Type5: typeid, resource5: ^Type5, $Type6: typeid, resource6: ^Type6,
+	$Type7: typeid, resource7: ^Type7, $Type8: typeid, resource8: ^Type8,
+	$Type9: typeid, resource9: ^Type9) {
 	set_resource(world, Type1, resource1)
 	set_resource(world, Type2, resource2)
 	set_resource(world, Type3, resource3)
@@ -610,13 +610,13 @@ set_9_resources :: #force_inline proc(world: ^World,
 /* Sets 10 resources values by their types.
    `world`     : Pointer to the world.
    `$TypeN`    : N-th resource type.
-   `resourceN` : N-th resource value (will be copied into storage). */
+   `resourceN` : Reference to N-th resource value (will be copied into storage). */
 set_10_resources :: #force_inline proc(world: ^World,
-	$Type1: typeid, resource1: Type1, $Type2: typeid, resource2: Type2,
-	$Type3: typeid, resource3: Type3, $Type4: typeid, resource4: Type4,
-	$Type5: typeid, resource5: Type5, $Type6: typeid, resource6: Type6,
-	$Type7: typeid, resource7: Type7, $Type8: typeid, resource8: Type8,
-	$Type9: typeid, resource9: Type9, $Type10: typeid, resource10: Type10) {
+	$Type1: typeid, resource1: ^Type1, $Type2: typeid, resource2: ^Type2,
+	$Type3: typeid, resource3: ^Type3, $Type4: typeid, resource4: ^Type4,
+	$Type5: typeid, resource5: ^Type5, $Type6: typeid, resource6: ^Type6,
+	$Type7: typeid, resource7: ^Type7, $Type8: typeid, resource8: ^Type8,
+	$Type9: typeid, resource9: ^Type9, $Type10: typeid, resource10: ^Type10) {
 	set_resource(world, Type1, resource1)
 	set_resource(world, Type2, resource2)
 	set_resource(world, Type3, resource3)
@@ -632,14 +632,14 @@ set_10_resources :: #force_inline proc(world: ^World,
 /* Sets 11 resources values by their types.
    `world`     : Pointer to the world.
    `$TypeN`    : N-th resource type.
-   `resourceN` : N-th resource value (will be copied into storage). */
+   `resourceN` : Reference to N-th resource value (will be copied into storage). */
 set_11_resources :: #force_inline proc(world: ^World,
-	$Type1: typeid, resource1: Type1, $Type2: typeid, resource2: Type2,
-	$Type3: typeid, resource3: Type3, $Type4: typeid, resource4: Type4,
-	$Type5: typeid, resource5: Type5, $Type6: typeid, resource6: Type6,
-	$Type7: typeid, resource7: Type7, $Type8: typeid, resource8: Type8,
-	$Type9: typeid, resource9: Type9, $Type10: typeid, resource10: Type10,
-	$Type11: typeid, resource11: Type11) {
+	$Type1: typeid, resource1: ^Type1, $Type2: typeid, resource2: ^Type2,
+	$Type3: typeid, resource3: ^Type3, $Type4: typeid, resource4: ^Type4,
+	$Type5: typeid, resource5: ^Type5, $Type6: typeid, resource6: ^Type6,
+	$Type7: typeid, resource7: ^Type7, $Type8: typeid, resource8: ^Type8,
+	$Type9: typeid, resource9: ^Type9, $Type10: typeid, resource10: ^Type10,
+	$Type11: typeid, resource11: ^Type11) {
 	set_resource(world, Type1, resource1)
 	set_resource(world, Type2, resource2)
 	set_resource(world, Type3, resource3)
@@ -656,14 +656,14 @@ set_11_resources :: #force_inline proc(world: ^World,
 /* Sets 12 resources values by their types.
    `world`     : Pointer to the world.
    `$TypeN`    : N-th resource type.
-   `resourceN` : N-th resource value (will be copied into storage). */
+   `resourceN` : Reference to N-th resource value (will be copied into storage). */
 set_12_resources :: #force_inline proc(world: ^World,
-	$Type1: typeid, resource1: Type1, $Type2: typeid, resource2: Type2,
-	$Type3: typeid, resource3: Type3, $Type4: typeid, resource4: Type4,
-	$Type5: typeid, resource5: Type5, $Type6: typeid, resource6: Type6,
-	$Type7: typeid, resource7: Type7, $Type8: typeid, resource8: Type8,
-	$Type9: typeid, resource9: Type9, $Type10: typeid, resource10: Type10,
-	$Type11: typeid, resource11: Type11, $Type12: typeid, resource12: Type12) {
+	$Type1: typeid, resource1: ^Type1, $Type2: typeid, resource2: ^Type2,
+	$Type3: typeid, resource3: ^Type3, $Type4: typeid, resource4: ^Type4,
+	$Type5: typeid, resource5: ^Type5, $Type6: typeid, resource6: ^Type6,
+	$Type7: typeid, resource7: ^Type7, $Type8: typeid, resource8: ^Type8,
+	$Type9: typeid, resource9: ^Type9, $Type10: typeid, resource10: ^Type10,
+	$Type11: typeid, resource11: ^Type11, $Type12: typeid, resource12: ^Type12) {
 	set_resource(world, Type1, resource1)
 	set_resource(world, Type2, resource2)
 	set_resource(world, Type3, resource3)
@@ -681,15 +681,15 @@ set_12_resources :: #force_inline proc(world: ^World,
 /* Sets 13 resources values by their types.
    `world`     : Pointer to the world.
    `$TypeN`    : N-th resource type.
-   `resourceN` : N-th resource value (will be copied into storage). */
+   `resourceN` : Reference to N-th resource value (will be copied into storage). */
 set_13_resources :: #force_inline proc(world: ^World,
-	$Type1: typeid, resource1: Type1, $Type2: typeid, resource2: Type2,
-	$Type3: typeid, resource3: Type3, $Type4: typeid, resource4: Type4,
-	$Type5: typeid, resource5: Type5, $Type6: typeid, resource6: Type6,
-	$Type7: typeid, resource7: Type7, $Type8: typeid, resource8: Type8,
-	$Type9: typeid, resource9: Type9, $Type10: typeid, resource10: Type10,
-	$Type11: typeid, resource11: Type11, $Type12: typeid, resource12: Type12,
-	$Type13: typeid, resource13: Type13) {
+	$Type1: typeid, resource1: ^Type1, $Type2: typeid, resource2: ^Type2,
+	$Type3: typeid, resource3: ^Type3, $Type4: typeid, resource4: ^Type4,
+	$Type5: typeid, resource5: ^Type5, $Type6: typeid, resource6: ^Type6,
+	$Type7: typeid, resource7: ^Type7, $Type8: typeid, resource8: ^Type8,
+	$Type9: typeid, resource9: ^Type9, $Type10: typeid, resource10: ^Type10,
+	$Type11: typeid, resource11: ^Type11, $Type12: typeid, resource12: ^Type12,
+	$Type13: typeid, resource13: ^Type13) {
 	set_resource(world, Type1, resource1)
 	set_resource(world, Type2, resource2)
 	set_resource(world, Type3, resource3)
@@ -1879,213 +1879,1122 @@ get_13_components :: #force_inline proc(entity: ^Entity,
 /* Gets 2 references to 2 resource values by their types.
    `world`  : Pointer to the world.
    `$TypeN` : N-th resource type. */
+get_2_resources_mut :: #force_inline proc(world: ^World,
+	$Type1: typeid, $Type2: typeid) ->
+	(r1: ^Type1, r2: ^Type2) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			r1 = cast(^Type1)mem.ptr_offset(storage, offset)
+		} else if id == id2 {
+			r2 = cast(^Type2)mem.ptr_offset(storage, offset)
+		}
+	}
+
+	return
+}
+
+/* Gets 2 resource values by their types.
+   `world`  : Pointer to the world.
+   `$TypeN` : N-th resource type. */
 get_2_resources :: #force_inline proc(world: ^World,
 	$Type1: typeid, $Type2: typeid) ->
-	(r1: ^Type1, r2: ^Type2) {
-	r1 = get_resource(world, Type1)
-	r2 = get_resource(world, Type2)
-	return
+	(Type1, Type2) #no_bounds_check {
+	r1: Type1 = ---
+	r2: Type2 = ---
+
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(&r1, mem.ptr_offset(storage, offset), size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(&r2, mem.ptr_offset(storage, offset), size_of(Type2))
+		}
+	}
+
+	return r1, r2
 }
 
 /* Gets 3 references to 3 resource values by their types.
    `world`  : Pointer to the world.
    `$TypeN` : N-th resource type. */
+get_3_resources_mut :: #force_inline proc(world: ^World,
+	$Type1: typeid, $Type2: typeid, $Type3: typeid) ->
+	(r1: ^Type1, r2: ^Type2, r3: ^Type3) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			r1 = cast(^Type1)mem.ptr_offset(storage, offset)
+		} else if id == id2 {
+			r2 = cast(^Type2)mem.ptr_offset(storage, offset)
+		} else if id == id3 {
+			r3 = cast(^Type3)mem.ptr_offset(storage, offset)
+		}
+	}
+
+	return
+}
+
+/* Gets 3 resource values by their types.
+   `world`  : Pointer to the world.
+   `$TypeN` : N-th resource type. */
 get_3_resources :: #force_inline proc(world: ^World,
 	$Type1: typeid, $Type2: typeid, $Type3: typeid) ->
-	(r1: ^Type1, r2: ^Type2, r3: ^Type3) {
-	r1 = get_resource(world, Type1)
-	r2 = get_resource(world, Type2)
-	r3 = get_resource(world, Type3)
-	return
+	(Type1, Type2, Type3) #no_bounds_check {
+	r1: Type1 = ---
+	r2: Type2 = ---
+	r3: Type3 = ---
+
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(&r1, mem.ptr_offset(storage, offset), size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(&r2, mem.ptr_offset(storage, offset), size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(&r3, mem.ptr_offset(storage, offset), size_of(Type3))
+		}
+	}
+
+	return r1, r2, r3
 }
 
 /* Gets 4 references to 4 resource values by their types.
    `world`  : Pointer to the world.
    `$TypeN` : N-th resource type. */
+get_4_resources_mut :: #force_inline proc(world: ^World,
+	$Type1: typeid, $Type2: typeid, $Type3: typeid, $Type4: typeid) ->
+	(r1: ^Type1, r2: ^Type2, r3: ^Type3, r4: ^Type4) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			r1 = cast(^Type1)mem.ptr_offset(storage, offset)
+		} else if id == id2 {
+			r2 = cast(^Type2)mem.ptr_offset(storage, offset)
+		} else if id == id3 {
+			r3 = cast(^Type3)mem.ptr_offset(storage, offset)
+		} else if id == id4 {
+			r4 = cast(^Type4)mem.ptr_offset(storage, offset)
+		}
+	}
+
+	return
+}
+
+/* Gets 4 resource values by their types.
+   `world`  : Pointer to the world.
+   `$TypeN` : N-th resource type. */
 get_4_resources :: #force_inline proc(world: ^World,
 	$Type1: typeid, $Type2: typeid, $Type3: typeid, $Type4: typeid) ->
-	(r1: ^Type1, r2: ^Type2, r3: ^Type3, r4: ^Type4) {
-	r1 = get_resource(world, Type1)
-	r2 = get_resource(world, Type2)
-	r3 = get_resource(world, Type3)
-	r4 = get_resource(world, Type4)
-	return
+	(Type1, Type2, Type3, Type4) #no_bounds_check {
+	r1: Type1 = ---
+	r2: Type2 = ---
+	r3: Type3 = ---
+	r4: Type4 = ---
+
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(&r1, mem.ptr_offset(storage, offset), size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(&r2, mem.ptr_offset(storage, offset), size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(&r3, mem.ptr_offset(storage, offset), size_of(Type3))
+		} else if id == id4 {
+			mem.copy_non_overlapping(&r4, mem.ptr_offset(storage, offset), size_of(Type4))
+		}
+	}
+
+	return r1, r2, r3, r4
 }
 
 /* Gets 5 references to 5 resource values by their types.
    `world`  : Pointer to the world.
    `$TypeN` : N-th resource type. */
+get_5_resources_mut :: #force_inline proc(world: ^World,
+	$Type1: typeid, $Type2: typeid, $Type3: typeid, $Type4: typeid, $Type5: typeid) ->
+	(r1: ^Type1, r2: ^Type2, r3: ^Type3, r4: ^Type4, r5: ^Type5) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			r1 = cast(^Type1)mem.ptr_offset(storage, offset)
+		} else if id == id2 {
+			r2 = cast(^Type2)mem.ptr_offset(storage, offset)
+		} else if id == id3 {
+			r3 = cast(^Type3)mem.ptr_offset(storage, offset)
+		} else if id == id4 {
+			r4 = cast(^Type4)mem.ptr_offset(storage, offset)
+		} else if id == id5 {
+			r5 = cast(^Type5)mem.ptr_offset(storage, offset)
+		}
+	}
+
+	return
+}
+
+/* Gets 5 resource values by their types.
+   `world`  : Pointer to the world.
+   `$TypeN` : N-th resource type. */
 get_5_resources :: #force_inline proc(world: ^World,
 	$Type1: typeid, $Type2: typeid, $Type3: typeid, $Type4: typeid, $Type5: typeid) ->
-	(r1: ^Type1, r2: ^Type2, r3: ^Type3, r4: ^Type4, r5: ^Type5) {
-	r1 = get_resource(world, Type1)
-	r2 = get_resource(world, Type2)
-	r3 = get_resource(world, Type3)
-	r4 = get_resource(world, Type4)
-	r5 = get_resource(world, Type5)
-	return
+	(Type1, Type2, Type3, Type4, Type5) #no_bounds_check {
+	r1: Type1 = ---
+	r2: Type2 = ---
+	r3: Type3 = ---
+	r4: Type4 = ---
+	r5: Type5 = ---
+	
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(&r1, mem.ptr_offset(storage, offset), size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(&r2, mem.ptr_offset(storage, offset), size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(&r3, mem.ptr_offset(storage, offset), size_of(Type3))
+		} else if id == id4 {
+			mem.copy_non_overlapping(&r4, mem.ptr_offset(storage, offset), size_of(Type4))
+		} else if id == id5 {
+			mem.copy_non_overlapping(&r5, mem.ptr_offset(storage, offset), size_of(Type5))
+		}
+	}
+
+	return r1, r2, r3, r4, r5
 }
 
 /* Gets 6 references to 6 resource values by their types.
    `world`  : Pointer to the world.
    `$TypeN` : N-th resource type. */
+get_6_resources_mut :: #force_inline proc(world: ^World,
+	$Type1: typeid, $Type2: typeid, $Type3: typeid, $Type4: typeid, $Type5: typeid, $Type6: typeid) ->
+	(r1: ^Type1, r2: ^Type2, r3: ^Type3, r4: ^Type4, r5: ^Type5, r6: ^Type6) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			r1 = cast(^Type1)mem.ptr_offset(storage, offset)
+		} else if id == id2 {
+			r2 = cast(^Type2)mem.ptr_offset(storage, offset)
+		} else if id == id3 {
+			r3 = cast(^Type3)mem.ptr_offset(storage, offset)
+		} else if id == id4 {
+			r4 = cast(^Type4)mem.ptr_offset(storage, offset)
+		} else if id == id5 {
+			r5 = cast(^Type5)mem.ptr_offset(storage, offset)
+		} else if id == id6 {
+			r6 = cast(^Type6)mem.ptr_offset(storage, offset)
+		}
+	}
+
+	return
+}
+
+/* Gets 6 resource values by their types.
+   `world`  : Pointer to the world.
+   `$TypeN` : N-th resource type. */
 get_6_resources :: #force_inline proc(world: ^World,
 	$Type1: typeid, $Type2: typeid, $Type3: typeid, $Type4: typeid, $Type5: typeid, $Type6: typeid) ->
-	(r1: ^Type1, r2: ^Type2, r3: ^Type3, r4: ^Type4, r5: ^Type5, r6: ^Type6) {
-	r1 = get_resource(world, Type1)
-	r2 = get_resource(world, Type2)
-	r3 = get_resource(world, Type3)
-	r4 = get_resource(world, Type4)
-	r5 = get_resource(world, Type5)
-	r6 = get_resource(world, Type6)
-	return
+	(Type1, Type2, Type3, Type4, Type5, Type6) #no_bounds_check {
+	r1: Type1 = ---
+	r2: Type2 = ---
+	r3: Type3 = ---
+	r4: Type4 = ---
+	r5: Type5 = ---
+	r6: Type6 = ---
+	
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(&r1, mem.ptr_offset(storage, offset), size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(&r2, mem.ptr_offset(storage, offset), size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(&r3, mem.ptr_offset(storage, offset), size_of(Type3))
+		} else if id == id4 {
+			mem.copy_non_overlapping(&r4, mem.ptr_offset(storage, offset), size_of(Type4))
+		} else if id == id5 {
+			mem.copy_non_overlapping(&r5, mem.ptr_offset(storage, offset), size_of(Type5))
+		} else if id == id6 {
+			mem.copy_non_overlapping(&r6, mem.ptr_offset(storage, offset), size_of(Type6))
+		}
+	}
+
+	return r1, r2, r3, r4, r5, r6
 }
 
 /* Gets 7 references to 7 resource values by their types.
    `world`  : Pointer to the world.
    `$TypeN` : N-th resource type. */
-get_7_resources :: #force_inline proc(world: ^World,
+get_7_resources_mut :: #force_inline proc(world: ^World,
 	$Type1: typeid, $Type2: typeid, $Type3: typeid, $Type4: typeid, $Type5: typeid, $Type6: typeid,
 	$Type7: typeid) ->
 	(r1: ^Type1, r2: ^Type2, r3: ^Type3, r4: ^Type4, r5: ^Type5, r6: ^Type6,
-	r7: ^Type7) {
-	r1 = get_resource(world, Type1)
-	r2 = get_resource(world, Type2)
-	r3 = get_resource(world, Type3)
-	r4 = get_resource(world, Type4)
-	r5 = get_resource(world, Type5)
-	r6 = get_resource(world, Type6)
-	r7 = get_resource(world, Type7)
+	r7: ^Type7) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			r1 = cast(^Type1)mem.ptr_offset(storage, offset)
+		} else if id == id2 {
+			r2 = cast(^Type2)mem.ptr_offset(storage, offset)
+		} else if id == id3 {
+			r3 = cast(^Type3)mem.ptr_offset(storage, offset)
+		} else if id == id4 {
+			r4 = cast(^Type4)mem.ptr_offset(storage, offset)
+		} else if id == id5 {
+			r5 = cast(^Type5)mem.ptr_offset(storage, offset)
+		} else if id == id6 {
+			r6 = cast(^Type6)mem.ptr_offset(storage, offset)
+		} else if id == id7 {
+			r7 = cast(^Type7)mem.ptr_offset(storage, offset)
+		}
+	}
+
 	return
+}
+
+/* Gets 7 resource values by their types.
+   `world`  : Pointer to the world.
+   `$TypeN` : N-th resource type. */
+get_7_resources :: #force_inline proc(world: ^World,
+	$Type1: typeid, $Type2: typeid, $Type3: typeid, $Type4: typeid, $Type5: typeid, $Type6: typeid,
+	$Type7: typeid) ->
+	(Type1, Type2, Type3, Type4, Type5, Type6, Type7) #no_bounds_check {
+	r1: Type1 = ---
+	r2: Type2 = ---
+	r3: Type3 = ---
+	r4: Type4 = ---
+	r5: Type5 = ---
+	r6: Type6 = ---
+	r7: Type7 = ---
+	
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(&r1, mem.ptr_offset(storage, offset), size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(&r2, mem.ptr_offset(storage, offset), size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(&r3, mem.ptr_offset(storage, offset), size_of(Type3))
+		} else if id == id4 {
+			mem.copy_non_overlapping(&r4, mem.ptr_offset(storage, offset), size_of(Type4))
+		} else if id == id5 {
+			mem.copy_non_overlapping(&r5, mem.ptr_offset(storage, offset), size_of(Type5))
+		} else if id == id6 {
+			mem.copy_non_overlapping(&r6, mem.ptr_offset(storage, offset), size_of(Type6))
+		} else if id == id7 {
+			mem.copy_non_overlapping(&r7, mem.ptr_offset(storage, offset), size_of(Type7))
+		}
+	}
+
+	return r1, r2, r3, r4, r5, r6, r7
 }
 
 /* Gets 8 references to 8 resource values by their types.
    `world`  : Pointer to the world.
    `$TypeN` : N-th resource type. */
-get_8_resources :: #force_inline proc(world: ^World,
+get_8_resources_mut :: #force_inline proc(world: ^World,
 	$Type1: typeid, $Type2: typeid, $Type3: typeid, $Type4: typeid, $Type5: typeid, $Type6: typeid,
 	$Type7: typeid, $Type8: typeid) ->
 	(r1: ^Type1, r2: ^Type2, r3: ^Type3, r4: ^Type4, r5: ^Type5, r6: ^Type6,
-	r7: ^Type7, r8: ^Type8) {
-	r1 = get_resource(world, Type1)
-	r2 = get_resource(world, Type2)
-	r3 = get_resource(world, Type3)
-	r4 = get_resource(world, Type4)
-	r5 = get_resource(world, Type5)
-	r6 = get_resource(world, Type6)
-	r7 = get_resource(world, Type7)
-	r8 = get_resource(world, Type8)
+	r7: ^Type7, r8: ^Type8) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			r1 = cast(^Type1)mem.ptr_offset(storage, offset)
+		} else if id == id2 {
+			r2 = cast(^Type2)mem.ptr_offset(storage, offset)
+		} else if id == id3 {
+			r3 = cast(^Type3)mem.ptr_offset(storage, offset)
+		} else if id == id4 {
+			r4 = cast(^Type4)mem.ptr_offset(storage, offset)
+		} else if id == id5 {
+			r5 = cast(^Type5)mem.ptr_offset(storage, offset)
+		} else if id == id6 {
+			r6 = cast(^Type6)mem.ptr_offset(storage, offset)
+		} else if id == id7 {
+			r7 = cast(^Type7)mem.ptr_offset(storage, offset)
+		} else if id == id8 {
+			r8 = cast(^Type8)mem.ptr_offset(storage, offset)
+		}
+	}
+
 	return
+}
+
+/* Gets 8 resource values by their types.
+   `world`  : Pointer to the world.
+   `$TypeN` : N-th resource type. */
+get_8_resources :: #force_inline proc(world: ^World,
+	$Type1: typeid, $Type2: typeid, $Type3: typeid, $Type4: typeid, $Type5: typeid, $Type6: typeid,
+	$Type7: typeid, $Type8: typeid) ->
+	(Type1, Type2, Type3, Type4, Type5, Type6, Type7, Type8) #no_bounds_check {
+	r1: Type1 = ---
+	r2: Type2 = ---
+	r3: Type3 = ---
+	r4: Type4 = ---
+	r5: Type5 = ---
+	r6: Type6 = ---
+	r7: Type7 = ---
+	r8: Type8 = ---
+	
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(&r1, mem.ptr_offset(storage, offset), size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(&r2, mem.ptr_offset(storage, offset), size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(&r3, mem.ptr_offset(storage, offset), size_of(Type3))
+		} else if id == id4 {
+			mem.copy_non_overlapping(&r4, mem.ptr_offset(storage, offset), size_of(Type4))
+		} else if id == id5 {
+			mem.copy_non_overlapping(&r5, mem.ptr_offset(storage, offset), size_of(Type5))
+		} else if id == id6 {
+			mem.copy_non_overlapping(&r6, mem.ptr_offset(storage, offset), size_of(Type6))
+		} else if id == id7 {
+			mem.copy_non_overlapping(&r7, mem.ptr_offset(storage, offset), size_of(Type7))
+		} else if id == id8 {
+			mem.copy_non_overlapping(&r8, mem.ptr_offset(storage, offset), size_of(Type8))
+		}
+	}
+
+	return r1, r2, r3, r4, r5, r6, r7, r8
 }
 
 /* Gets 9 references to 9 resource values by their types.
    `world`  : Pointer to the world.
    `$TypeN` : N-th resource type. */
-get_9_resources :: #force_inline proc(world: ^World,
+get_9_resources_mut :: #force_inline proc(world: ^World,
 	$Type1: typeid, $Type2: typeid, $Type3: typeid, $Type4: typeid, $Type5: typeid, $Type6: typeid,
 	$Type7: typeid, $Type8: typeid, $Type9: typeid) ->
 	(r1: ^Type1, r2: ^Type2, r3: ^Type3, r4: ^Type4, r5: ^Type5, r6: ^Type6,
-	r7: ^Type7, r8: ^Type8, r9: ^Type9) {
-	r1 = get_resource(world, Type1)
-	r2 = get_resource(world, Type2)
-	r3 = get_resource(world, Type3)
-	r4 = get_resource(world, Type4)
-	r5 = get_resource(world, Type5)
-	r6 = get_resource(world, Type6)
-	r7 = get_resource(world, Type7)
-	r8 = get_resource(world, Type8)
-	r9 = get_resource(world, Type9)
+	r7: ^Type7, r8: ^Type8, r9: ^Type9) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+	id9: u64 = transmute(u64)typeid_of(Type9)
+
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			r1 = cast(^Type1)mem.ptr_offset(storage, offset)
+		} else if id == id2 {
+			r2 = cast(^Type2)mem.ptr_offset(storage, offset)
+		} else if id == id3 {
+			r3 = cast(^Type3)mem.ptr_offset(storage, offset)
+		} else if id == id4 {
+			r4 = cast(^Type4)mem.ptr_offset(storage, offset)
+		} else if id == id5 {
+			r5 = cast(^Type5)mem.ptr_offset(storage, offset)
+		} else if id == id6 {
+			r6 = cast(^Type6)mem.ptr_offset(storage, offset)
+		} else if id == id7 {
+			r7 = cast(^Type7)mem.ptr_offset(storage, offset)
+		} else if id == id8 {
+			r8 = cast(^Type8)mem.ptr_offset(storage, offset)
+		} else if id == id9 {
+			r9 = cast(^Type9)mem.ptr_offset(storage, offset)
+		}
+	}
+
 	return
+}
+
+/* Gets 9 resource values by their types.
+   `world`  : Pointer to the world.
+   `$TypeN` : N-th resource type. */
+get_9_resources :: #force_inline proc(world: ^World,
+	$Type1: typeid, $Type2: typeid, $Type3: typeid, $Type4: typeid, $Type5: typeid, $Type6: typeid,
+	$Type7: typeid, $Type8: typeid, $Type9: typeid) ->
+	(Type1, Type2, Type3, Type4, Type5, Type6, Type7, Type8, Type9) #no_bounds_check {
+	r1: Type1 = ---
+	r2: Type2 = ---
+	r3: Type3 = ---
+	r4: Type4 = ---
+	r5: Type5 = ---
+	r6: Type6 = ---
+	r7: Type7 = ---
+	r8: Type8 = ---
+	r9: Type9 = ---
+	
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+	id9: u64 = transmute(u64)typeid_of(Type9)
+
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(&r1, mem.ptr_offset(storage, offset), size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(&r2, mem.ptr_offset(storage, offset), size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(&r3, mem.ptr_offset(storage, offset), size_of(Type3))
+		} else if id == id4 {
+			mem.copy_non_overlapping(&r4, mem.ptr_offset(storage, offset), size_of(Type4))
+		} else if id == id5 {
+			mem.copy_non_overlapping(&r5, mem.ptr_offset(storage, offset), size_of(Type5))
+		} else if id == id6 {
+			mem.copy_non_overlapping(&r6, mem.ptr_offset(storage, offset), size_of(Type6))
+		} else if id == id7 {
+			mem.copy_non_overlapping(&r7, mem.ptr_offset(storage, offset), size_of(Type7))
+		} else if id == id8 {
+			mem.copy_non_overlapping(&r8, mem.ptr_offset(storage, offset), size_of(Type8))
+		} else if id == id9 {
+			mem.copy_non_overlapping(&r9, mem.ptr_offset(storage, offset), size_of(Type9))
+		}
+	}
+
+	return r1, r2, r3, r4, r5, r6, r7, r8, r9
 }
 
 /* Gets 10 references to 10 resource values by their types.
    `world`  : Pointer to the world.
    `$TypeN` : N-th resource type. */
-get_10_resources :: #force_inline proc(world: ^World,
+get_10_resources_mut :: #force_inline proc(world: ^World,
 	$Type1: typeid, $Type2: typeid, $Type3: typeid, $Type4: typeid, $Type5: typeid, $Type6: typeid,
 	$Type7: typeid, $Type8: typeid, $Type9: typeid, $Type10: typeid) ->
 	(r1: ^Type1, r2: ^Type2, r3: ^Type3, r4: ^Type4, r5: ^Type5, r6: ^Type6,
-	r7: ^Type7, r8: ^Type8, r9: ^Type9, r10: ^Type10) {
-	r1 = get_resource(world, Type1)
-	r2 = get_resource(world, Type2)
-	r3 = get_resource(world, Type3)
-	r4 = get_resource(world, Type4)
-	r5 = get_resource(world, Type5)
-	r6 = get_resource(world, Type6)
-	r7 = get_resource(world, Type7)
-	r8 = get_resource(world, Type8)
-	r9 = get_resource(world, Type9)
-	r10 = get_resource(world, Type10)
+	r7: ^Type7, r8: ^Type8, r9: ^Type9, r10: ^Type10) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+	id9: u64 = transmute(u64)typeid_of(Type9)
+	id10: u64 = transmute(u64)typeid_of(Type10)
+
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			r1 = cast(^Type1)mem.ptr_offset(storage, offset)
+		} else if id == id2 {
+			r2 = cast(^Type2)mem.ptr_offset(storage, offset)
+		} else if id == id3 {
+			r3 = cast(^Type3)mem.ptr_offset(storage, offset)
+		} else if id == id4 {
+			r4 = cast(^Type4)mem.ptr_offset(storage, offset)
+		} else if id == id5 {
+			r5 = cast(^Type5)mem.ptr_offset(storage, offset)
+		} else if id == id6 {
+			r6 = cast(^Type6)mem.ptr_offset(storage, offset)
+		} else if id == id7 {
+			r7 = cast(^Type7)mem.ptr_offset(storage, offset)
+		} else if id == id8 {
+			r8 = cast(^Type8)mem.ptr_offset(storage, offset)
+		} else if id == id9 {
+			r9 = cast(^Type9)mem.ptr_offset(storage, offset)
+		} else if id == id10 {
+			r10 = cast(^Type10)mem.ptr_offset(storage, offset)
+		}
+	}
+
 	return
+}
+
+/* Gets 10 resource values by their types.
+   `world`  : Pointer to the world.
+   `$TypeN` : N-th resource type. */
+get_10_resources :: #force_inline proc(world: ^World,
+	$Type1: typeid, $Type2: typeid, $Type3: typeid, $Type4: typeid, $Type5: typeid, $Type6: typeid,
+	$Type7: typeid, $Type8: typeid, $Type9: typeid, $Type10: typeid) ->
+	(Type1, Type2, Type3, Type4, Type5, Type6, Type7, Type8, Type9, Type10) #no_bounds_check {
+	r1: Type1 = ---
+	r2: Type2 = ---
+	r3: Type3 = ---
+	r4: Type4 = ---
+	r5: Type5 = ---
+	r6: Type6 = ---
+	r7: Type7 = ---
+	r8: Type8 = ---
+	r9: Type9 = ---
+	r10: Type10 = ---
+	
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+	id9: u64 = transmute(u64)typeid_of(Type9)
+	id10: u64 = transmute(u64)typeid_of(Type10)
+
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(&r1, mem.ptr_offset(storage, offset), size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(&r2, mem.ptr_offset(storage, offset), size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(&r3, mem.ptr_offset(storage, offset), size_of(Type3))
+		} else if id == id4 {
+			mem.copy_non_overlapping(&r4, mem.ptr_offset(storage, offset), size_of(Type4))
+		} else if id == id5 {
+			mem.copy_non_overlapping(&r5, mem.ptr_offset(storage, offset), size_of(Type5))
+		} else if id == id6 {
+			mem.copy_non_overlapping(&r6, mem.ptr_offset(storage, offset), size_of(Type6))
+		} else if id == id7 {
+			mem.copy_non_overlapping(&r7, mem.ptr_offset(storage, offset), size_of(Type7))
+		} else if id == id8 {
+			mem.copy_non_overlapping(&r8, mem.ptr_offset(storage, offset), size_of(Type8))
+		} else if id == id9 {
+			mem.copy_non_overlapping(&r9, mem.ptr_offset(storage, offset), size_of(Type9))
+		} else if id == id10 {
+			mem.copy_non_overlapping(&r10, mem.ptr_offset(storage, offset), size_of(Type10))
+		}
+	}
+
+	return r1, r2, r3, r4, r5, r6, r7, r8, r9, r10
 }
 
 /* Gets 11 references to 11 resource values by their types.
    `world`  : Pointer to the world.
    `$TypeN` : N-th resource type. */
-get_11_resources :: #force_inline proc(world: ^World,
+get_11_resources_mut :: #force_inline proc(world: ^World,
 	$Type1: typeid, $Type2: typeid, $Type3: typeid, $Type4: typeid, $Type5: typeid, $Type6: typeid,
 	$Type7: typeid, $Type8: typeid, $Type9: typeid, $Type10: typeid, $Type11: typeid) ->
 	(r1: ^Type1, r2: ^Type2, r3: ^Type3, r4: ^Type4, r5: ^Type5, r6: ^Type6,
-	r7: ^Type7, r8: ^Type8, r9: ^Type9, r10: ^Type10, r11: ^Type11) {
-	r1 = get_resource(world, Type1)
-	r2 = get_resource(world, Type2)
-	r3 = get_resource(world, Type3)
-	r4 = get_resource(world, Type4)
-	r5 = get_resource(world, Type5)
-	r6 = get_resource(world, Type6)
-	r7 = get_resource(world, Type7)
-	r8 = get_resource(world, Type8)
-	r9 = get_resource(world, Type9)
-	r10 = get_resource(world, Type10)
-	r11 = get_resource(world, Type11)
+	r7: ^Type7, r8: ^Type8, r9: ^Type9, r10: ^Type10, r11: ^Type11) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+	id9: u64 = transmute(u64)typeid_of(Type9)
+	id10: u64 = transmute(u64)typeid_of(Type10)
+	id11: u64 = transmute(u64)typeid_of(Type11)
+
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			r1 = cast(^Type1)mem.ptr_offset(storage, offset)
+		} else if id == id2 {
+			r2 = cast(^Type2)mem.ptr_offset(storage, offset)
+		} else if id == id3 {
+			r3 = cast(^Type3)mem.ptr_offset(storage, offset)
+		} else if id == id4 {
+			r4 = cast(^Type4)mem.ptr_offset(storage, offset)
+		} else if id == id5 {
+			r5 = cast(^Type5)mem.ptr_offset(storage, offset)
+		} else if id == id6 {
+			r6 = cast(^Type6)mem.ptr_offset(storage, offset)
+		} else if id == id7 {
+			r7 = cast(^Type7)mem.ptr_offset(storage, offset)
+		} else if id == id8 {
+			r8 = cast(^Type8)mem.ptr_offset(storage, offset)
+		} else if id == id9 {
+			r9 = cast(^Type9)mem.ptr_offset(storage, offset)
+		} else if id == id10 {
+			r10 = cast(^Type10)mem.ptr_offset(storage, offset)
+		} else if id == id11 {
+			r11 = cast(^Type11)mem.ptr_offset(storage, offset)
+		}
+	}
+
 	return
+}
+
+/* Gets 11 resource values by their types.
+   `world`  : Pointer to the world.
+   `$TypeN` : N-th resource type. */
+get_11_resources :: #force_inline proc(world: ^World,
+	$Type1: typeid, $Type2: typeid, $Type3: typeid, $Type4: typeid, $Type5: typeid, $Type6: typeid,
+	$Type7: typeid, $Type8: typeid, $Type9: typeid, $Type10: typeid, $Type11: typeid) ->
+	(Type1, Type2, Type3, Type4, Type5, Type6, Type7, Type8, Type9, Type10, Type11) #no_bounds_check {
+	r1: Type1 = ---
+	r2: Type2 = ---
+	r3: Type3 = ---
+	r4: Type4 = ---
+	r5: Type5 = ---
+	r6: Type6 = ---
+	r7: Type7 = ---
+	r8: Type8 = ---
+	r9: Type9 = ---
+	r10: Type10 = ---
+	r11: Type11 = ---
+	
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+	id9: u64 = transmute(u64)typeid_of(Type9)
+	id10: u64 = transmute(u64)typeid_of(Type10)
+	id11: u64 = transmute(u64)typeid_of(Type11)
+
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(&r1, mem.ptr_offset(storage, offset), size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(&r2, mem.ptr_offset(storage, offset), size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(&r3, mem.ptr_offset(storage, offset), size_of(Type3))
+		} else if id == id4 {
+			mem.copy_non_overlapping(&r4, mem.ptr_offset(storage, offset), size_of(Type4))
+		} else if id == id5 {
+			mem.copy_non_overlapping(&r5, mem.ptr_offset(storage, offset), size_of(Type5))
+		} else if id == id6 {
+			mem.copy_non_overlapping(&r6, mem.ptr_offset(storage, offset), size_of(Type6))
+		} else if id == id7 {
+			mem.copy_non_overlapping(&r7, mem.ptr_offset(storage, offset), size_of(Type7))
+		} else if id == id8 {
+			mem.copy_non_overlapping(&r8, mem.ptr_offset(storage, offset), size_of(Type8))
+		} else if id == id9 {
+			mem.copy_non_overlapping(&r9, mem.ptr_offset(storage, offset), size_of(Type9))
+		} else if id == id10 {
+			mem.copy_non_overlapping(&r10, mem.ptr_offset(storage, offset), size_of(Type10))
+		} else if id == id11 {
+			mem.copy_non_overlapping(&r11, mem.ptr_offset(storage, offset), size_of(Type11))
+		}
+	}
+
+	return r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11
 }
 
 /* Gets 12 references to 12 resource values by their types.
    `world`  : Pointer to the world.
    `$TypeN` : N-th resource type. */
-get_12_resources :: #force_inline proc(world: ^World,
+get_12_resources_mut :: #force_inline proc(world: ^World,
 	$Type1: typeid, $Type2: typeid, $Type3: typeid, $Type4: typeid, $Type5: typeid, $Type6: typeid,
 	$Type7: typeid, $Type8: typeid, $Type9: typeid, $Type10: typeid, $Type11: typeid, $Type12: typeid) ->
 	(r1: ^Type1, r2: ^Type2, r3: ^Type3, r4: ^Type4, r5: ^Type5, r6: ^Type6,
-	r7: ^Type7, r8: ^Type8, r9: ^Type9, r10: ^Type10, r11: ^Type11, r12: ^Type12) {
-	r1 = get_resource(world, Type1)
-	r2 = get_resource(world, Type2)
-	r3 = get_resource(world, Type3)
-	r4 = get_resource(world, Type4)
-	r5 = get_resource(world, Type5)
-	r6 = get_resource(world, Type6)
-	r7 = get_resource(world, Type7)
-	r8 = get_resource(world, Type8)
-	r9 = get_resource(world, Type9)
-	r10 = get_resource(world, Type10)
-	r11 = get_resource(world, Type11)
-	r12 = get_resource(world, Type12)
+	r7: ^Type7, r8: ^Type8, r9: ^Type9, r10: ^Type10, r11: ^Type11, r12: ^Type12) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+	id9: u64 = transmute(u64)typeid_of(Type9)
+	id10: u64 = transmute(u64)typeid_of(Type10)
+	id11: u64 = transmute(u64)typeid_of(Type11)
+	id12: u64 = transmute(u64)typeid_of(Type12)
+
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			r1 = cast(^Type1)mem.ptr_offset(storage, offset)
+		} else if id == id2 {
+			r2 = cast(^Type2)mem.ptr_offset(storage, offset)
+		} else if id == id3 {
+			r3 = cast(^Type3)mem.ptr_offset(storage, offset)
+		} else if id == id4 {
+			r4 = cast(^Type4)mem.ptr_offset(storage, offset)
+		} else if id == id5 {
+			r5 = cast(^Type5)mem.ptr_offset(storage, offset)
+		} else if id == id6 {
+			r6 = cast(^Type6)mem.ptr_offset(storage, offset)
+		} else if id == id7 {
+			r7 = cast(^Type7)mem.ptr_offset(storage, offset)
+		} else if id == id8 {
+			r8 = cast(^Type8)mem.ptr_offset(storage, offset)
+		} else if id == id9 {
+			r9 = cast(^Type9)mem.ptr_offset(storage, offset)
+		} else if id == id10 {
+			r10 = cast(^Type10)mem.ptr_offset(storage, offset)
+		} else if id == id11 {
+			r11 = cast(^Type11)mem.ptr_offset(storage, offset)
+		} else if id == id12 {
+			r12 = cast(^Type12)mem.ptr_offset(storage, offset)
+		}
+	}
+
 	return
 }
 
+/* Gets 12 resource values by their types.
+   `world`  : Pointer to the world.
+   `$TypeN` : N-th resource type. */
+get_12_resources :: #force_inline proc(world: ^World,
+	$Type1: typeid, $Type2: typeid, $Type3: typeid, $Type4: typeid, $Type5: typeid, $Type6: typeid,
+	$Type7: typeid, $Type8: typeid, $Type9: typeid, $Type10: typeid, $Type11: typeid, $Type12: typeid) ->
+	(Type1, Type2, Type3, Type4, Type5, Type6, Type7, Type8, Type9, Type10, Type11, Type12) #no_bounds_check {
+	r1: Type1 = ---
+	r2: Type2 = ---
+	r3: Type3 = ---
+	r4: Type4 = ---
+	r5: Type5 = ---
+	r6: Type6 = ---
+	r7: Type7 = ---
+	r8: Type8 = ---
+	r9: Type9 = ---
+	r10: Type10 = ---
+	r11: Type11 = ---
+	r12: Type12 = ---
+	
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+	id9: u64 = transmute(u64)typeid_of(Type9)
+	id10: u64 = transmute(u64)typeid_of(Type10)
+	id11: u64 = transmute(u64)typeid_of(Type11)
+	id12: u64 = transmute(u64)typeid_of(Type12)
+
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(&r1, mem.ptr_offset(storage, offset), size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(&r2, mem.ptr_offset(storage, offset), size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(&r3, mem.ptr_offset(storage, offset), size_of(Type3))
+		} else if id == id4 {
+			mem.copy_non_overlapping(&r4, mem.ptr_offset(storage, offset), size_of(Type4))
+		} else if id == id5 {
+			mem.copy_non_overlapping(&r5, mem.ptr_offset(storage, offset), size_of(Type5))
+		} else if id == id6 {
+			mem.copy_non_overlapping(&r6, mem.ptr_offset(storage, offset), size_of(Type6))
+		} else if id == id7 {
+			mem.copy_non_overlapping(&r7, mem.ptr_offset(storage, offset), size_of(Type7))
+		} else if id == id8 {
+			mem.copy_non_overlapping(&r8, mem.ptr_offset(storage, offset), size_of(Type8))
+		} else if id == id9 {
+			mem.copy_non_overlapping(&r9, mem.ptr_offset(storage, offset), size_of(Type9))
+		} else if id == id10 {
+			mem.copy_non_overlapping(&r10, mem.ptr_offset(storage, offset), size_of(Type10))
+		} else if id == id11 {
+			mem.copy_non_overlapping(&r11, mem.ptr_offset(storage, offset), size_of(Type11))
+		} else if id == id12 {
+			mem.copy_non_overlapping(&r12, mem.ptr_offset(storage, offset), size_of(Type12))
+		}
+	}
+
+	return r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12
+}
+
 /* Gets 13 references to 13 resource values by their types.
+   `world`  : Pointer to the world.
+   `$TypeN` : N-th resource type. */
+get_13_resources_mut :: #force_inline proc(world: ^World,
+	$Type1: typeid, $Type2: typeid, $Type3: typeid, $Type4: typeid, $Type5: typeid, $Type6: typeid,
+	$Type7: typeid, $Type8: typeid, $Type9: typeid, $Type10: typeid, $Type11: typeid, $Type12: typeid,
+	$Type13: typeid) ->
+	(r1: ^Type1, r2: ^Type2, r3: ^Type3, r4: ^Type4, r5: ^Type5, r6: ^Type6,
+	r7: ^Type7, r8: ^Type8, r9: ^Type9, r10: ^Type10, r11: ^Type11, r12: ^Type12,
+	r13: ^Type13) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+	id9: u64 = transmute(u64)typeid_of(Type9)
+	id10: u64 = transmute(u64)typeid_of(Type10)
+	id11: u64 = transmute(u64)typeid_of(Type11)
+	id12: u64 = transmute(u64)typeid_of(Type12)
+	id13: u64 = transmute(u64)typeid_of(Type13)
+
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			r1 = cast(^Type1)mem.ptr_offset(storage, offset)
+		} else if id == id2 {
+			r2 = cast(^Type2)mem.ptr_offset(storage, offset)
+		} else if id == id3 {
+			r3 = cast(^Type3)mem.ptr_offset(storage, offset)
+		} else if id == id4 {
+			r4 = cast(^Type4)mem.ptr_offset(storage, offset)
+		} else if id == id5 {
+			r5 = cast(^Type5)mem.ptr_offset(storage, offset)
+		} else if id == id6 {
+			r6 = cast(^Type6)mem.ptr_offset(storage, offset)
+		} else if id == id7 {
+			r7 = cast(^Type7)mem.ptr_offset(storage, offset)
+		} else if id == id8 {
+			r8 = cast(^Type8)mem.ptr_offset(storage, offset)
+		} else if id == id9 {
+			r9 = cast(^Type9)mem.ptr_offset(storage, offset)
+		} else if id == id10 {
+			r10 = cast(^Type10)mem.ptr_offset(storage, offset)
+		} else if id == id11 {
+			r11 = cast(^Type11)mem.ptr_offset(storage, offset)
+		} else if id == id12 {
+			r12 = cast(^Type12)mem.ptr_offset(storage, offset)
+		} else if id == id13 {
+			r13 = cast(^Type13)mem.ptr_offset(storage, offset)
+		}
+	}
+
+	return
+}
+
+/* Gets 13 resource values by their types.
    `world`  : Pointer to the world.
    `$TypeN` : N-th resource type. */
 get_13_resources :: #force_inline proc(world: ^World,
 	$Type1: typeid, $Type2: typeid, $Type3: typeid, $Type4: typeid, $Type5: typeid, $Type6: typeid,
 	$Type7: typeid, $Type8: typeid, $Type9: typeid, $Type10: typeid, $Type11: typeid, $Type12: typeid,
 	$Type13: typeid) ->
-	(r1: ^Type1, r2: ^Type2, r3: ^Type3, r4: ^Type4, r5: ^Type5, r6: ^Type6,
-	r7: ^Type7, r8: ^Type8, r9: ^Type9, r10: ^Type10, r11: ^Type11, r12: ^Type12,
-	r13: ^Type13) {
-	r1 = get_resource(world, Type1)
-	r2 = get_resource(world, Type2)
-	r3 = get_resource(world, Type3)
-	r4 = get_resource(world, Type4)
-	r5 = get_resource(world, Type5)
-	r6 = get_resource(world, Type6)
-	r7 = get_resource(world, Type7)
-	r8 = get_resource(world, Type8)
-	r9 = get_resource(world, Type9)
-	r10 = get_resource(world, Type10)
-	r11 = get_resource(world, Type11)
-	r12 = get_resource(world, Type12)
-	r13 = get_resource(world, Type13)
-	return
+	(Type1, Type2, Type3, Type4, Type5, Type6, Type7, Type8, Type9, Type10, Type11, Type12,
+	Type13) #no_bounds_check {
+	r1: Type1 = ---
+	r2: Type2 = ---
+	r3: Type3 = ---
+	r4: Type4 = ---
+	r5: Type5 = ---
+	r6: Type6 = ---
+	r7: Type7 = ---
+	r8: Type8 = ---
+	r9: Type9 = ---
+	r10: Type10 = ---
+	r11: Type11 = ---
+	r12: Type12 = ---
+	r13: Type13 = ---
+	
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+	id9: u64 = transmute(u64)typeid_of(Type9)
+	id10: u64 = transmute(u64)typeid_of(Type10)
+	id11: u64 = transmute(u64)typeid_of(Type11)
+	id12: u64 = transmute(u64)typeid_of(Type12)
+	id13: u64 = transmute(u64)typeid_of(Type13)
+
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(&r1, mem.ptr_offset(storage, offset), size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(&r2, mem.ptr_offset(storage, offset), size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(&r3, mem.ptr_offset(storage, offset), size_of(Type3))
+		} else if id == id4 {
+			mem.copy_non_overlapping(&r4, mem.ptr_offset(storage, offset), size_of(Type4))
+		} else if id == id5 {
+			mem.copy_non_overlapping(&r5, mem.ptr_offset(storage, offset), size_of(Type5))
+		} else if id == id6 {
+			mem.copy_non_overlapping(&r6, mem.ptr_offset(storage, offset), size_of(Type6))
+		} else if id == id7 {
+			mem.copy_non_overlapping(&r7, mem.ptr_offset(storage, offset), size_of(Type7))
+		} else if id == id8 {
+			mem.copy_non_overlapping(&r8, mem.ptr_offset(storage, offset), size_of(Type8))
+		} else if id == id9 {
+			mem.copy_non_overlapping(&r9, mem.ptr_offset(storage, offset), size_of(Type9))
+		} else if id == id10 {
+			mem.copy_non_overlapping(&r10, mem.ptr_offset(storage, offset), size_of(Type10))
+		} else if id == id11 {
+			mem.copy_non_overlapping(&r11, mem.ptr_offset(storage, offset), size_of(Type11))
+		} else if id == id12 {
+			mem.copy_non_overlapping(&r12, mem.ptr_offset(storage, offset), size_of(Type12))
+		} else if id == id13 {
+			mem.copy_non_overlapping(&r13, mem.ptr_offset(storage, offset), size_of(Type13))
+		}
+	}
+
+	return r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13
 }

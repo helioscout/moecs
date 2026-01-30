@@ -1,8 +1,7 @@
 package moecs
 
 /* Size (items count) of the one components chunk or entities collection for each block.
-   Bigger chunk size increase productivity of entities adding, less chunk size speed up
-   reading component while world runing. */
+   Bigger chunk size increase productivity of entities adding, less chunk size can save a bit of memory. */
 
 /* Dynamic lifetime chunk size. */
 DYNAMIC_CHUNK_SIZE : int : 500
@@ -13,6 +12,8 @@ STATIC_CHUNK_SIZE  : int : 300
 MAX_COMPONENTS_COUNT : int : 128
 /* Maximum tags count available for adding to entity. */
 MAX_TAGS_COUNT       : int : 128
+/* Maximum resources count available for adding to the world. */
+MAX_RESOURCES_COUNT  : int : 128
 
 /* Count of bits in one marker word (element of marker array). */
 @(private) MARKER_BITS_COUNT : uint : size_of(uint) * 8
@@ -20,9 +21,6 @@ MAX_TAGS_COUNT       : int : 128
 @(private) COMPONENTS_MARKER_SIZE : uint : (uint(MAX_COMPONENTS_COUNT) + MARKER_BITS_COUNT - 1) / MARKER_BITS_COUNT
 /* Size of tags marker (array of bitset). */
 @(private) TAGS_MARKER_SIZE : uint : (uint(MAX_TAGS_COUNT) + MARKER_BITS_COUNT - 1) / MARKER_BITS_COUNT
-
-/* Registered resources collection (with values) for each world. */
-@(private) Resources :: map[typeid]Resource
 
 /* Entities/blocks lifetime. */
 Lifetime :: enum u8 {
@@ -187,6 +185,7 @@ get :: proc {
 
 get_mut :: proc {
 	get_component_mut,
+	get_resource_mut,
 	get_2_components_mut,
 	get_3_components_mut,
 	get_4_components_mut,
@@ -198,7 +197,19 @@ get_mut :: proc {
 	get_10_components_mut,
 	get_11_components_mut,
 	get_12_components_mut,
-	get_13_components_mut
+	get_13_components_mut,
+	get_2_resources_mut,
+	get_3_resources_mut,
+	get_4_resources_mut,
+	get_5_resources_mut,
+	get_6_resources_mut,
+	get_7_resources_mut,
+	get_8_resources_mut,
+	get_9_resources_mut,
+	get_10_resources_mut,
+	get_11_resources_mut,
+	get_12_resources_mut,
+	get_13_resources_mut
 }
 
 remove :: proc {

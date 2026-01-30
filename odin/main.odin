@@ -33,6 +33,20 @@ Resource2 :: struct {
 	count : int
 }
 
+Resource3 :: struct {
+	ptr : rawptr,
+	data : [3]f32
+}
+
+Resource4 :: struct {
+	pos : Position,
+	hp : Health
+}
+
+Resource5 :: struct {
+	arr : [10]int
+}
+
 VecType :: distinct [2]f32
 
 Tag1 :: distinct int
@@ -78,16 +92,24 @@ system1 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 
 system2 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 	for entity in entities {
-		pos, center, vec, health, vel, rot := ecs.get(entity, Position, Center, VecType, Health, Velocity, Rotation)
+		// res1 := ecs.get(world, Resource1)
+		// res2 := ecs.get(world, Resource2)
+		// res3 := ecs.get_resource(world, Resource3)
+		// res4 := ecs.get_resource(world, Resource4)
+		// res5 := ecs.get(world, Resource5)
+		res1, res2, res3, res4, res5 := ecs.get(world, Resource1, Resource2, Resource3, Resource4, Resource5)
+		// pos, center, vec, health, vel, rot := ecs.get(entity, Position, Center, VecType, Health, Velocity, Rotation)
 		// pos, center, vec, health, vel := ecs.get(entity, Position, Center, VecType, Health, Velocity)
 		// pos, center, vec, health := ecs.get(entity, Position, Center, VecType, Health)
 		// pos, center, vec := ecs.get(entity, Position, Center, VecType)
 		// pos, center := ecs.get(entity, Position, Center)
 		// pos := ecs.get(entity, Position)
 
-		pos.x += 1
-		center.cx += 1
+		// pos.x += 1
+		// center.cx += 1
 		// fmt.println(pos, center)
+		res3.data[0] = 3
+		res4.pos.x += 1
 
 		// ecs.set(entity,
 		// 	Position, &Position { x = 10, y = 10 },
@@ -100,16 +122,24 @@ system2 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 
 system3 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 	for entity in entities {
-		pos, center, vec, health, vel, rot := ecs.get(entity, Position, Center, VecType, Health, Velocity, Rotation)
+		// res1 := ecs.get(world, Resource1)
+		// res2 := ecs.get(world, Resource2)
+		// res3 := ecs.get_resource(world, Resource3)
+		// res4 := ecs.get_resource(world, Resource4)
+		// res5 := ecs.get(world, Resource5)
+		res1, res2, res3, res4, res5 := ecs.get(world, Resource1, Resource2, Resource3, Resource4, Resource5)
+		// pos, center, vec, health, vel, rot := ecs.get(entity, Position, Center, VecType, Health, Velocity, Rotation)
 		// pos, center, vec, health, vel := ecs.get(entity, Position, Center, VecType, Health, Velocity)
 		// pos, center, vec, health := ecs.get(entity, Position, Center, VecType, Health)
 		// pos, center, vec := ecs.get(entity, Position, Center, VecType)
 		// pos, center := ecs.get(entity, Position, Center)
 		// pos := ecs.get(entity, Position)
 
-		pos.x += 1
-		center.cx += 1
+		// pos.x += 1
+		// center.cx += 1
 		// fmt.println(pos, center)
+		res3.data[0] = 3
+		res4.pos.x += 1
 
 		// ecs.set(entity,
 		// 	Position, &Position { x = 10, y = 10 },
@@ -136,6 +166,9 @@ main :: proc() {
 	ecs.register(world, .COMPONENT, Velocity)
 	ecs.register(world, .RESOURCE, Resource1)
 	ecs.register(world, .RESOURCE, Resource2)
+	ecs.register(world, .RESOURCE, Resource3)
+	ecs.register(world, .RESOURCE, Resource4)
+	ecs.register(world, .RESOURCE, Resource5)
 	ecs.register(world, .TAG, Tag1)
 	ecs.register(world, .TAG, Tag2)
 
@@ -250,8 +283,8 @@ main :: proc() {
 	// fmt.printfln("-- static blocks count: %v", len(world.statics))
 
 	ecs.set(world,
-		Resource1, Resource1 { enabled = true },
-		Resource2, Resource2 { count = 10 })
+		Resource1, &Resource1 { enabled = true },
+		Resource2, &Resource2 { count = 10 })
 	
 	// if r, ok := ecs.get(world, Resource1); ok {
 	// 	fmt.println(r)

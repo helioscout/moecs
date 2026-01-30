@@ -1,5 +1,6 @@
 package moecs
 
+import "core:mem"
 import "core:slice"
 import str "core:strings"
 import sa "core:container/small_array"
@@ -12,8 +13,7 @@ World :: struct {
 	components : Components,
 	/* Registered tag types. */
 	tags : Tags,
-	/* Registered resource types with its instances (values).
-	   Collection of all world resources. */
+	/* Registered resource types. */
 	resources : Resources,
 	/* Mounted systems. */
 	systems : [dynamic]^System,
@@ -51,7 +51,8 @@ register :: proc(world: ^World, element: Element, $Type: typeid) {
 		case .TAG:
 			tags_add(&world.tags, Type, { type = Type, idx = world.tags.count })
 		case .RESOURCE:
-			world.resources[Type] = { type = Type, value = new(Type) }
+			resources_add(&world.resources, Type, { type = Type, size = size_of(Type),
+				idx = world.resources.count })
 	}
 }
 
@@ -114,6 +115,14 @@ run :: proc(world: ^World) {
 	if world.running do return
 
 	components_adjust(&world.components)
+
+	if (world.resources.count > 0) {
+		resources_adjust(&world.resources)
+		
+		ptr, err := mem.alloc(world.resources.size)
+		if err != .None do panic(fmt.tprintf("Storage memory allocation error: %v", err))
+		world.resources.storage = ptr
+	}
 
 	world.running = true
 }
@@ -178,25 +187,39 @@ new_block :: proc(world: ^World, lifetime: Lifetime) -> ^Block {
    `world`   : Pointer to the world.
    `$Type`   : Resource type.
    `returns` : Pointer to the resource and operation success. */
-get_resource :: proc(world: ^World, $Type: typeid) -> (^Type, bool) #optional_ok {
-	if resource, ok := world.resources[Type]; ok {
-		return cast(^Type)resource.value, true
+get_resource_mut :: #force_inline proc(world: ^World, $Type: typeid) -> (^Type, bool) #no_bounds_check #optional_ok {
+	if r, ok := resources_get(&world.resources, Type); ok {
+		ptr := mem.ptr_offset(cast(^u8)world.resources.storage, r.offset)
+		return cast(^Type)ptr, true
 	}
 
 	return nil, false
 }
 
+/* Gets resource value by its type.
+   `world`   : Pointer to the world.
+   `$Type`   : Resource type.
+   `returns` : Resource value and operation success. */
+get_resource :: #force_inline proc(world: ^World, $Type: typeid) -> (Type, bool) #no_bounds_check #optional_ok {
+	resource: Type = ---
+
+	if r, ok := resources_get(&world.resources, Type); ok {
+		ptr := mem.ptr_offset(cast(^u8)world.resources.storage, r.offset)
+		mem.copy_non_overlapping(&resource, ptr, size_of(Type))
+	}
+
+	return resource, false
+}
+
 /* Sets resource value by its type.
    `world`    : Pointer to the world.
    `$Type`    : Resource type.
-   `resource` : Resource value (will be copied into storage).
-   `returns`  : True if resource type was found, otherwise - false. */
-set_resource :: proc(world: ^World, $Type: typeid, resource: Type) -> bool {
-	if Type in world.resources {
-		(cast(^Type)world.resources[Type].value)^ = resource
-		return true
-	} else {
-		return false
+   `resource` : Reference to resource value (will be copied into storage). */
+set_resource :: proc(world: ^World, $Type: typeid, resource: ^Type) #no_bounds_check {
+	if r, ok := resources_get(&world.resources, Type); ok {
+		ptr := mem.ptr_offset(cast(^u8)world.resources.storage, r.offset)
+		cell: ^Type = cast(^Type)ptr
+		cell^ = resource^
 	}
 }
 
