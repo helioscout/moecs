@@ -78,6 +78,8 @@ get_component :: #force_inline proc(entity: ^Entity, $Type: typeid) -> (Type, bo
 			ptr := mem.ptr_offset(cast(^u8)entity.block.chunks,
 				entity.block.world.components.size * entity.chunk_idx + c.offset)
 			mem.copy_non_overlapping(&component, ptr, size_of(Type))
+
+			return component, true
 		}
 	}
 
