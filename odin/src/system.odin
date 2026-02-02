@@ -14,6 +14,8 @@ System :: struct {
 	components : [COMPONENTS_MARKER_SIZE]uint,
 	/* Tags marker, each set bit specifies tag in the system match query. */
 	tags : [TAGS_MARKER_SIZE]uint,
+	/* System running phase, order in the pipeline. By default equals UPDATE. */
+	phase : Phase,
 	/* Entities lifetime flag to optimize queries and do not process lifetimes
 	   that you want to avoid for current system. Not used in ARCHETYPE approach. */
 	lifetime : bit_set[Lifetime; u8],
@@ -32,6 +34,8 @@ SystemDefinition :: struct {
 	components : []typeid,
 	/* Tags list that should match while the system query. */
 	tags : []typeid,
+	/* System running phase, order in the pipeline. By default equals UPDATE. */
+	phase : Phase,
 	/* Entities lifetime flag to optimize queries and do not process lifetimes
 	   that you want to avoid for current system. */
 	lifetime : bit_set[Lifetime; u8],
@@ -56,4 +60,12 @@ enable :: #force_inline proc(system: ^System) {
    `system` : Pointer to the system. */
 disable :: #force_inline proc(system: ^System) {
 	system.state -= { .ENABLED }
+}
+
+/* Checks if the system is a task.
+   `system`  : Pointer to the system.
+   `returns` : True if system is a task, otherwise - false. */
+@(private="package")
+is_task :: #force_inline proc(system: ^System) -> bool {
+	return .IS_TASK in system.state
 }

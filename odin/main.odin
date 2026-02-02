@@ -68,6 +68,10 @@ marker_print :: proc(marker: [MARKER_SIZE]uint) {
 	fmt.println("--------------")
 }
 
+startup :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
+	fmt.println("-- startup system...")
+}
+
 system1 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 	despawned := false
 	count := 0
@@ -97,7 +101,7 @@ system2 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 		// res3 := ecs.get_resource(world, Resource3)
 		// res4 := ecs.get_resource(world, Resource4)
 		// res5 := ecs.get(world, Resource5)
-		res1, res2, res3, res4, res5 := ecs.get(world, Resource1, Resource2, Resource3, Resource4, Resource5)
+		// res1, res2, res3, res4, res5 := ecs.get(world, Resource1, Resource2, Resource3, Resource4, Resource5)
 		// pos, center, vec, health, vel, rot := ecs.get(entity, Position, Center, VecType, Health, Velocity, Rotation)
 		// pos, center, vec, health, vel := ecs.get(entity, Position, Center, VecType, Health, Velocity)
 		// pos, center, vec, health := ecs.get(entity, Position, Center, VecType, Health)
@@ -107,16 +111,17 @@ system2 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 
 		// pos.x += 1
 		// center.cx += 1
-		// fmt.println(pos, center)
-		res3.data[0] = 3
-		res4.pos.x += 1
+		// fmt.println("s2: ", pos, center)
+		// res3.data[0] = 3
+		// res4.pos.x += 1
 
-		// ecs.set(entity,
-		// 	Position, &Position { x = 10, y = 10 },
-		// 	Center, &Center { cx = 20, cy = 20 },
-		// 	Health, &Health { hp = 30 },
-		// 	Rotation, &Rotation { angle = 90 },
-		// 	Velocity, &Velocity { 50 })
+		// ecs.set(entity, Position, &Position { x = 10, y = 20 })
+		ecs.set(entity,
+			Position, &Position { x = 10, y = 10 },
+			Center, &Center { cx = 20, cy = 20 },
+			Health, &Health { hp = 30 },
+			Rotation, &Rotation { angle = 90 },
+			Velocity, &Velocity { 50 })
 	}
 }
 
@@ -127,7 +132,7 @@ system3 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 		// res3 := ecs.get_resource(world, Resource3)
 		// res4 := ecs.get_resource(world, Resource4)
 		// res5 := ecs.get(world, Resource5)
-		res1, res2, res3, res4, res5 := ecs.get(world, Resource1, Resource2, Resource3, Resource4, Resource5)
+		// res1, res2, res3, res4, res5 := ecs.get(world, Resource1, Resource2, Resource3, Resource4, Resource5)
 		// pos, center, vec, health, vel, rot := ecs.get(entity, Position, Center, VecType, Health, Velocity, Rotation)
 		// pos, center, vec, health, vel := ecs.get(entity, Position, Center, VecType, Health, Velocity)
 		// pos, center, vec, health := ecs.get(entity, Position, Center, VecType, Health)
@@ -137,16 +142,17 @@ system3 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 
 		// pos.x += 1
 		// center.cx += 1
-		// fmt.println(pos, center)
-		res3.data[0] = 3
-		res4.pos.x += 1
+		// fmt.println("s3: ", pos, center)
+		// res3.data[0] = 3
+		// res4.pos.x += 1
 
-		// ecs.set(entity,
-		// 	Position, &Position { x = 10, y = 10 },
-		// 	Center, &Center { cx = 20, cy = 20 },
-		// 	Health, &Health { hp = 30 },
-		// 	Rotation, &Rotation { angle = 90 },
-		// 	Velocity, &Velocity { 50 })
+		// ecs.set(entity, Position, &Position { x = 10, y = 20 })
+		ecs.set(entity,
+			Position, &Position { x = 10, y = 10 },
+			Center, &Center { cx = 20, cy = 20 },
+			Health, &Health { hp = 30 },
+			Rotation, &Rotation { angle = 90 },
+			Velocity, &Velocity { 50 })
 	}
 }
 
@@ -172,6 +178,7 @@ main :: proc() {
 	ecs.register(world, .TAG, Tag1)
 	ecs.register(world, .TAG, Tag2)
 
+	ecs.mount(world, { callback = startup, phase = .START })
 	ecs.mount(world, { tags = { Tag1 }, callback = system1 })
 	ecs.mount(world, { tags = { Tag2 }, callback = system1 })
 	ecs.mount(world, { components = { Position, Center }, callback = system3 })

@@ -57,6 +57,8 @@ ElementState :: enum {
 	HAS_TAGS,
 	/* System has components in the match query. */
 	HAS_COMPONENTS,
+	/* Indicates that a system is task, has no components or tags in match query. */
+	IS_TASK,
 	/* Entity should be re-archetyped at deffered (perform) stage. */
 	ARCHETYPING,
 	/* Entity should be despawned at deffered (perform) stage. */
@@ -72,6 +74,29 @@ Approach :: enum {
 	   that represent entity's components/tags configuration. At each world progress step
 	   all archetypes will be iterated witch applying match condition of each system. */
 	ARCHETYPE
+}
+
+/* System running phase, determine when system should run diring pipeline. */
+Phase :: enum u8 {
+	/* System will run once at the beggining of the first progress step. */
+	START       = 1,
+	/* System will run before update phase. */
+	PRE_UPDATE  = 2,
+	/* Main phase of each progress step. */
+	UPDATE      = 0,
+	/* System will run after update phase. */
+	POST_UPDATE = 3
+}
+
+@(private) Schedule :: struct {
+	/* Systems that are being runned at the start phase. */
+	start		: [dynamic]^System,
+	/* Systems that are being runned at the pre-update phase. */
+	pre_update	: [dynamic]^System,
+	/* Systems that are being runned at the update phase. */
+	update		: [dynamic]^System,
+	/* Systems that are being runned at the post-update phase. */
+	post_update : [dynamic]^System
 }
 
 /* Deffered actions for the world. */

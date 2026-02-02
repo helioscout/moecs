@@ -1,5 +1,6 @@
 package moecs
 
+import "base:sanitizer"
 import "core:mem"
 import "core:slice"
 import str "core:strings"
@@ -15,8 +16,10 @@ World :: struct {
 	tags : Tags,
 	/* Registered resource types. */
 	resources : Resources,
-	/* Mounted systems. */
+	/* All mounted systems. */
 	systems : [dynamic]^System,
+	/* Systems splitted by phase for running in the pipeline. */
+	schedule : Schedule,
 	/* Archetypes collection of the world. */
 	archetypes : [dynamic]^Archetype,
 	/* Blocks for entities with dynamic lifetime. */
@@ -25,6 +28,8 @@ World :: struct {
 	statics : [dynamic]^Block,
 	/* Indicates that the world is running. */
 	running : bool,
+	/* Indicates that START phase has already executed. */
+	started : bool,
 	/* Indicates that the world is in performing stage (runs deffered actions). */
 	performing : bool,
 	/* Deffered actions for the world. */
@@ -61,35 +66,46 @@ register :: proc(world: ^World, element: Element, $Type: typeid) {
    `definition` : System definition. */
 mount :: proc(world: ^World, definition: SystemDefinition) {
 	if len(definition.name) > 0 && has_system(world, definition.name) do panic("System with such name has already been mounted.")
-	if len(definition.components) == 0 && len(definition.tags) == 0 do panic("Components or tags must be specified.")
 	if definition.callback == nil do panic("Callback must be provided.")
 	if world.running do panic("You can't change already running world.")
 
 	system : ^System = new(System)
-
 	system^ = { name = definition.name, state = { .ENABLED }, callback = definition.callback,
-				lifetime = card(definition.lifetime) == 0 ? { .DYNAMIC, .STATIC } : definition.lifetime }
+				lifetime = card(definition.lifetime) == 0 ? { .DYNAMIC, .STATIC } : definition.lifetime,
+				phase = .UPDATE }
 
-	if len(definition.components) > 0 {
-		for type in definition.components {
-			if idx, ok := component_index(&world.components, type); ok {
-				marker_set(COMPONENTS_MARKER_SIZE, &system.components, idx)
+	if len(definition.components) == 0 && len(definition.tags) == 0 {
+		system.state += { .IS_TASK }
+	} else {
+		if len(definition.components) > 0 {
+			for type in definition.components {
+				if idx, ok := component_index(&world.components, type); ok {
+					marker_set(COMPONENTS_MARKER_SIZE, &system.components, idx)
+				}
 			}
+
+			system.state += { .HAS_COMPONENTS }
 		}
 
-		system.state += { .HAS_COMPONENTS }
-	}
-
-	if len(definition.tags) > 0 {
-		for type in definition.tags {
-			if idx, ok := tag_index(&world.tags, type); ok {
-				marker_set(TAGS_MARKER_SIZE, &system.tags, idx)
+		if len(definition.tags) > 0 {
+			for type in definition.tags {
+				if idx, ok := tag_index(&world.tags, type); ok {
+					marker_set(TAGS_MARKER_SIZE, &system.tags, idx)
+				}
 			}
+
+			system.state += { .HAS_TAGS }
 		}
 
-		system.state += { .HAS_TAGS }
 	}
 
+	switch definition.phase {
+		case .START: append(&world.schedule.start, system)
+		case .PRE_UPDATE: append(&world.schedule.pre_update, system)
+		case .UPDATE: append(&world.schedule.update, system)
+		case .POST_UPDATE: append(&world.schedule.post_update, system)
+	}
+	
 	append(&world.systems, system)
 }
 
@@ -97,14 +113,32 @@ mount :: proc(world: ^World, definition: SystemDefinition) {
    `world` : Pointer to the world.
    `name`  : System name. */
 unmount :: proc(world: ^World, name: string) {
-	for system, index in world.systems {
+	system: ^System = remove_system(world, &world.systems, name)
+
+	if system != nil {
+		delete(system.entities)
+		
+		remove_system(world, &world.schedule.start, name)
+		remove_system(world, &world.schedule.pre_update, name)
+		remove_system(world, &world.schedule.update, name)
+		remove_system(world, &world.schedule.post_update, name)
+	}
+}
+
+/* Removes the system from collection.
+   `world`   : Pointer to the world.
+   `systems` : Collection with systems.
+   `name`    : System name. */
+@(private="file")
+remove_system :: proc(world: ^World, systems: ^[dynamic]^System, name: string) -> ^System {
+	for system, index in systems^ {
 		if str.compare(system.name, name) == 0 {
-			delete(system.entities)
-			unordered_remove(&world.systems, index)
-			
-			break
+			unordered_remove(systems, index)
+			return system
 		}
 	}
+
+	return nil
 }
 
 /* Runs the world, but at first constructs all neccessary data from registered elements.
@@ -276,29 +310,26 @@ get_system :: #force_inline proc(world: ^World, name: string) -> (^System, bool)
 	return nil, false
 }
 
-/* Progress one step of the world life. Runs all mounted systems.
+/* Progress one step of the world life. Runs all mounted systems for all phases.
    `world` : Pointer to the world. */
 progress :: proc(world: ^World) {
 	if !world.running do panic("Run the world first.")
-	
+
 	if world.approach == .ARCHETYPE {
-		for system in world.systems {
-			if enabled(system) {
-				for archetype in world.archetypes {
-					if (.HAS_TAGS not_in system.state ||
-					   marker_is_subset(MAX_TAGS_COUNT, TAGS_MARKER_SIZE, archetype.tags, system.tags)) &&
-					   (.HAS_COMPONENTS not_in system.state ||
-					   marker_is_subset(MAX_COMPONENTS_COUNT, COMPONENTS_MARKER_SIZE, archetype.components, system.components)) {
-					   	/* Call system callback for matched archetype. */
-						system.callback(&archetype.entities, world)
-					}
-				}
-			}
+		if !world.started {
+			step_archetype(world, &world.schedule.start)
+			world.started = true
 		}
+
+		step_archetype(world, &world.schedule.pre_update)
+		step_archetype(world, &world.schedule.update)
+		step_archetype(world, &world.schedule.post_update)
 
 		perform(world)
 	} else if world.approach == .ITERATION {
-		for system in world.systems do clear(&system.entities)
+		for system in world.systems {
+			if !is_task(system) do clear(&system.entities)
+		}
 	
 		each(world, callback = proc(entity: ^Entity, lifetime: Lifetime, world: ^World) {
 			for system in world.systems {
@@ -314,10 +345,49 @@ progress :: proc(world: ^World) {
 			}
 		})
 
-		for system in world.systems {
-			if enabled(system) {
-				system.callback(&system.entities, world)
+		if !world.started {
+			step_iteration(world, &world.schedule.start)
+			world.started = true
+		}
+
+		step_iteration(world, &world.schedule.pre_update)
+		step_iteration(world, &world.schedule.update)
+		step_iteration(world, &world.schedule.post_update)
+	}
+}
+
+/* Progress one step of the world life for one phase and ARCHETYPE approach.
+   `world`   : Pointer to the world.
+   `systems` : Collection of the systems of particular phase. */
+@(private="file")
+step_archetype :: #force_inline proc(world: ^World, systems: ^[dynamic]^System) {
+	for system in systems^ {
+		if enabled(system) {
+			if is_task(system) {
+				system.callback(nil, world)
+			} else {
+				for archetype in world.archetypes {
+					if (.HAS_TAGS not_in system.state ||
+					   marker_is_subset(MAX_TAGS_COUNT, TAGS_MARKER_SIZE, archetype.tags, system.tags)) &&
+					   (.HAS_COMPONENTS not_in system.state ||
+					   marker_is_subset(MAX_COMPONENTS_COUNT, COMPONENTS_MARKER_SIZE, archetype.components, system.components)) {
+					   	/* Call system callback for matched archetype. */
+						system.callback(&archetype.entities, world)
+					}
+				}
 			}
+		}
+	}
+}
+
+/* Progress one step of the world life for one phase and ITERATION approach.
+   `world`   : Pointer to the world.
+   `systems` : Collection of the systems of particular phase. */
+@(private="file")
+step_iteration :: #force_inline proc(world: ^World, systems: ^[dynamic]^System) {
+	for system in systems^ {
+		if enabled(system) {
+			system.callback(is_task(system) ? nil : &system.entities, world)
 		}
 	}
 }
