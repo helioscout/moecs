@@ -304,6 +304,38 @@ set_5_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2,
 	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4,
 	$Type5: typeid, component5: ^Type5) {
+	// id1: u64 = transmute(u64)typeid_of(Type1)
+	// id2: u64 = transmute(u64)typeid_of(Type2)
+	// id3: u64 = transmute(u64)typeid_of(Type3)
+	// id4: u64 = transmute(u64)typeid_of(Type4)
+	// id5: u64 = transmute(u64)typeid_of(Type5)
+
+	// world: ^World = entity.block.world
+	// buffer: [16384]u8 = ---
+	// storage: ^u8 = cast(^u8)entity.block.chunks
+	// chunk_offset := world.components.size * entity.chunk_idx
+	
+	// mem.copy_non_overlapping(&buffer, mem.ptr_offset(storage, chunk_offset), world.components.size)
+
+	// for i := 0; i < world.components.count; i += 1 {
+	// 	id := world.components.ids[i]
+	// 	offset := world.components.types[i].offset
+
+	// 	if id == id1 {
+	// 		mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+	// 	} else if id == id2 {
+	// 		mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+	// 	} else if id == id3 {
+	// 		mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+	// 	} else if id == id4 {
+	// 		mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+	// 	} else if id == id5 {
+	// 		mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+	// 	}
+	// }
+
+	// mem.copy_non_overlapping(mem.ptr_offset(storage, chunk_offset), &buffer, world.components.size)
+	
 	set_component(entity, Type1, component1)
 	set_component(entity, Type2, component2)
 	set_component(entity, Type3, component3)
@@ -336,13 +368,51 @@ set_7_components :: #force_inline proc(entity: ^Entity,
 	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4,
 	$Type5: typeid, component5: ^Type5, $Type6: typeid, component6: ^Type6,
 	$Type7: typeid, component7: ^Type7) {
-	set_component(entity, Type1, component1)
-	set_component(entity, Type2, component2)
-	set_component(entity, Type3, component3)
-	set_component(entity, Type4, component4)
-	set_component(entity, Type5, component5)
-	set_component(entity, Type6, component6)
-	set_component(entity, Type7, component7)
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+
+	world: ^World = entity.block.world
+	buffer: [16384]u8 = ---
+	storage: ^u8 = cast(^u8)entity.block.chunks
+	chunk_offset := world.components.size * entity.chunk_idx
+	
+	mem.copy_non_overlapping(&buffer, mem.ptr_offset(storage, chunk_offset), world.components.size)
+
+	for i := 0; i < world.components.count; i += 1 {
+		id := world.components.ids[i]
+		offset := world.components.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+		} else if id == id4 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+		} else if id == id5 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+		} else if id == id6 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+		} else if id == id7 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component7, size_of(Type7))
+		}
+	}
+
+	mem.copy_non_overlapping(mem.ptr_offset(storage, chunk_offset), &buffer, world.components.size)
+
+	// set_component(entity, Type1, component1)
+	// set_component(entity, Type2, component2)
+	// set_component(entity, Type3, component3)
+	// set_component(entity, Type4, component4)
+	// set_component(entity, Type5, component5)
+	// set_component(entity, Type6, component6)
+	// set_component(entity, Type7, component7)
 }
 
 /* Sets 8 components values in the entity by their types and instances (initializers).

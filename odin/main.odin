@@ -22,6 +22,11 @@ Rotation :: struct {
 	rad: f32
 }
 
+Mutation :: struct {
+	stage: int,
+	skin: u128
+}
+
 Velocity :: distinct [1]f32
 
 Resource1 :: struct {
@@ -121,7 +126,9 @@ system2 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 			Center, &Center { cx = 20, cy = 20 },
 			Health, &Health { hp = 30 },
 			Rotation, &Rotation { angle = 90 },
-			Velocity, &Velocity { 50 })
+			Velocity, &Velocity { 50 },
+			VecType, &VecType { 10, 20 },
+			Mutation, &Mutation { skin = 11 })
 	}
 }
 
@@ -152,7 +159,9 @@ system3 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 			Center, &Center { cx = 20, cy = 20 },
 			Health, &Health { hp = 30 },
 			Rotation, &Rotation { angle = 90 },
-			Velocity, &Velocity { 50 })
+			Velocity, &Velocity { 50 },
+			VecType, &VecType { 10, 20 },
+			Mutation, &Mutation { skin = 11 })
 	}
 }
 
@@ -170,6 +179,7 @@ main :: proc() {
 	ecs.register(world, .COMPONENT, Health)
 	ecs.register(world, .COMPONENT, Rotation)
 	ecs.register(world, .COMPONENT, Velocity)
+	ecs.register(world, .COMPONENT, Mutation)
 	ecs.register(world, .RESOURCE, Resource1)
 	ecs.register(world, .RESOURCE, Resource2)
 	ecs.register(world, .RESOURCE, Resource3)
@@ -308,7 +318,9 @@ main :: proc() {
 			Center, &Center { cx = i + 20, cy = i + 20 },
 			Health, &Health { hp = 30 },
 			Rotation, &Rotation { angle = 90 },
-			Velocity, &Velocity { 50 })
+			Velocity, &Velocity { 50 },
+			VecType, &VecType { 10, 20 },
+			Mutation, &Mutation { skin = 11 })
 	}
 
 	ecs.each(world, callback = proc(entity: ^ecs.Entity, lifetime: ecs.Lifetime, world: ^ecs.World) {
@@ -339,27 +351,38 @@ main :: proc() {
 	ecs.add(e3, VecType, &VecType { 10, 20 })
 
 	ecs.add(e4,
-		Position, &Position { x = 1, y = 2 },
-		Center,   &Center   { cx = 1, cy = 2 })
+		Position, &Position { x = 10, y = 10 },
+		Center, &Center { cx = 20, cy = 20 },
+		Health, &Health { hp = 30 },
+		Rotation, &Rotation { angle = 90 },
+		Velocity, &Velocity { 50 },
+		VecType, &VecType { 10, 20 })
 
 	// ecs.remove(e4, Position, Center, int)
 	// ecs.remove(e4, Position)
 
-	if c, ok := ecs.get(e4, Position); ok {
-		fmt.println(c)
-	} else do fmt.println("Component not found.")
-	
-	if c, ok := ecs.get_component(e4, Center); ok {
-		fmt.println(c)
-	} else do fmt.println("Component not found.")
+	if c, ok := ecs.get(e4, Position); ok { fmt.println(c) } else do fmt.println("Component not found.")
+	if c, ok := ecs.get(e4, Center); ok { fmt.println(c) } else do fmt.println("Component not found.")
+	if c, ok := ecs.get(e4, Health); ok { fmt.println(c) } else do fmt.println("Component not found.")
+	if c, ok := ecs.get(e4, Rotation); ok { fmt.println(c) } else do fmt.println("Component not found.")
+	if c, ok := ecs.get(e4, Velocity); ok { fmt.println(c) } else do fmt.println("Component not found.")
+	if c, ok := ecs.get(e4, VecType); ok { fmt.println(c) } else do fmt.println("Component not found.")
 
-	ecs.set(e4, Position, &Position { x = 10, y = 20 },
-				Center,   &Center { cx = 11, cy = 22 })
+	ecs.set(e4,
+		Position, &Position { x = 77, y = 78 },
+		Center,   &Center { cx = 79, cy = 80 },
+		Health, &Health { hp = 88 },
+		Rotation, &Rotation { angle = 180 },
+		Velocity, &Velocity { 300 })
 
-	pos, center := ecs.get(e4, Position, Center)
+	pos, center, health, vel, rot, vec := ecs.get(e4, Position, Center, Health, Velocity, Rotation, VecType)
 
 	fmt.println(pos)
 	fmt.println(center)
+	fmt.println(health)
+	fmt.println(rot)
+	fmt.println(vel)
+	fmt.println(vec)
 
 	// c := ecs.get(e4, Position)
 
@@ -385,11 +408,13 @@ main :: proc() {
 	for i in 0..<100000 + 3 {
 		e := ecs.spawn(world, .DYNAMIC)
 		ecs.add(e,
-			// Position, &Position { x = 10, y = 10 },
+			Position, &Position { x = 10, y = 10 },
 			Center, &Center { cx = 20, cy = 20 },
 			Health, &Health { hp = 30 },
 			Rotation, &Rotation { angle = 90 },
-			Velocity, &Velocity { 50 })
+			Velocity, &Velocity { 50 },
+			VecType, &VecType { 10, 20 },
+			Mutation, &Mutation { skin = 11 })
 		ecs.tag(e, Tag2)
 	}
 
@@ -429,7 +454,9 @@ main :: proc() {
 			Center, &Center { cx = 20, cy = 20 },
 			Health, &Health { hp = 30 },
 			Rotation, &Rotation { angle = 90 },
-			Velocity, &Velocity { 50 })
+			Velocity, &Velocity { 50 },
+			VecType, &VecType { 10, 20 },
+			Mutation, &Mutation { skin = 11 })
 		// ecs.spawn(world, .STATIC)
 	}
 
