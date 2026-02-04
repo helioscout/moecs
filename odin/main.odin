@@ -3,6 +3,7 @@ package main
 import "core:fmt"
 import "core:time"
 import "core:os"
+import "core:mem"
 import ecs "src"
 
 Position :: struct {
@@ -40,7 +41,8 @@ Resource2 :: struct {
 
 Resource3 :: struct {
 	ptr : rawptr,
-	data : [3]f32
+	data : [3]f32,
+	some : u128
 }
 
 Resource4 :: struct {
@@ -121,7 +123,21 @@ system2 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 		// res4.pos.x += 1
 
 		// ecs.set(entity, Position, &Position { x = 10, y = 20 })
-		ecs.set(entity,
+		// ecs.set(entity,
+		// 	Position, &Position { x = 10, y = 10 },
+		// 	Center, &Center { cx = 20, cy = 20 },
+		// 	Health, &Health { hp = 30 },
+		// 	Rotation, &Rotation { angle = 90 },
+		// 	Velocity, &Velocity { 50 },
+		// 	VecType, &VecType { 10, 20 },
+		// 	Mutation, &Mutation { skin = 11 })
+		// ecs.set(world,
+		// 	Resource1, &Resource1 { enabled = false },
+		// 	Resource2, &Resource2 { count = 3 },
+		// 	Resource3, &Resource3 { some = 300 },
+		// 	Resource4, &Resource4 { pos = { x = 1, y = 2 } },
+		// 	Resource5, &Resource5 { arr = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 } })
+		ecs.add(entity,
 			Position, &Position { x = 10, y = 10 },
 			Center, &Center { cx = 20, cy = 20 },
 			Health, &Health { hp = 30 },
@@ -154,7 +170,21 @@ system3 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 		// res4.pos.x += 1
 
 		// ecs.set(entity, Position, &Position { x = 10, y = 20 })
-		ecs.set(entity,
+		// ecs.set(entity,
+		// 	Position, &Position { x = 10, y = 10 },
+		// 	Center, &Center { cx = 20, cy = 20 },
+		// 	Health, &Health { hp = 30 },
+		// 	Rotation, &Rotation { angle = 90 },
+		// 	Velocity, &Velocity { 50 },
+		// 	VecType, &VecType { 10, 20 },
+		// 	Mutation, &Mutation { skin = 11 })
+		// ecs.set(world,
+		// 	Resource1, &Resource1 { enabled = false },
+		// 	Resource2, &Resource2 { count = 3 },
+		// 	Resource3, &Resource3 { some = 300 },
+		// 	Resource4, &Resource4 { pos = { x = 1, y = 2 } },
+		// 	Resource5, &Resource5 { arr = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 } })
+		ecs.add(entity,
 			Position, &Position { x = 10, y = 10 },
 			Center, &Center { cx = 20, cy = 20 },
 			Health, &Health { hp = 30 },
@@ -176,10 +206,10 @@ main :: proc() {
 	ecs.register(world, .COMPONENT, Position)
 	ecs.register(world, .COMPONENT, Center)
 	ecs.register(world, .COMPONENT, VecType)
+	ecs.register(world, .COMPONENT, Mutation)
 	ecs.register(world, .COMPONENT, Health)
 	ecs.register(world, .COMPONENT, Rotation)
 	ecs.register(world, .COMPONENT, Velocity)
-	ecs.register(world, .COMPONENT, Mutation)
 	ecs.register(world, .RESOURCE, Resource1)
 	ecs.register(world, .RESOURCE, Resource2)
 	ecs.register(world, .RESOURCE, Resource3)
@@ -210,6 +240,7 @@ main :: proc() {
 	// fmt.printfln("marker: %b", max(uint) >> (64 - 3 % 64))
 	// fmt.println(3 / 64)
 	fmt.printfln("Entity size: %v", size_of(ecs.Entity))
+	fmt.printfln("DEFAULT_ALIGNMENT: %v", mem.DEFAULT_ALIGNMENT)
 
 	// marker: [MARKER_SIZE]uint
 
@@ -301,13 +332,23 @@ main :: proc() {
 
 	ecs.set(world,
 		Resource1, &Resource1 { enabled = true },
-		Resource2, &Resource2 { count = 10 })
+		Resource2, &Resource2 { count = 10 },
+		Resource3, &Resource3 { some = 200 })
 	
 	// if r, ok := ecs.get(world, Resource1); ok {
 	// 	fmt.println(r)
 	// }
 
 	r1, r2 := ecs.get(world, Resource1, Resource2)
+
+	fmt.println(r1)
+	fmt.println(r2)
+
+	ecs.set(world,
+		Resource1, &Resource1 { enabled = false },
+		Resource3, &Resource3 { some = 900 })
+
+	r1, r2 = ecs.get(world, Resource1, Resource2)
 
 	fmt.println(r1)
 	fmt.println(r2)
@@ -356,7 +397,8 @@ main :: proc() {
 		Health, &Health { hp = 30 },
 		Rotation, &Rotation { angle = 90 },
 		Velocity, &Velocity { 50 },
-		VecType, &VecType { 10, 20 })
+		VecType, &VecType { 10, 20 },
+		Mutation, &Mutation { skin = 200 })
 
 	// ecs.remove(e4, Position, Center, int)
 	// ecs.remove(e4, Position)

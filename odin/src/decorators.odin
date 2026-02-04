@@ -9,9 +9,37 @@ import "core:mem"
    `$TypeN`     : N-th component type.
    `componentN` : Reference to the N-th component instance. */
 add_2_components :: #force_inline proc(entity: ^Entity,
-	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2) {
-	add_component(entity, Type1, component1, false)
-	add_component(entity, Type2, component2, false)
+	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+
+	world: ^World = entity.block.world
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)entity.block.chunks
+	chunk_offset := world.components.size * entity.chunk_idx
+
+	if world.components.count != 2 {
+		/* We need to read existing components values first to save values of ones
+		   that are not being set in this method, but if total components count equals
+		   number of proceeding types in this method we can omit reading for optimization
+		   since all components values will be replaced by new ones. */
+		mem.copy_non_overlapping(&buffer, mem.ptr_offset(storage, chunk_offset), world.components.size)
+	}
+
+	for i := 0; i < world.components.count; i += 1 {
+		id := world.components.ids[i]
+		offset := world.components.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		}
+	}
+
+	mem.copy_non_overlapping(mem.ptr_offset(storage, chunk_offset), &buffer, world.components.size)
 
 	archetyping(entity)
 }
@@ -23,10 +51,41 @@ add_2_components :: #force_inline proc(entity: ^Entity,
    `componentN` : Reference to the N-th component instance. */
 add_3_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2,
-	$Type3: typeid, component3: ^Type3) {
-	add_component(entity, Type1, component1, false)
-	add_component(entity, Type2, component2, false)
-	add_component(entity, Type3, component3, false)
+	$Type3: typeid, component3: ^Type3) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+
+	world: ^World = entity.block.world
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)entity.block.chunks
+	chunk_offset := world.components.size * entity.chunk_idx
+
+	if world.components.count != 3 {
+		/* We need to read existing components values first to save values of ones
+		   that are not being set in this method, but if total components count equals
+		   number of proceeding types in this method we can omit reading for optimization
+		   since all components values will be replaced by new ones. */
+		mem.copy_non_overlapping(&buffer, mem.ptr_offset(storage, chunk_offset), world.components.size)
+	}
+
+	for i := 0; i < world.components.count; i += 1 {
+		id := world.components.ids[i]
+		offset := world.components.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		}
+	}
+
+	mem.copy_non_overlapping(mem.ptr_offset(storage, chunk_offset), &buffer, world.components.size)
 
 	archetyping(entity)
 }
@@ -38,11 +97,45 @@ add_3_components :: #force_inline proc(entity: ^Entity,
    `componentN` : Reference to the N-th component instance. */
 add_4_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2,
-	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4) {
-	add_component(entity, Type1, component1, false)
-	add_component(entity, Type2, component2, false)
-	add_component(entity, Type3, component3, false)
-	add_component(entity, Type4, component4, false)
+	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+
+	world: ^World = entity.block.world
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)entity.block.chunks
+	chunk_offset := world.components.size * entity.chunk_idx
+
+	if world.components.count != 4 {
+		/* We need to read existing components values first to save values of ones
+		   that are not being set in this method, but if total components count equals
+		   number of proceeding types in this method we can omit reading for optimization
+		   since all components values will be replaced by new ones. */
+		mem.copy_non_overlapping(&buffer, mem.ptr_offset(storage, chunk_offset), world.components.size)
+	}
+
+	for i := 0; i < world.components.count; i += 1 {
+		id := world.components.ids[i]
+		offset := world.components.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id4 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		}
+	}
+
+	mem.copy_non_overlapping(mem.ptr_offset(storage, chunk_offset), &buffer, world.components.size)
 
 	archetyping(entity)
 }
@@ -55,12 +148,49 @@ add_4_components :: #force_inline proc(entity: ^Entity,
 add_5_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2,
 	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4,
-	$Type5: typeid, component5: ^Type5) {
-	add_component(entity, Type1, component1, false)
-	add_component(entity, Type2, component2, false)
-	add_component(entity, Type3, component3, false)
-	add_component(entity, Type4, component4, false)
-	add_component(entity, Type5, component5, false)
+	$Type5: typeid, component5: ^Type5) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+
+	world: ^World = entity.block.world
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)entity.block.chunks
+	chunk_offset := world.components.size * entity.chunk_idx
+
+	if world.components.count != 5 {
+		/* We need to read existing components values first to save values of ones
+		   that are not being set in this method, but if total components count equals
+		   number of proceeding types in this method we can omit reading for optimization
+		   since all components values will be replaced by new ones. */
+		mem.copy_non_overlapping(&buffer, mem.ptr_offset(storage, chunk_offset), world.components.size)
+	}
+
+	for i := 0; i < world.components.count; i += 1 {
+		id := world.components.ids[i]
+		offset := world.components.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id4 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id5 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		}
+	}
+
+	mem.copy_non_overlapping(mem.ptr_offset(storage, chunk_offset), &buffer, world.components.size)
 
 	archetyping(entity)
 }
@@ -73,13 +203,53 @@ add_5_components :: #force_inline proc(entity: ^Entity,
 add_6_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2,
 	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4,
-	$Type5: typeid, component5: ^Type5, $Type6: typeid, component6: ^Type6) {
-	add_component(entity, Type1, component1, false)
-	add_component(entity, Type2, component2, false)
-	add_component(entity, Type3, component3, false)
-	add_component(entity, Type4, component4, false)
-	add_component(entity, Type5, component5, false)
-	add_component(entity, Type6, component6, false)
+	$Type5: typeid, component5: ^Type5, $Type6: typeid, component6: ^Type6) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+
+	world: ^World = entity.block.world
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)entity.block.chunks
+	chunk_offset := world.components.size * entity.chunk_idx
+
+	if world.components.count != 6 {
+		/* We need to read existing components values first to save values of ones
+		   that are not being set in this method, but if total components count equals
+		   number of proceeding types in this method we can omit reading for optimization
+		   since all components values will be replaced by new ones. */
+		mem.copy_non_overlapping(&buffer, mem.ptr_offset(storage, chunk_offset), world.components.size)
+	}
+
+	for i := 0; i < world.components.count; i += 1 {
+		id := world.components.ids[i]
+		offset := world.components.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id4 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id5 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id6 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		}
+	}
+
+	mem.copy_non_overlapping(mem.ptr_offset(storage, chunk_offset), &buffer, world.components.size)
 
 	archetyping(entity)
 }
@@ -93,14 +263,57 @@ add_7_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2,
 	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4,
 	$Type5: typeid, component5: ^Type5, $Type6: typeid, component6: ^Type6,
-	$Type7: typeid, component7: ^Type7) {
-	add_component(entity, Type1, component1, false)
-	add_component(entity, Type2, component2, false)
-	add_component(entity, Type3, component3, false)
-	add_component(entity, Type4, component4, false)
-	add_component(entity, Type5, component5, false)
-	add_component(entity, Type6, component6, false)
-	add_component(entity, Type7, component7, false)
+	$Type7: typeid, component7: ^Type7) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+
+	world: ^World = entity.block.world
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)entity.block.chunks
+	chunk_offset := world.components.size * entity.chunk_idx
+
+	if world.components.count != 7 {
+		/* We need to read existing components values first to save values of ones
+		   that are not being set in this method, but if total components count equals
+		   number of proceeding types in this method we can omit reading for optimization
+		   since all components values will be replaced by new ones. */
+		mem.copy_non_overlapping(&buffer, mem.ptr_offset(storage, chunk_offset), world.components.size)
+	}
+
+	for i := 0; i < world.components.count; i += 1 {
+		id := world.components.ids[i]
+		offset := world.components.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id4 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id5 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id6 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id7 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component7, size_of(Type7))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		}
+	}
+
+	mem.copy_non_overlapping(mem.ptr_offset(storage, chunk_offset), &buffer, world.components.size)
 
 	archetyping(entity)
 }
@@ -114,15 +327,61 @@ add_8_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2,
 	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4,
 	$Type5: typeid, component5: ^Type5, $Type6: typeid, component6: ^Type6,
-	$Type7: typeid, component7: ^Type7, $Type8: typeid, component8: ^Type8) {
-	add_component(entity, Type1, component1, false)
-	add_component(entity, Type2, component2, false)
-	add_component(entity, Type3, component3, false)
-	add_component(entity, Type4, component4, false)
-	add_component(entity, Type5, component5, false)
-	add_component(entity, Type6, component6, false)
-	add_component(entity, Type7, component7, false)
-	add_component(entity, Type8, component8, false)
+	$Type7: typeid, component7: ^Type7, $Type8: typeid, component8: ^Type8) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+
+	world: ^World = entity.block.world
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)entity.block.chunks
+	chunk_offset := world.components.size * entity.chunk_idx
+
+	if world.components.count != 8 {
+		/* We need to read existing components values first to save values of ones
+		   that are not being set in this method, but if total components count equals
+		   number of proceeding types in this method we can omit reading for optimization
+		   since all components values will be replaced by new ones. */
+		mem.copy_non_overlapping(&buffer, mem.ptr_offset(storage, chunk_offset), world.components.size)
+	}
+
+	for i := 0; i < world.components.count; i += 1 {
+		id := world.components.ids[i]
+		offset := world.components.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id4 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id5 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id6 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id7 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component7, size_of(Type7))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id8 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component8, size_of(Type8))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		}
+	}
+
+	mem.copy_non_overlapping(mem.ptr_offset(storage, chunk_offset), &buffer, world.components.size)
 
 	archetyping(entity)
 }
@@ -137,16 +396,65 @@ add_9_components :: #force_inline proc(entity: ^Entity,
 	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4,
 	$Type5: typeid, component5: ^Type5, $Type6: typeid, component6: ^Type6,
 	$Type7: typeid, component7: ^Type7, $Type8: typeid, component8: ^Type8,
-	$Type9: typeid, component9: ^Type9) {
-	add_component(entity, Type1, component1, false)
-	add_component(entity, Type2, component2, false)
-	add_component(entity, Type3, component3, false)
-	add_component(entity, Type4, component4, false)
-	add_component(entity, Type5, component5, false)
-	add_component(entity, Type6, component6, false)
-	add_component(entity, Type7, component7, false)
-	add_component(entity, Type8, component8, false)
-	add_component(entity, Type9, component9, false)
+	$Type9: typeid, component9: ^Type9) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+	id9: u64 = transmute(u64)typeid_of(Type9)
+
+	world: ^World = entity.block.world
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)entity.block.chunks
+	chunk_offset := world.components.size * entity.chunk_idx
+
+	if world.components.count != 9 {
+		/* We need to read existing components values first to save values of ones
+		   that are not being set in this method, but if total components count equals
+		   number of proceeding types in this method we can omit reading for optimization
+		   since all components values will be replaced by new ones. */
+		mem.copy_non_overlapping(&buffer, mem.ptr_offset(storage, chunk_offset), world.components.size)
+	}
+
+	for i := 0; i < world.components.count; i += 1 {
+		id := world.components.ids[i]
+		offset := world.components.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id4 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id5 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id6 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id7 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component7, size_of(Type7))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id8 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component8, size_of(Type8))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id9 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component9, size_of(Type9))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		}
+	}
+
+	mem.copy_non_overlapping(mem.ptr_offset(storage, chunk_offset), &buffer, world.components.size)
 
 	archetyping(entity)
 }
@@ -161,17 +469,69 @@ add_10_components :: #force_inline proc(entity: ^Entity,
 	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4,
 	$Type5: typeid, component5: ^Type5, $Type6: typeid, component6: ^Type6,
 	$Type7: typeid, component7: ^Type7, $Type8: typeid, component8: ^Type8,
-	$Type9: typeid, component9: ^Type9, $Type10: typeid, component10: ^Type10) {
-	add_component(entity, Type1, component1, false)
-	add_component(entity, Type2, component2, false)
-	add_component(entity, Type3, component3, false)
-	add_component(entity, Type4, component4, false)
-	add_component(entity, Type5, component5, false)
-	add_component(entity, Type6, component6, false)
-	add_component(entity, Type7, component7, false)
-	add_component(entity, Type8, component8, false)
-	add_component(entity, Type9, component9, false)
-	add_component(entity, Type10, component10, false)
+	$Type9: typeid, component9: ^Type9, $Type10: typeid, component10: ^Type10) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+	id9: u64 = transmute(u64)typeid_of(Type9)
+	id10: u64 = transmute(u64)typeid_of(Type10)
+
+	world: ^World = entity.block.world
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)entity.block.chunks
+	chunk_offset := world.components.size * entity.chunk_idx
+
+	if world.components.count != 10 {
+		/* We need to read existing components values first to save values of ones
+		   that are not being set in this method, but if total components count equals
+		   number of proceeding types in this method we can omit reading for optimization
+		   since all components values will be replaced by new ones. */
+		mem.copy_non_overlapping(&buffer, mem.ptr_offset(storage, chunk_offset), world.components.size)
+	}
+
+	for i := 0; i < world.components.count; i += 1 {
+		id := world.components.ids[i]
+		offset := world.components.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id4 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id5 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id6 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id7 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component7, size_of(Type7))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id8 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component8, size_of(Type8))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id9 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component9, size_of(Type9))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id10 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component10, size_of(Type10))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		}
+	}
+
+	mem.copy_non_overlapping(mem.ptr_offset(storage, chunk_offset), &buffer, world.components.size)
 
 	archetyping(entity)
 }
@@ -187,18 +547,73 @@ add_11_components :: #force_inline proc(entity: ^Entity,
 	$Type5: typeid, component5: ^Type5, $Type6: typeid, component6: ^Type6,
 	$Type7: typeid, component7: ^Type7, $Type8: typeid, component8: ^Type8,
 	$Type9: typeid, component9: ^Type9, $Type10: typeid, component10: ^Type10,
-	$Type11: typeid, component11: ^Type11) {
-	add_component(entity, Type1, component1, false)
-	add_component(entity, Type2, component2, false)
-	add_component(entity, Type3, component3, false)
-	add_component(entity, Type4, component4, false)
-	add_component(entity, Type5, component5, false)
-	add_component(entity, Type6, component6, false)
-	add_component(entity, Type7, component7, false)
-	add_component(entity, Type8, component8, false)
-	add_component(entity, Type9, component9, false)
-	add_component(entity, Type10, component10, false)
-	add_component(entity, Type11, component11, false)
+	$Type11: typeid, component11: ^Type11) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+	id9: u64 = transmute(u64)typeid_of(Type9)
+	id10: u64 = transmute(u64)typeid_of(Type10)
+	id11: u64 = transmute(u64)typeid_of(Type11)
+
+	world: ^World = entity.block.world
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)entity.block.chunks
+	chunk_offset := world.components.size * entity.chunk_idx
+
+	if world.components.count != 11 {
+		/* We need to read existing components values first to save values of ones
+		   that are not being set in this method, but if total components count equals
+		   number of proceeding types in this method we can omit reading for optimization
+		   since all components values will be replaced by new ones. */
+		mem.copy_non_overlapping(&buffer, mem.ptr_offset(storage, chunk_offset), world.components.size)
+	}
+
+	for i := 0; i < world.components.count; i += 1 {
+		id := world.components.ids[i]
+		offset := world.components.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id4 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id5 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id6 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id7 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component7, size_of(Type7))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id8 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component8, size_of(Type8))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id9 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component9, size_of(Type9))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id10 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component10, size_of(Type10))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id11 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component11, size_of(Type11))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		}
+	}
+
+	mem.copy_non_overlapping(mem.ptr_offset(storage, chunk_offset), &buffer, world.components.size)
 
 	archetyping(entity)
 }
@@ -214,19 +629,77 @@ add_12_components :: #force_inline proc(entity: ^Entity,
 	$Type5: typeid, component5: ^Type5, $Type6: typeid, component6: ^Type6,
 	$Type7: typeid, component7: ^Type7, $Type8: typeid, component8: ^Type8,
 	$Type9: typeid, component9: ^Type9, $Type10: typeid, component10: ^Type10,
-	$Type11: typeid, component11: ^Type11, $Type12: typeid, component12: ^Type12) {
-	add_component(entity, Type1, component1, false)
-	add_component(entity, Type2, component2, false)
-	add_component(entity, Type3, component3, false)
-	add_component(entity, Type4, component4, false)
-	add_component(entity, Type5, component5, false)
-	add_component(entity, Type6, component6, false)
-	add_component(entity, Type7, component7, false)
-	add_component(entity, Type8, component8, false)
-	add_component(entity, Type9, component9, false)
-	add_component(entity, Type10, component10, false)
-	add_component(entity, Type11, component11, false)
-	add_component(entity, Type12, component12, false)
+	$Type11: typeid, component11: ^Type11, $Type12: typeid, component12: ^Type12) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+	id9: u64 = transmute(u64)typeid_of(Type9)
+	id10: u64 = transmute(u64)typeid_of(Type10)
+	id11: u64 = transmute(u64)typeid_of(Type11)
+	id12: u64 = transmute(u64)typeid_of(Type12)
+
+	world: ^World = entity.block.world
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)entity.block.chunks
+	chunk_offset := world.components.size * entity.chunk_idx
+
+	if world.components.count != 12 {
+		/* We need to read existing components values first to save values of ones
+		   that are not being set in this method, but if total components count equals
+		   number of proceeding types in this method we can omit reading for optimization
+		   since all components values will be replaced by new ones. */
+		mem.copy_non_overlapping(&buffer, mem.ptr_offset(storage, chunk_offset), world.components.size)
+	}
+
+	for i := 0; i < world.components.count; i += 1 {
+		id := world.components.ids[i]
+		offset := world.components.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id4 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id5 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id6 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id7 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component7, size_of(Type7))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id8 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component8, size_of(Type8))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id9 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component9, size_of(Type9))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id10 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component10, size_of(Type10))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id11 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component11, size_of(Type11))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id12 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component12, size_of(Type12))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		}
+	}
+
+	mem.copy_non_overlapping(mem.ptr_offset(storage, chunk_offset), &buffer, world.components.size)
 
 	archetyping(entity)
 }
@@ -243,20 +716,81 @@ add_13_components :: #force_inline proc(entity: ^Entity,
 	$Type7: typeid, component7: ^Type7, $Type8: typeid, component8: ^Type8,
 	$Type9: typeid, component9: ^Type9, $Type10: typeid, component10: ^Type10,
 	$Type11: typeid, component11: ^Type11, $Type12: typeid, component12: ^Type12,
-	$Type13: typeid, component13: ^Type13) {
-	add_component(entity, Type1, component1, false)
-	add_component(entity, Type2, component2, false)
-	add_component(entity, Type3, component3, false)
-	add_component(entity, Type4, component4, false)
-	add_component(entity, Type5, component5, false)
-	add_component(entity, Type6, component6, false)
-	add_component(entity, Type7, component7, false)
-	add_component(entity, Type8, component8, false)
-	add_component(entity, Type9, component9, false)
-	add_component(entity, Type10, component10, false)
-	add_component(entity, Type11, component11, false)
-	add_component(entity, Type12, component12, false)
-	add_component(entity, Type13, component13, false)
+	$Type13: typeid, component13: ^Type13) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+	id9: u64 = transmute(u64)typeid_of(Type9)
+	id10: u64 = transmute(u64)typeid_of(Type10)
+	id11: u64 = transmute(u64)typeid_of(Type11)
+	id12: u64 = transmute(u64)typeid_of(Type12)
+	id13: u64 = transmute(u64)typeid_of(Type13)
+
+	world: ^World = entity.block.world
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)entity.block.chunks
+	chunk_offset := world.components.size * entity.chunk_idx
+
+	if world.components.count != 13 {
+		/* We need to read existing components values first to save values of ones
+		   that are not being set in this method, but if total components count equals
+		   number of proceeding types in this method we can omit reading for optimization
+		   since all components values will be replaced by new ones. */
+		mem.copy_non_overlapping(&buffer, mem.ptr_offset(storage, chunk_offset), world.components.size)
+	}
+
+	for i := 0; i < world.components.count; i += 1 {
+		id := world.components.ids[i]
+		offset := world.components.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id4 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id5 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id6 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id7 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component7, size_of(Type7))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id8 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component8, size_of(Type8))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id9 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component9, size_of(Type9))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id10 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component10, size_of(Type10))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id11 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component11, size_of(Type11))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id12 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component12, size_of(Type12))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		} else if id == id13 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component13, size_of(Type13))
+			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+		}
+	}
+
+	mem.copy_non_overlapping(mem.ptr_offset(storage, chunk_offset), &buffer, world.components.size)
 
 	archetyping(entity)
 }
@@ -266,9 +800,35 @@ add_13_components :: #force_inline proc(entity: ^Entity,
    `$TypeN`     : N-th component type.
    `componentN` : Reference to the N-th component instance." */
 set_2_components :: #force_inline proc(entity: ^Entity,
-	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2) {
-	set_component(entity, Type1, component1)
-	set_component(entity, Type2, component2)
+	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+
+	world: ^World = entity.block.world
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)entity.block.chunks
+	chunk_offset := world.components.size * entity.chunk_idx
+
+	if world.components.count != 2 {
+		/* We need to read existing components values first to save values of ones
+		   that are not being set in this method, but if total components count equals
+		   number of proceeding types in this method we can omit reading for optimization
+		   since all components values will be replaced by new ones. */
+		mem.copy_non_overlapping(&buffer, mem.ptr_offset(storage, chunk_offset), world.components.size)
+	}
+
+	for i := 0; i < world.components.count; i += 1 {
+		id := world.components.ids[i]
+		offset := world.components.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+		}
+	}
+
+	mem.copy_non_overlapping(mem.ptr_offset(storage, chunk_offset), &buffer, world.components.size)
 }
 
 /* Sets 3 components values in the entity by their types and instances (initializers).
@@ -277,10 +837,38 @@ set_2_components :: #force_inline proc(entity: ^Entity,
    `componentN` : Reference to the N-th component instance." */
 set_3_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2,
-	$Type3: typeid, component3: ^Type3) {
-	set_component(entity, Type1, component1)
-	set_component(entity, Type2, component2)
-	set_component(entity, Type3, component3)
+	$Type3: typeid, component3: ^Type3) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+
+	world: ^World = entity.block.world
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)entity.block.chunks
+	chunk_offset := world.components.size * entity.chunk_idx
+
+	if world.components.count != 3 {
+		/* We need to read existing components values first to save values of ones
+		   that are not being set in this method, but if total components count equals
+		   number of proceeding types in this method we can omit reading for optimization
+		   since all components values will be replaced by new ones. */
+		mem.copy_non_overlapping(&buffer, mem.ptr_offset(storage, chunk_offset), world.components.size)
+	}
+
+	for i := 0; i < world.components.count; i += 1 {
+		id := world.components.ids[i]
+		offset := world.components.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+		}
+	}
+
+	mem.copy_non_overlapping(mem.ptr_offset(storage, chunk_offset), &buffer, world.components.size)
 }
 
 /* Sets 4 components values in the entity by their types and instances (initializers).
@@ -289,11 +877,41 @@ set_3_components :: #force_inline proc(entity: ^Entity,
    `componentN` : Reference to the N-th component instance." */
 set_4_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2,
-	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4) {
-	set_component(entity, Type1, component1)
-	set_component(entity, Type2, component2)
-	set_component(entity, Type3, component3)
-	set_component(entity, Type4, component4)
+	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+
+	world: ^World = entity.block.world
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)entity.block.chunks
+	chunk_offset := world.components.size * entity.chunk_idx
+
+	if world.components.count != 4 {
+		/* We need to read existing components values first to save values of ones
+		   that are not being set in this method, but if total components count equals
+		   number of proceeding types in this method we can omit reading for optimization
+		   since all components values will be replaced by new ones. */
+		mem.copy_non_overlapping(&buffer, mem.ptr_offset(storage, chunk_offset), world.components.size)
+	}
+
+	for i := 0; i < world.components.count; i += 1 {
+		id := world.components.ids[i]
+		offset := world.components.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+		} else if id == id4 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+		}
+	}
+
+	mem.copy_non_overlapping(mem.ptr_offset(storage, chunk_offset), &buffer, world.components.size)
 }
 
 /* Sets 5 components values in the entity by their types and instances (initializers).
@@ -303,44 +921,44 @@ set_4_components :: #force_inline proc(entity: ^Entity,
 set_5_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2,
 	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4,
-	$Type5: typeid, component5: ^Type5) {
-	// id1: u64 = transmute(u64)typeid_of(Type1)
-	// id2: u64 = transmute(u64)typeid_of(Type2)
-	// id3: u64 = transmute(u64)typeid_of(Type3)
-	// id4: u64 = transmute(u64)typeid_of(Type4)
-	// id5: u64 = transmute(u64)typeid_of(Type5)
+	$Type5: typeid, component5: ^Type5) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
 
-	// world: ^World = entity.block.world
-	// buffer: [16384]u8 = ---
-	// storage: ^u8 = cast(^u8)entity.block.chunks
-	// chunk_offset := world.components.size * entity.chunk_idx
-	
-	// mem.copy_non_overlapping(&buffer, mem.ptr_offset(storage, chunk_offset), world.components.size)
+	world: ^World = entity.block.world
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)entity.block.chunks
+	chunk_offset := world.components.size * entity.chunk_idx
 
-	// for i := 0; i < world.components.count; i += 1 {
-	// 	id := world.components.ids[i]
-	// 	offset := world.components.types[i].offset
+	if world.components.count != 5 {
+		/* We need to read existing components values first to save values of ones
+		   that are not being set in this method, but if total components count equals
+		   number of proceeding types in this method we can omit reading for optimization
+		   since all components values will be replaced by new ones. */
+		mem.copy_non_overlapping(&buffer, mem.ptr_offset(storage, chunk_offset), world.components.size)
+	}
 
-	// 	if id == id1 {
-	// 		mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
-	// 	} else if id == id2 {
-	// 		mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
-	// 	} else if id == id3 {
-	// 		mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
-	// 	} else if id == id4 {
-	// 		mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
-	// 	} else if id == id5 {
-	// 		mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
-	// 	}
-	// }
+	for i := 0; i < world.components.count; i += 1 {
+		id := world.components.ids[i]
+		offset := world.components.types[i].offset
 
-	// mem.copy_non_overlapping(mem.ptr_offset(storage, chunk_offset), &buffer, world.components.size)
-	
-	set_component(entity, Type1, component1)
-	set_component(entity, Type2, component2)
-	set_component(entity, Type3, component3)
-	set_component(entity, Type4, component4)
-	set_component(entity, Type5, component5)
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+		} else if id == id4 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+		} else if id == id5 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+		}
+	}
+
+	mem.copy_non_overlapping(mem.ptr_offset(storage, chunk_offset), &buffer, world.components.size)
 }
 
 /* Sets 6 components values in the entity by their types and instances (initializers).
@@ -350,13 +968,47 @@ set_5_components :: #force_inline proc(entity: ^Entity,
 set_6_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2,
 	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4,
-	$Type5: typeid, component5: ^Type5, $Type6: typeid, component6: ^Type6) {
-	set_component(entity, Type1, component1)
-	set_component(entity, Type2, component2)
-	set_component(entity, Type3, component3)
-	set_component(entity, Type4, component4)
-	set_component(entity, Type5, component5)
-	set_component(entity, Type6, component6)
+	$Type5: typeid, component5: ^Type5, $Type6: typeid, component6: ^Type6) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+
+	world: ^World = entity.block.world
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)entity.block.chunks
+	chunk_offset := world.components.size * entity.chunk_idx
+
+	if world.components.count != 6 {
+		/* We need to read existing components values first to save values of ones
+		   that are not being set in this method, but if total components count equals
+		   number of proceeding types in this method we can omit reading for optimization
+		   since all components values will be replaced by new ones. */
+		mem.copy_non_overlapping(&buffer, mem.ptr_offset(storage, chunk_offset), world.components.size)
+	}
+
+	for i := 0; i < world.components.count; i += 1 {
+		id := world.components.ids[i]
+		offset := world.components.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+		} else if id == id4 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+		} else if id == id5 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+		} else if id == id6 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+		}
+	}
+
+	mem.copy_non_overlapping(mem.ptr_offset(storage, chunk_offset), &buffer, world.components.size)
 }
 
 /* Sets 7 components values in the entity by their types and instances (initializers).
@@ -367,7 +1019,7 @@ set_7_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2,
 	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4,
 	$Type5: typeid, component5: ^Type5, $Type6: typeid, component6: ^Type6,
-	$Type7: typeid, component7: ^Type7) {
+	$Type7: typeid, component7: ^Type7) #no_bounds_check {
 	id1: u64 = transmute(u64)typeid_of(Type1)
 	id2: u64 = transmute(u64)typeid_of(Type2)
 	id3: u64 = transmute(u64)typeid_of(Type3)
@@ -377,11 +1029,17 @@ set_7_components :: #force_inline proc(entity: ^Entity,
 	id7: u64 = transmute(u64)typeid_of(Type7)
 
 	world: ^World = entity.block.world
-	buffer: [16384]u8 = ---
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
 	storage: ^u8 = cast(^u8)entity.block.chunks
 	chunk_offset := world.components.size * entity.chunk_idx
-	
-	mem.copy_non_overlapping(&buffer, mem.ptr_offset(storage, chunk_offset), world.components.size)
+
+	if world.components.count != 7 {
+		/* We need to read existing components values first to save values of ones
+		   that are not being set in this method, but if total components count equals
+		   number of proceeding types in this method we can omit reading for optimization
+		   since all components values will be replaced by new ones. */
+		mem.copy_non_overlapping(&buffer, mem.ptr_offset(storage, chunk_offset), world.components.size)
+	}
 
 	for i := 0; i < world.components.count; i += 1 {
 		id := world.components.ids[i]
@@ -405,14 +1063,6 @@ set_7_components :: #force_inline proc(entity: ^Entity,
 	}
 
 	mem.copy_non_overlapping(mem.ptr_offset(storage, chunk_offset), &buffer, world.components.size)
-
-	// set_component(entity, Type1, component1)
-	// set_component(entity, Type2, component2)
-	// set_component(entity, Type3, component3)
-	// set_component(entity, Type4, component4)
-	// set_component(entity, Type5, component5)
-	// set_component(entity, Type6, component6)
-	// set_component(entity, Type7, component7)
 }
 
 /* Sets 8 components values in the entity by their types and instances (initializers).
@@ -423,15 +1073,53 @@ set_8_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2,
 	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4,
 	$Type5: typeid, component5: ^Type5, $Type6: typeid, component6: ^Type6,
-	$Type7: typeid, component7: ^Type7, $Type8: typeid, component8: ^Type8) {
-	set_component(entity, Type1, component1)
-	set_component(entity, Type2, component2)
-	set_component(entity, Type3, component3)
-	set_component(entity, Type4, component4)
-	set_component(entity, Type5, component5)
-	set_component(entity, Type6, component6)
-	set_component(entity, Type7, component7)
-	set_component(entity, Type8, component8)
+	$Type7: typeid, component7: ^Type7, $Type8: typeid, component8: ^Type8) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+
+	world: ^World = entity.block.world
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)entity.block.chunks
+	chunk_offset := world.components.size * entity.chunk_idx
+
+	if world.components.count != 8 {
+		/* We need to read existing components values first to save values of ones
+		   that are not being set in this method, but if total components count equals
+		   number of proceeding types in this method we can omit reading for optimization
+		   since all components values will be replaced by new ones. */
+		mem.copy_non_overlapping(&buffer, mem.ptr_offset(storage, chunk_offset), world.components.size)
+	}
+
+	for i := 0; i < world.components.count; i += 1 {
+		id := world.components.ids[i]
+		offset := world.components.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+		} else if id == id4 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+		} else if id == id5 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+		} else if id == id6 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+		} else if id == id7 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component7, size_of(Type7))
+		} else if id == id8 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component8, size_of(Type8))
+		}
+	}
+
+	mem.copy_non_overlapping(mem.ptr_offset(storage, chunk_offset), &buffer, world.components.size)
 }
 
 /* Sets 9 components values in the entity by their types and instances (initializers).
@@ -443,16 +1131,56 @@ set_9_components :: #force_inline proc(entity: ^Entity,
 	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4,
 	$Type5: typeid, component5: ^Type5, $Type6: typeid, component6: ^Type6,
 	$Type7: typeid, component7: ^Type7, $Type8: typeid, component8: ^Type8,
-	$Type9: typeid, component9: ^Type9) {
-	set_component(entity, Type1, component1)
-	set_component(entity, Type2, component2)
-	set_component(entity, Type3, component3)
-	set_component(entity, Type4, component4)
-	set_component(entity, Type5, component5)
-	set_component(entity, Type6, component6)
-	set_component(entity, Type7, component7)
-	set_component(entity, Type8, component8)
-	set_component(entity, Type9, component9)
+	$Type9: typeid, component9: ^Type9) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+	id9: u64 = transmute(u64)typeid_of(Type9)
+
+	world: ^World = entity.block.world
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)entity.block.chunks
+	chunk_offset := world.components.size * entity.chunk_idx
+
+	if world.components.count != 9 {
+		/* We need to read existing components values first to save values of ones
+		   that are not being set in this method, but if total components count equals
+		   number of proceeding types in this method we can omit reading for optimization
+		   since all components values will be replaced by new ones. */
+		mem.copy_non_overlapping(&buffer, mem.ptr_offset(storage, chunk_offset), world.components.size)
+	}
+
+	for i := 0; i < world.components.count; i += 1 {
+		id := world.components.ids[i]
+		offset := world.components.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+		} else if id == id4 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+		} else if id == id5 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+		} else if id == id6 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+		} else if id == id7 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component7, size_of(Type7))
+		} else if id == id8 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component8, size_of(Type8))
+		} else if id == id9 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component9, size_of(Type9))
+		}
+	}
+
+	mem.copy_non_overlapping(mem.ptr_offset(storage, chunk_offset), &buffer, world.components.size)
 }
 
 /* Sets 10 components values in the entity by their types and instances (initializers).
@@ -464,17 +1192,59 @@ set_10_components :: #force_inline proc(entity: ^Entity,
 	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4,
 	$Type5: typeid, component5: ^Type5, $Type6: typeid, component6: ^Type6,
 	$Type7: typeid, component7: ^Type7, $Type8: typeid, component8: ^Type8,
-	$Type9: typeid, component9: ^Type9, $Type10: typeid, component10: ^Type10) {
-	set_component(entity, Type1, component1)
-	set_component(entity, Type2, component2)
-	set_component(entity, Type3, component3)
-	set_component(entity, Type4, component4)
-	set_component(entity, Type5, component5)
-	set_component(entity, Type6, component6)
-	set_component(entity, Type7, component7)
-	set_component(entity, Type8, component8)
-	set_component(entity, Type9, component9)
-	set_component(entity, Type10, component10)
+	$Type9: typeid, component9: ^Type9, $Type10: typeid, component10: ^Type10) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+	id9: u64 = transmute(u64)typeid_of(Type9)
+	id10: u64 = transmute(u64)typeid_of(Type10)
+
+	world: ^World = entity.block.world
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)entity.block.chunks
+	chunk_offset := world.components.size * entity.chunk_idx
+
+	if world.components.count != 10 {
+		/* We need to read existing components values first to save values of ones
+		   that are not being set in this method, but if total components count equals
+		   number of proceeding types in this method we can omit reading for optimization
+		   since all components values will be replaced by new ones. */
+		mem.copy_non_overlapping(&buffer, mem.ptr_offset(storage, chunk_offset), world.components.size)
+	}
+
+	for i := 0; i < world.components.count; i += 1 {
+		id := world.components.ids[i]
+		offset := world.components.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+		} else if id == id4 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+		} else if id == id5 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+		} else if id == id6 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+		} else if id == id7 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component7, size_of(Type7))
+		} else if id == id8 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component8, size_of(Type8))
+		} else if id == id9 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component9, size_of(Type9))
+		} else if id == id10 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component10, size_of(Type10))
+		}
+	}
+
+	mem.copy_non_overlapping(mem.ptr_offset(storage, chunk_offset), &buffer, world.components.size)
 }
 
 /* Sets 11 components values in the entity by their types and instances (initializers).
@@ -487,18 +1257,62 @@ set_11_components :: #force_inline proc(entity: ^Entity,
 	$Type5: typeid, component5: ^Type5, $Type6: typeid, component6: ^Type6,
 	$Type7: typeid, component7: ^Type7, $Type8: typeid, component8: ^Type8,
 	$Type9: typeid, component9: ^Type9, $Type10: typeid, component10: ^Type10,
-	$Type11: typeid, component11: ^Type11) {
-	set_component(entity, Type1, component1)
-	set_component(entity, Type2, component2)
-	set_component(entity, Type3, component3)
-	set_component(entity, Type4, component4)
-	set_component(entity, Type5, component5)
-	set_component(entity, Type6, component6)
-	set_component(entity, Type7, component7)
-	set_component(entity, Type8, component8)
-	set_component(entity, Type9, component9)
-	set_component(entity, Type10, component10)
-	set_component(entity, Type11, component11)
+	$Type11: typeid, component11: ^Type11) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+	id9: u64 = transmute(u64)typeid_of(Type9)
+	id10: u64 = transmute(u64)typeid_of(Type10)
+	id11: u64 = transmute(u64)typeid_of(Type11)
+
+	world: ^World = entity.block.world
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)entity.block.chunks
+	chunk_offset := world.components.size * entity.chunk_idx
+
+	if world.components.count != 11 {
+		/* We need to read existing components values first to save values of ones
+		   that are not being set in this method, but if total components count equals
+		   number of proceeding types in this method we can omit reading for optimization
+		   since all components values will be replaced by new ones. */
+		mem.copy_non_overlapping(&buffer, mem.ptr_offset(storage, chunk_offset), world.components.size)
+	}
+
+	for i := 0; i < world.components.count; i += 1 {
+		id := world.components.ids[i]
+		offset := world.components.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+		} else if id == id4 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+		} else if id == id5 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+		} else if id == id6 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+		} else if id == id7 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component7, size_of(Type7))
+		} else if id == id8 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component8, size_of(Type8))
+		} else if id == id9 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component9, size_of(Type9))
+		} else if id == id10 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component10, size_of(Type10))
+		} else if id == id11 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component11, size_of(Type11))
+		}
+	}
+
+	mem.copy_non_overlapping(mem.ptr_offset(storage, chunk_offset), &buffer, world.components.size)
 }
 
 /* Sets 12 components values in the entity by their types and instances (initializers).
@@ -511,19 +1325,65 @@ set_12_components :: #force_inline proc(entity: ^Entity,
 	$Type5: typeid, component5: ^Type5, $Type6: typeid, component6: ^Type6,
 	$Type7: typeid, component7: ^Type7, $Type8: typeid, component8: ^Type8,
 	$Type9: typeid, component9: ^Type9, $Type10: typeid, component10: ^Type10,
-	$Type11: typeid, component11: ^Type11, $Type12: typeid, component12: ^Type12) {
-	set_component(entity, Type1, component1)
-	set_component(entity, Type2, component2)
-	set_component(entity, Type3, component3)
-	set_component(entity, Type4, component4)
-	set_component(entity, Type5, component5)
-	set_component(entity, Type6, component6)
-	set_component(entity, Type7, component7)
-	set_component(entity, Type8, component8)
-	set_component(entity, Type9, component9)
-	set_component(entity, Type10, component10)
-	set_component(entity, Type11, component11)
-	set_component(entity, Type12, component12)
+	$Type11: typeid, component11: ^Type11, $Type12: typeid, component12: ^Type12) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+	id9: u64 = transmute(u64)typeid_of(Type9)
+	id10: u64 = transmute(u64)typeid_of(Type10)
+	id11: u64 = transmute(u64)typeid_of(Type11)
+	id12: u64 = transmute(u64)typeid_of(Type12)
+
+	world: ^World = entity.block.world
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)entity.block.chunks
+	chunk_offset := world.components.size * entity.chunk_idx
+
+	if world.components.count != 12 {
+		/* We need to read existing components values first to save values of ones
+		   that are not being set in this method, but if total components count equals
+		   number of proceeding types in this method we can omit reading for optimization
+		   since all components values will be replaced by new ones. */
+		mem.copy_non_overlapping(&buffer, mem.ptr_offset(storage, chunk_offset), world.components.size)
+	}
+
+	for i := 0; i < world.components.count; i += 1 {
+		id := world.components.ids[i]
+		offset := world.components.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+		} else if id == id4 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+		} else if id == id5 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+		} else if id == id6 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+		} else if id == id7 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component7, size_of(Type7))
+		} else if id == id8 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component8, size_of(Type8))
+		} else if id == id9 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component9, size_of(Type9))
+		} else if id == id10 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component10, size_of(Type10))
+		} else if id == id11 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component11, size_of(Type11))
+		} else if id == id12 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component12, size_of(Type12))
+		}
+	}
+
+	mem.copy_non_overlapping(mem.ptr_offset(storage, chunk_offset), &buffer, world.components.size)
 }
 
 /* Sets 13 components values in the entity by their types and instances (initializers).
@@ -537,20 +1397,68 @@ set_13_components :: #force_inline proc(entity: ^Entity,
 	$Type7: typeid, component7: ^Type7, $Type8: typeid, component8: ^Type8,
 	$Type9: typeid, component9: ^Type9, $Type10: typeid, component10: ^Type10,
 	$Type11: typeid, component11: ^Type11, $Type12: typeid, component12: ^Type12,
-	$Type13: typeid, component13: ^Type13) {
-	set_component(entity, Type1, component1)
-	set_component(entity, Type2, component2)
-	set_component(entity, Type3, component3)
-	set_component(entity, Type4, component4)
-	set_component(entity, Type5, component5)
-	set_component(entity, Type6, component6)
-	set_component(entity, Type7, component7)
-	set_component(entity, Type8, component8)
-	set_component(entity, Type9, component9)
-	set_component(entity, Type10, component10)
-	set_component(entity, Type11, component11)
-	set_component(entity, Type12, component12)
-	set_component(entity, Type13, component13)
+	$Type13: typeid, component13: ^Type13) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+	id9: u64 = transmute(u64)typeid_of(Type9)
+	id10: u64 = transmute(u64)typeid_of(Type10)
+	id11: u64 = transmute(u64)typeid_of(Type11)
+	id12: u64 = transmute(u64)typeid_of(Type12)
+	id13: u64 = transmute(u64)typeid_of(Type13)
+
+	world: ^World = entity.block.world
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)entity.block.chunks
+	chunk_offset := world.components.size * entity.chunk_idx
+
+	if world.components.count != 13 {
+		/* We need to read existing components values first to save values of ones
+		   that are not being set in this method, but if total components count equals
+		   number of proceeding types in this method we can omit reading for optimization
+		   since all components values will be replaced by new ones. */
+		mem.copy_non_overlapping(&buffer, mem.ptr_offset(storage, chunk_offset), world.components.size)
+	}
+
+	for i := 0; i < world.components.count; i += 1 {
+		id := world.components.ids[i]
+		offset := world.components.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+		} else if id == id4 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+		} else if id == id5 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+		} else if id == id6 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+		} else if id == id7 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component7, size_of(Type7))
+		} else if id == id8 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component8, size_of(Type8))
+		} else if id == id9 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component9, size_of(Type9))
+		} else if id == id10 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component10, size_of(Type10))
+		} else if id == id11 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component11, size_of(Type11))
+		} else if id == id12 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component12, size_of(Type12))
+		} else if id == id13 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component13, size_of(Type13))
+		}
+	}
+
+	mem.copy_non_overlapping(mem.ptr_offset(storage, chunk_offset), &buffer, world.components.size)
 }
 
 /* Sets 2 resources values by their types.
@@ -558,9 +1466,29 @@ set_13_components :: #force_inline proc(entity: ^Entity,
    `$TypeN`    : N-th resource type.
    `resourceN` : Reference to N-th resource value (will be copied into storage). */
 set_2_resources :: #force_inline proc(world: ^World,
-	$Type1: typeid, resource1: ^Type1, $Type2: typeid, resource2: ^Type2) {
-	set_resource(world, Type1, resource1)
-	set_resource(world, Type2, resource2)
+	$Type1: typeid, resource1: ^Type1, $Type2: typeid, resource2: ^Type2) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	if world.resources.count != 2 {
+		mem.copy_non_overlapping(&buffer, storage, world.resources.size)
+	}
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource1, size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource2, size_of(Type2))
+		}
+	}
+
+	mem.copy_non_overlapping(storage, &buffer, world.resources.size)
 }
 
 /* Sets 3 resources values by their types.
@@ -569,10 +1497,32 @@ set_2_resources :: #force_inline proc(world: ^World,
    `resourceN` : Reference to N-th resource value (will be copied into storage). */
 set_3_resources :: #force_inline proc(world: ^World,
 	$Type1: typeid, resource1: ^Type1, $Type2: typeid, resource2: ^Type2,
-	$Type3: typeid, resource3: ^Type3) {
-	set_resource(world, Type1, resource1)
-	set_resource(world, Type2, resource2)
-	set_resource(world, Type3, resource3)
+	$Type3: typeid, resource3: ^Type3) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	if world.resources.count != 3 {
+		mem.copy_non_overlapping(&buffer, storage, world.resources.size)
+	}
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource1, size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource2, size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource3, size_of(Type3))
+		}
+	}
+
+	mem.copy_non_overlapping(storage, &buffer, world.resources.size)
 }
 
 /* Sets 4 resources values by their types.
@@ -581,11 +1531,35 @@ set_3_resources :: #force_inline proc(world: ^World,
    `resourceN` : Reference to N-th resource value (will be copied into storage). */
 set_4_resources :: #force_inline proc(world: ^World,
 	$Type1: typeid, resource1: ^Type1, $Type2: typeid, resource2: ^Type2,
-	$Type3: typeid, resource3: ^Type3, $Type4: typeid, resource4: ^Type4) {
-	set_resource(world, Type1, resource1)
-	set_resource(world, Type2, resource2)
-	set_resource(world, Type3, resource3)
-	set_resource(world, Type4, resource4)
+	$Type3: typeid, resource3: ^Type3, $Type4: typeid, resource4: ^Type4) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	if world.resources.count != 4 {
+		mem.copy_non_overlapping(&buffer, storage, world.resources.size)
+	}
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource1, size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource2, size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource3, size_of(Type3))
+		} else if id == id4 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource4, size_of(Type4))
+		}
+	}
+
+	mem.copy_non_overlapping(storage, &buffer, world.resources.size)
 }
 
 /* Sets 5 resources values by their types.
@@ -595,12 +1569,38 @@ set_4_resources :: #force_inline proc(world: ^World,
 set_5_resources :: #force_inline proc(world: ^World,
 	$Type1: typeid, resource1: ^Type1, $Type2: typeid, resource2: ^Type2,
 	$Type3: typeid, resource3: ^Type3, $Type4: typeid, resource4: ^Type4,
-	$Type5: typeid, resource5: ^Type5) {
-	set_resource(world, Type1, resource1)
-	set_resource(world, Type2, resource2)
-	set_resource(world, Type3, resource3)
-	set_resource(world, Type4, resource4)
-	set_resource(world, Type5, resource5)
+	$Type5: typeid, resource5: ^Type5) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	if world.resources.count != 5 {
+		mem.copy_non_overlapping(&buffer, storage, world.resources.size)
+	}
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource1, size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource2, size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource3, size_of(Type3))
+		} else if id == id4 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource4, size_of(Type4))
+		} else if id == id5 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource5, size_of(Type5))
+		}
+	}
+
+	mem.copy_non_overlapping(storage, &buffer, world.resources.size)
 }
 
 /* Sets 6 resources values by their types.
@@ -610,13 +1610,41 @@ set_5_resources :: #force_inline proc(world: ^World,
 set_6_resources :: #force_inline proc(world: ^World,
 	$Type1: typeid, resource1: ^Type1, $Type2: typeid, resource2: ^Type2,
 	$Type3: typeid, resource3: ^Type3, $Type4: typeid, resource4: ^Type4,
-	$Type5: typeid, resource5: ^Type5, $Type6: typeid, resource6: ^Type6) {
-	set_resource(world, Type1, resource1)
-	set_resource(world, Type2, resource2)
-	set_resource(world, Type3, resource3)
-	set_resource(world, Type4, resource4)
-	set_resource(world, Type5, resource5)
-	set_resource(world, Type6, resource6)
+	$Type5: typeid, resource5: ^Type5, $Type6: typeid, resource6: ^Type6) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	if world.resources.count != 6 {
+		mem.copy_non_overlapping(&buffer, storage, world.resources.size)
+	}
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource1, size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource2, size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource3, size_of(Type3))
+		} else if id == id4 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource4, size_of(Type4))
+		} else if id == id5 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource5, size_of(Type5))
+		} else if id == id6 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource6, size_of(Type6))
+		}
+	}
+
+	mem.copy_non_overlapping(storage, &buffer, world.resources.size)
 }
 
 /* Sets 7 resources values by their types.
@@ -627,14 +1655,44 @@ set_7_resources :: #force_inline proc(world: ^World,
 	$Type1: typeid, resource1: ^Type1, $Type2: typeid, resource2: ^Type2,
 	$Type3: typeid, resource3: ^Type3, $Type4: typeid, resource4: ^Type4,
 	$Type5: typeid, resource5: ^Type5, $Type6: typeid, resource6: ^Type6,
-	$Type7: typeid, resource7: ^Type7) {
-	set_resource(world, Type1, resource1)
-	set_resource(world, Type2, resource2)
-	set_resource(world, Type3, resource3)
-	set_resource(world, Type4, resource4)
-	set_resource(world, Type5, resource5)
-	set_resource(world, Type6, resource6)
-	set_resource(world, Type7, resource7)
+	$Type7: typeid, resource7: ^Type7) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	if world.resources.count != 7 {
+		mem.copy_non_overlapping(&buffer, storage, world.resources.size)
+	}
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource1, size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource2, size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource3, size_of(Type3))
+		} else if id == id4 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource4, size_of(Type4))
+		} else if id == id5 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource5, size_of(Type5))
+		} else if id == id6 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource6, size_of(Type6))
+		} else if id == id7 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource7, size_of(Type7))
+		}
+	}
+
+	mem.copy_non_overlapping(storage, &buffer, world.resources.size)
 }
 
 /* Sets 8 resources values by their types.
@@ -645,15 +1703,47 @@ set_8_resources :: #force_inline proc(world: ^World,
 	$Type1: typeid, resource1: ^Type1, $Type2: typeid, resource2: ^Type2,
 	$Type3: typeid, resource3: ^Type3, $Type4: typeid, resource4: ^Type4,
 	$Type5: typeid, resource5: ^Type5, $Type6: typeid, resource6: ^Type6,
-	$Type7: typeid, resource7: ^Type7, $Type8: typeid, resource8: ^Type8) {
-	set_resource(world, Type1, resource1)
-	set_resource(world, Type2, resource2)
-	set_resource(world, Type3, resource3)
-	set_resource(world, Type4, resource4)
-	set_resource(world, Type5, resource5)
-	set_resource(world, Type6, resource6)
-	set_resource(world, Type7, resource7)
-	set_resource(world, Type8, resource8)
+	$Type7: typeid, resource7: ^Type7, $Type8: typeid, resource8: ^Type8) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	if world.resources.count != 8 {
+		mem.copy_non_overlapping(&buffer, storage, world.resources.size)
+	}
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource1, size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource2, size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource3, size_of(Type3))
+		} else if id == id4 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource4, size_of(Type4))
+		} else if id == id5 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource5, size_of(Type5))
+		} else if id == id6 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource6, size_of(Type6))
+		} else if id == id7 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource7, size_of(Type7))
+		} else if id == id8 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource8, size_of(Type8))
+		}
+	}
+
+	mem.copy_non_overlapping(storage, &buffer, world.resources.size)
 }
 
 /* Sets 9 resources values by their types.
@@ -665,16 +1755,50 @@ set_9_resources :: #force_inline proc(world: ^World,
 	$Type3: typeid, resource3: ^Type3, $Type4: typeid, resource4: ^Type4,
 	$Type5: typeid, resource5: ^Type5, $Type6: typeid, resource6: ^Type6,
 	$Type7: typeid, resource7: ^Type7, $Type8: typeid, resource8: ^Type8,
-	$Type9: typeid, resource9: ^Type9) {
-	set_resource(world, Type1, resource1)
-	set_resource(world, Type2, resource2)
-	set_resource(world, Type3, resource3)
-	set_resource(world, Type4, resource4)
-	set_resource(world, Type5, resource5)
-	set_resource(world, Type6, resource6)
-	set_resource(world, Type7, resource7)
-	set_resource(world, Type8, resource8)
-	set_resource(world, Type9, resource9)
+	$Type9: typeid, resource9: ^Type9) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+	id9: u64 = transmute(u64)typeid_of(Type9)
+
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	if world.resources.count != 9 {
+		mem.copy_non_overlapping(&buffer, storage, world.resources.size)
+	}
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource1, size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource2, size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource3, size_of(Type3))
+		} else if id == id4 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource4, size_of(Type4))
+		} else if id == id5 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource5, size_of(Type5))
+		} else if id == id6 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource6, size_of(Type6))
+		} else if id == id7 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource7, size_of(Type7))
+		} else if id == id8 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource8, size_of(Type8))
+		} else if id == id9 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource9, size_of(Type9))
+		}
+	}
+
+	mem.copy_non_overlapping(storage, &buffer, world.resources.size)
 }
 
 /* Sets 10 resources values by their types.
@@ -686,17 +1810,53 @@ set_10_resources :: #force_inline proc(world: ^World,
 	$Type3: typeid, resource3: ^Type3, $Type4: typeid, resource4: ^Type4,
 	$Type5: typeid, resource5: ^Type5, $Type6: typeid, resource6: ^Type6,
 	$Type7: typeid, resource7: ^Type7, $Type8: typeid, resource8: ^Type8,
-	$Type9: typeid, resource9: ^Type9, $Type10: typeid, resource10: ^Type10) {
-	set_resource(world, Type1, resource1)
-	set_resource(world, Type2, resource2)
-	set_resource(world, Type3, resource3)
-	set_resource(world, Type4, resource4)
-	set_resource(world, Type5, resource5)
-	set_resource(world, Type6, resource6)
-	set_resource(world, Type7, resource7)
-	set_resource(world, Type8, resource8)
-	set_resource(world, Type9, resource9)
-	set_resource(world, Type10, resource10)
+	$Type9: typeid, resource9: ^Type9, $Type10: typeid, resource10: ^Type10) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+	id9: u64 = transmute(u64)typeid_of(Type9)
+	id10: u64 = transmute(u64)typeid_of(Type10)
+
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	if world.resources.count != 10 {
+		mem.copy_non_overlapping(&buffer, storage, world.resources.size)
+	}
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource1, size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource2, size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource3, size_of(Type3))
+		} else if id == id4 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource4, size_of(Type4))
+		} else if id == id5 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource5, size_of(Type5))
+		} else if id == id6 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource6, size_of(Type6))
+		} else if id == id7 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource7, size_of(Type7))
+		} else if id == id8 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource8, size_of(Type8))
+		} else if id == id9 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource9, size_of(Type9))
+		} else if id == id10 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource10, size_of(Type10))
+		}
+	}
+
+	mem.copy_non_overlapping(storage, &buffer, world.resources.size)
 }
 
 /* Sets 11 resources values by their types.
@@ -709,18 +1869,56 @@ set_11_resources :: #force_inline proc(world: ^World,
 	$Type5: typeid, resource5: ^Type5, $Type6: typeid, resource6: ^Type6,
 	$Type7: typeid, resource7: ^Type7, $Type8: typeid, resource8: ^Type8,
 	$Type9: typeid, resource9: ^Type9, $Type10: typeid, resource10: ^Type10,
-	$Type11: typeid, resource11: ^Type11) {
-	set_resource(world, Type1, resource1)
-	set_resource(world, Type2, resource2)
-	set_resource(world, Type3, resource3)
-	set_resource(world, Type4, resource4)
-	set_resource(world, Type5, resource5)
-	set_resource(world, Type6, resource6)
-	set_resource(world, Type7, resource7)
-	set_resource(world, Type8, resource8)
-	set_resource(world, Type9, resource9)
-	set_resource(world, Type10, resource10)
-	set_resource(world, Type11, resource11)
+	$Type11: typeid, resource11: ^Type11) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+	id9: u64 = transmute(u64)typeid_of(Type9)
+	id10: u64 = transmute(u64)typeid_of(Type10)
+	id11: u64 = transmute(u64)typeid_of(Type11)
+
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	if world.resources.count != 11 {
+		mem.copy_non_overlapping(&buffer, storage, world.resources.size)
+	}
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource1, size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource2, size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource3, size_of(Type3))
+		} else if id == id4 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource4, size_of(Type4))
+		} else if id == id5 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource5, size_of(Type5))
+		} else if id == id6 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource6, size_of(Type6))
+		} else if id == id7 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource7, size_of(Type7))
+		} else if id == id8 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource8, size_of(Type8))
+		} else if id == id9 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource9, size_of(Type9))
+		} else if id == id10 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource10, size_of(Type10))
+		} else if id == id11 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource11, size_of(Type11))
+		}
+	}
+
+	mem.copy_non_overlapping(storage, &buffer, world.resources.size)
 }
 
 /* Sets 12 resources values by their types.
@@ -733,19 +1931,59 @@ set_12_resources :: #force_inline proc(world: ^World,
 	$Type5: typeid, resource5: ^Type5, $Type6: typeid, resource6: ^Type6,
 	$Type7: typeid, resource7: ^Type7, $Type8: typeid, resource8: ^Type8,
 	$Type9: typeid, resource9: ^Type9, $Type10: typeid, resource10: ^Type10,
-	$Type11: typeid, resource11: ^Type11, $Type12: typeid, resource12: ^Type12) {
-	set_resource(world, Type1, resource1)
-	set_resource(world, Type2, resource2)
-	set_resource(world, Type3, resource3)
-	set_resource(world, Type4, resource4)
-	set_resource(world, Type5, resource5)
-	set_resource(world, Type6, resource6)
-	set_resource(world, Type7, resource7)
-	set_resource(world, Type8, resource8)
-	set_resource(world, Type9, resource9)
-	set_resource(world, Type10, resource10)
-	set_resource(world, Type11, resource11)
-	set_resource(world, Type12, resource12)
+	$Type11: typeid, resource11: ^Type11, $Type12: typeid, resource12: ^Type12) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+	id9: u64 = transmute(u64)typeid_of(Type9)
+	id10: u64 = transmute(u64)typeid_of(Type10)
+	id11: u64 = transmute(u64)typeid_of(Type11)
+	id12: u64 = transmute(u64)typeid_of(Type12)
+
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	if world.resources.count != 12 {
+		mem.copy_non_overlapping(&buffer, storage, world.resources.size)
+	}
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource1, size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource2, size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource3, size_of(Type3))
+		} else if id == id4 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource4, size_of(Type4))
+		} else if id == id5 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource5, size_of(Type5))
+		} else if id == id6 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource6, size_of(Type6))
+		} else if id == id7 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource7, size_of(Type7))
+		} else if id == id8 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource8, size_of(Type8))
+		} else if id == id9 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource9, size_of(Type9))
+		} else if id == id10 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource10, size_of(Type10))
+		} else if id == id11 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource11, size_of(Type11))
+		} else if id == id12 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource12, size_of(Type12))
+		}
+	}
+
+	mem.copy_non_overlapping(storage, &buffer, world.resources.size)
 }
 
 /* Sets 13 resources values by their types.
@@ -759,20 +1997,62 @@ set_13_resources :: #force_inline proc(world: ^World,
 	$Type7: typeid, resource7: ^Type7, $Type8: typeid, resource8: ^Type8,
 	$Type9: typeid, resource9: ^Type9, $Type10: typeid, resource10: ^Type10,
 	$Type11: typeid, resource11: ^Type11, $Type12: typeid, resource12: ^Type12,
-	$Type13: typeid, resource13: ^Type13) {
-	set_resource(world, Type1, resource1)
-	set_resource(world, Type2, resource2)
-	set_resource(world, Type3, resource3)
-	set_resource(world, Type4, resource4)
-	set_resource(world, Type5, resource5)
-	set_resource(world, Type6, resource6)
-	set_resource(world, Type7, resource7)
-	set_resource(world, Type8, resource8)
-	set_resource(world, Type9, resource9)
-	set_resource(world, Type10, resource10)
-	set_resource(world, Type11, resource11)
-	set_resource(world, Type12, resource12)
-	set_resource(world, Type13, resource13)
+	$Type13: typeid, resource13: ^Type13) #no_bounds_check {
+	id1: u64 = transmute(u64)typeid_of(Type1)
+	id2: u64 = transmute(u64)typeid_of(Type2)
+	id3: u64 = transmute(u64)typeid_of(Type3)
+	id4: u64 = transmute(u64)typeid_of(Type4)
+	id5: u64 = transmute(u64)typeid_of(Type5)
+	id6: u64 = transmute(u64)typeid_of(Type6)
+	id7: u64 = transmute(u64)typeid_of(Type7)
+	id8: u64 = transmute(u64)typeid_of(Type8)
+	id9: u64 = transmute(u64)typeid_of(Type9)
+	id10: u64 = transmute(u64)typeid_of(Type10)
+	id11: u64 = transmute(u64)typeid_of(Type11)
+	id12: u64 = transmute(u64)typeid_of(Type12)
+	id13: u64 = transmute(u64)typeid_of(Type13)
+
+	buffer: [STACK_BUFFER_SIZE]u8 = ---
+	storage: ^u8 = cast(^u8)world.resources.storage
+
+	if world.resources.count != 13 {
+		mem.copy_non_overlapping(&buffer, storage, world.resources.size)
+	}
+
+	for i := 0; i < world.resources.count; i += 1 {
+		id := world.resources.ids[i]
+		offset := world.resources.types[i].offset
+
+		if id == id1 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource1, size_of(Type1))
+		} else if id == id2 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource2, size_of(Type2))
+		} else if id == id3 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource3, size_of(Type3))
+		} else if id == id4 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource4, size_of(Type4))
+		} else if id == id5 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource5, size_of(Type5))
+		} else if id == id6 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource6, size_of(Type6))
+		} else if id == id7 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource7, size_of(Type7))
+		} else if id == id8 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource8, size_of(Type8))
+		} else if id == id9 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource9, size_of(Type9))
+		} else if id == id10 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource10, size_of(Type10))
+		} else if id == id11 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource11, size_of(Type11))
+		} else if id == id12 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource12, size_of(Type12))
+		} else if id == id13 {
+			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), resource13, size_of(Type13))
+		}
+	}
+
+	mem.copy_non_overlapping(storage, &buffer, world.resources.size)
 }
 
 /* Gets 2 references to the 2 components values by their types.

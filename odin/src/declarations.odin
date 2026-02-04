@@ -7,6 +7,9 @@ package moecs
 DYNAMIC_CHUNK_SIZE : int : 500
 /* Static lifetime chunk size. */
 STATIC_CHUNK_SIZE  : int : 300
+/* Bytes buffer size used for reading/writing components.
+   Must be not less that total size of all registered components. */
+STACK_BUFFER_SIZE : int : 16 * 1024
 
 /* Maximum components count available for adding to entity. */
 MAX_COMPONENTS_COUNT : int : 128

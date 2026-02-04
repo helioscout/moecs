@@ -1,6 +1,7 @@
 package moecs
 
 import "core:slice"
+import "core:mem"
 
 /* Component elment type description. */
 @(private="package")
@@ -55,7 +56,6 @@ components_add :: proc(components: ^Components, type: typeid, component: Compone
 
 	components.ids[components.count] = transmute(u64)type
 	components.types[components.count] = component
-	components.size += component.size
 
 	components.count += 1
 }
@@ -98,7 +98,17 @@ components_adjust :: proc(components: ^Components) {
 
 	components.types[0].offset = 0
 
-	for i in 1..<components.count {
-		components.types[i].offset = components.types[i - 1].offset + components.types[i - 1].size
+	offset : = 0
+	chunk_align := 1
+
+	for i in 0..<components.count {
+		info := type_info_of(components.types[i].type)
+
+		offset = mem.align_forward_int(offset, info.align)
+		components.types[i].offset = offset
+		offset += info.size
+		chunk_align = max(chunk_align, info.align)
 	}
+
+	components.size = mem.align_forward_int(offset, chunk_align)
 }

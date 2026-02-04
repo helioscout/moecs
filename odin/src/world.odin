@@ -150,6 +150,9 @@ run :: proc(world: ^World) {
 
 	components_adjust(&world.components)
 
+	if world.components.size > STACK_BUFFER_SIZE do panic("Total components size must be less than STACK_BUFFER_SIZE.")
+	if world.resources.size > STACK_BUFFER_SIZE do panic("Total resources size must be less than STACK_BUFFER_SIZE.")
+
 	if (world.resources.count > 0) {
 		resources_adjust(&world.resources)
 		

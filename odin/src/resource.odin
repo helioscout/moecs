@@ -1,6 +1,7 @@
 package moecs
 
 import "core:slice"
+import "core:mem"
 
 /* Resource element type description. */
 @(private="package")
@@ -55,7 +56,6 @@ resources_add :: proc(resources: ^Resources, type: typeid, resource: Resource) {
 
 	resources.ids[resources.count] = transmute(u64)type
 	resources.types[resources.count] = resource
-	resources.size += resource.size
 
 	resources.count += 1
 }
@@ -98,7 +98,17 @@ resources_adjust :: proc(resources: ^Resources) {
 
 	resources.types[0].offset = 0
 
-	for i in 1..<resources.count {
-		resources.types[i].offset = resources.types[i - 1].offset + resources.types[i - 1].size
+	offset := 0
+	chunk_align := 1
+	
+	for i in 0..<resources.count {
+		info := type_info_of(resources.types[i].type)
+
+		offset = mem.align_forward_int(offset, info.align)
+		resources.types[i].offset = offset
+		offset += info.size
+		chunk_align = max(chunk_align, info.align)
 	}
+
+	resources.size = mem.align_forward_int(offset, chunk_align)
 }
