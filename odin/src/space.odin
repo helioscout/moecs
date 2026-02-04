@@ -12,6 +12,16 @@ size :: proc() -> int {
 init :: proc() {
 }
 
+/* Free all worlds of he space. */
+destroy :: proc() {
+	for world in worlds {
+		free_world(world)
+		free(world)
+	}
+
+	delete(worlds)
+}
+
 /* Creates new world.
    `approach` : Query match approach.
    `returns`  : Pointer to newly created world. */

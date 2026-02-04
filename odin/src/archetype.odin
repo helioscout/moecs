@@ -25,3 +25,10 @@ archetype_remove :: #force_inline proc(entity: ^Entity) {
 		entity.archetype = nil
 	}
 }
+
+/* Free all archetype resources.
+   `archetype` : Pointer to the achetype. */
+@(private="package")
+free_archetype :: proc(archetype: ^Archetype) {
+	delete(archetype.entities)
+}

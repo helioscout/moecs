@@ -1,6 +1,5 @@
 package moecs
 
-import "base:sanitizer"
 import "core:mem"
 import "core:slice"
 import str "core:strings"
@@ -116,12 +115,13 @@ unmount :: proc(world: ^World, name: string) {
 	system: ^System = remove_system(world, &world.systems, name)
 
 	if system != nil {
-		delete(system.entities)
-		
 		remove_system(world, &world.schedule.start, name)
 		remove_system(world, &world.schedule.pre_update, name)
 		remove_system(world, &world.schedule.update, name)
 		remove_system(world, &world.schedule.post_update, name)
+
+		delete(system.entities)
+		free(system)
 	}
 }
 
@@ -432,6 +432,44 @@ perform :: proc(world: ^World) {
 	world.performing = false
 }
 
+/* Free all world resources.
+   `world` : Pointer to the world. */
+@(private="package")
+free_world :: proc(world: ^World) {
+	for system in world.systems {
+		free_system(system)
+		free(system)
+	}
+	
+	for archetype in world.archetypes {
+		free_archetype(archetype)
+		free(archetype)
+	}
+
+	for block in world.dynamics {
+		free_block(block)
+		free(block)
+	}
+	
+	for block in world.statics {
+		free_block(block)
+		free(block)
+	}
+
+	delete(world.systems)
+	delete(world.archetypes)
+	delete(world.dynamics)
+	delete(world.statics)
+	delete(world.schedule.start)
+	delete(world.schedule.pre_update)
+	delete(world.schedule.update)
+	delete(world.schedule.post_update)
+	delete(world.deffered.despawning)
+	delete(world.deffered.archetyping)
+
+	free(world.resources.storage)
+}
+
 /* Creates new archetype.
    `world`      : Pointer to the world.
    `components` : Components bitset.
@@ -474,6 +512,7 @@ get_archetype :: proc(world: ^World, components: [COMPONENTS_MARKER_SIZE]uint,
 delete_archetype :: proc(world: ^World, archetype: ^Archetype) {
 	if index, ok := slice.linear_search(world.archetypes[:], archetype); ok {
 		unordered_remove(&world.archetypes, index)
+		free(archetype)
 	}
 }
 

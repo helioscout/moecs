@@ -144,3 +144,11 @@ block_pop_free_index :: proc(block: ^Block) -> int {
 
 	return idx
 }
+
+/* Free all block resources.
+   `block`   : Reference to the block. */
+@(private="package")
+free_block :: proc(block: ^Block) {
+	delete(block.entities)
+	free(block.chunks)
+}

@@ -111,4 +111,6 @@ components_adjust :: proc(components: ^Components) {
 	}
 
 	components.size = mem.align_forward_int(offset, chunk_align)
+
+	delete(types)
 }

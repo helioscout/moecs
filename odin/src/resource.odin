@@ -111,4 +111,6 @@ resources_adjust :: proc(resources: ^Resources) {
 	}
 
 	resources.size = mem.align_forward_int(offset, chunk_align)
+
+	delete(types)
 }

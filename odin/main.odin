@@ -196,6 +196,21 @@ system3 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 }
 
 main :: proc() {
+	when ODIN_DEBUG {
+		track: mem.Tracking_Allocator
+		mem.tracking_allocator_init(&track, context.allocator)
+		context.allocator = mem.tracking_allocator(&track)
+
+		defer {
+			if len(track.allocation_map) > 0 {
+				for _, entry in track.allocation_map {
+					fmt.eprintf("%v leaked %v bytes\n", entry.location, entry.size)
+				}
+			}
+			mem.tracking_allocator_destroy(&track)
+		}
+	}
+
 	_time: time.Time = ---
 	_duration: time.Duration = ---
 	
@@ -538,6 +553,8 @@ main :: proc() {
 	_duration = time.diff(_time, time.now())
 	fmt.printfln("-- ellapsed: %v ms", time.duration_milliseconds(_duration))
 	fmt.printfln("-- ellapsed: %v", _duration)
+
+	ecs.destroy()
 
 	// buffer: [10]byte
 	// os.read(os.stdin, buffer[:])
