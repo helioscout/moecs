@@ -64,14 +64,17 @@ register :: proc(world: ^World, element: Element, $Type: typeid) {
    `world`      : Pointer to the world.
    `definition` : System definition. */
 mount :: proc(world: ^World, definition: SystemDefinition) {
-	if len(definition.name) > 0 && has_system(world, definition.name) do panic("System with such name has already been mounted.")
+	named := len(definition.name) > 0
+	
+	if named && has_system(world, definition.name) do panic("System with such name has already been mounted.")
+	if !named && definition.phase == .MANUAL do panic("Systems with MANUAL phase must have a name.")
 	if definition.callback == nil do panic("Callback must be provided.")
 	if world.running do panic("You can't change already running world.")
 
 	system : ^System = new(System)
 	system^ = { name = definition.name, state = { .ENABLED }, callback = definition.callback,
 				lifetime = card(definition.lifetime) == 0 ? { .DYNAMIC, .STATIC } : definition.lifetime,
-				phase = .UPDATE }
+				phase = definition.phase }
 
 	if len(definition.components) == 0 && len(definition.tags) == 0 {
 		system.state += { .IS_TASK }
@@ -98,7 +101,7 @@ mount :: proc(world: ^World, definition: SystemDefinition) {
 
 	}
 
-	switch definition.phase {
+	#partial switch definition.phase {
 		case .START: append(&world.schedule.start, system)
 		case .PRE_UPDATE: append(&world.schedule.pre_update, system)
 		case .UPDATE: append(&world.schedule.update, system)
@@ -430,6 +433,27 @@ perform :: proc(world: ^World) {
 	delete(archetypes)
 
 	world.performing = false
+}
+
+/* Execute system by its name.
+   `world`   : Pointer to the world.
+   `name`    : System name. */
+execute :: proc(world: ^World, name: string) {
+	if system, ok := get_system(world, name); ok {
+		if is_task(system) {
+			system.callback(nil, world)
+		} else {
+			for archetype in world.archetypes {
+				if (.HAS_TAGS not_in system.state ||
+				   marker_is_subset(MAX_TAGS_COUNT, TAGS_MARKER_SIZE, archetype.tags, system.tags)) &&
+				   (.HAS_COMPONENTS not_in system.state ||
+				   marker_is_subset(MAX_COMPONENTS_COUNT, COMPONENTS_MARKER_SIZE, archetype.components, system.components)) {
+				   	/* Call system callback for matched archetype. */
+					system.callback(&archetype.entities, world)
+				}
+			}
+		}
+	}
 }
 
 /* Free all world resources.

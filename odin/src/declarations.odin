@@ -79,7 +79,7 @@ Approach :: enum {
 	ARCHETYPE
 }
 
-/* System running phase, determine when system should run diring pipeline. */
+/* System running phase, determine when system should run during pipeline. */
 Phase :: enum u8 {
 	/* System will run once at the beggining of the first progress step. */
 	START       = 1,
@@ -88,7 +88,9 @@ Phase :: enum u8 {
 	/* Main phase of each progress step. */
 	UPDATE      = 0,
 	/* System will run after update phase. */
-	POST_UPDATE = 3
+	POST_UPDATE = 3,
+	/* System can be executed only manually using its name. */
+	MANUAL      = 4
 }
 
 @(private) Schedule :: struct {

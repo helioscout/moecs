@@ -109,15 +109,15 @@ system2 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 		// res4 := ecs.get_resource(world, Resource4)
 		// res5 := ecs.get(world, Resource5)
 		// res1, res2, res3, res4, res5 := ecs.get(world, Resource1, Resource2, Resource3, Resource4, Resource5)
-		// pos, center, vec, health, vel, rot := ecs.get(entity, Position, Center, VecType, Health, Velocity, Rotation)
+		pos, center, vec, health, vel, rot := ecs.get(entity, Position, Center, VecType, Health, Velocity, Rotation)
 		// pos, center, vec, health, vel := ecs.get(entity, Position, Center, VecType, Health, Velocity)
 		// pos, center, vec, health := ecs.get(entity, Position, Center, VecType, Health)
 		// pos, center, vec := ecs.get(entity, Position, Center, VecType)
 		// pos, center := ecs.get(entity, Position, Center)
 		// pos := ecs.get(entity, Position)
 
-		// pos.x += 1
-		// center.cx += 1
+		pos.x += 1
+		center.cx += 1
 		// fmt.println("s2: ", pos, center)
 		// res3.data[0] = 3
 		// res4.pos.x += 1
@@ -137,14 +137,14 @@ system2 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 		// 	Resource3, &Resource3 { some = 300 },
 		// 	Resource4, &Resource4 { pos = { x = 1, y = 2 } },
 		// 	Resource5, &Resource5 { arr = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 } })
-		ecs.add(entity,
-			Position, &Position { x = 10, y = 10 },
-			Center, &Center { cx = 20, cy = 20 },
-			Health, &Health { hp = 30 },
-			Rotation, &Rotation { angle = 90 },
-			Velocity, &Velocity { 50 },
-			VecType, &VecType { 10, 20 },
-			Mutation, &Mutation { skin = 11 })
+		// ecs.add(entity,
+		// 	Position, &Position { x = 10, y = 10 },
+		// 	Center, &Center { cx = 20, cy = 20 },
+		// 	Health, &Health { hp = 30 },
+		// 	Rotation, &Rotation { angle = 90 },
+		// 	Velocity, &Velocity { 50 },
+		// 	VecType, &VecType { 10, 20 },
+		// 	Mutation, &Mutation { skin = 11 })
 	}
 }
 
@@ -156,15 +156,15 @@ system3 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 		// res4 := ecs.get_resource(world, Resource4)
 		// res5 := ecs.get(world, Resource5)
 		// res1, res2, res3, res4, res5 := ecs.get(world, Resource1, Resource2, Resource3, Resource4, Resource5)
-		// pos, center, vec, health, vel, rot := ecs.get(entity, Position, Center, VecType, Health, Velocity, Rotation)
+		pos, center, vec, health, vel, rot := ecs.get(entity, Position, Center, VecType, Health, Velocity, Rotation)
 		// pos, center, vec, health, vel := ecs.get(entity, Position, Center, VecType, Health, Velocity)
 		// pos, center, vec, health := ecs.get(entity, Position, Center, VecType, Health)
 		// pos, center, vec := ecs.get(entity, Position, Center, VecType)
 		// pos, center := ecs.get(entity, Position, Center)
 		// pos := ecs.get(entity, Position)
 
-		// pos.x += 1
-		// center.cx += 1
+		pos.x += 1
+		center.cx += 1
 		// fmt.println("s3: ", pos, center)
 		// res3.data[0] = 3
 		// res4.pos.x += 1
@@ -184,15 +184,19 @@ system3 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 		// 	Resource3, &Resource3 { some = 300 },
 		// 	Resource4, &Resource4 { pos = { x = 1, y = 2 } },
 		// 	Resource5, &Resource5 { arr = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 } })
-		ecs.add(entity,
-			Position, &Position { x = 10, y = 10 },
-			Center, &Center { cx = 20, cy = 20 },
-			Health, &Health { hp = 30 },
-			Rotation, &Rotation { angle = 90 },
-			Velocity, &Velocity { 50 },
-			VecType, &VecType { 10, 20 },
-			Mutation, &Mutation { skin = 11 })
+		// ecs.add(entity,
+		// 	Position, &Position { x = 10, y = 10 },
+		// 	Center, &Center { cx = 20, cy = 20 },
+		// 	Health, &Health { hp = 30 },
+		// 	Rotation, &Rotation { angle = 90 },
+		// 	Velocity, &Velocity { 50 },
+		// 	VecType, &VecType { 10, 20 },
+		// 	Mutation, &Mutation { skin = 11 })
 	}
+}
+
+system4 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
+	fmt.println("-- manual system...")
 }
 
 main :: proc() {
@@ -240,6 +244,7 @@ main :: proc() {
 	ecs.mount(world, { components = { Position, Center }, tags = { Tag1, Tag2 }, callback = system3})
 	ecs.mount(world, { name = "s1", components = { Position }, tags = { Tag1 }, callback = system2 })
 	ecs.mount(world, { name = "s2", components = { Center }, tags = { Tag2 }, callback = system2 })
+	ecs.mount(world, { name = "m_sys", callback = system4, phase = .MANUAL })
 	ecs.run(world)
 	fmt.println("--- world is running ---")
 
@@ -553,6 +558,8 @@ main :: proc() {
 	_duration = time.diff(_time, time.now())
 	fmt.printfln("-- ellapsed: %v ms", time.duration_milliseconds(_duration))
 	fmt.printfln("-- ellapsed: %v", _duration)
+
+	ecs.execute(world, "m_sys")
 
 	ecs.destroy()
 
