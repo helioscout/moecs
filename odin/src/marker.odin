@@ -62,7 +62,7 @@ marker_equals :: #force_inline proc($count: int, $size: uint, marker1: [size]uin
 
 /* Clones marker.
    `$size`   : Marker (array) size.
-   `marker`  : Pointer to bitset (marker array).
+   `marker`  : Bitset (marker array).
    `returns` : New marker. */
 marker_clone :: #force_inline proc($size: uint, marker: [size]uint) -> [size]uint #no_bounds_check {
 	clone: [size]uint
@@ -70,6 +70,13 @@ marker_clone :: #force_inline proc($size: uint, marker: [size]uint) -> [size]uin
 	for i in 0..<size do clone[i] = marker[i]
 
 	return clone
+}
+
+/* Set all marker's bits to 0.
+   `$size`   : Marker (array) size.
+   `marker`  : Pointer to bitset (marker array). */
+marker_clear :: #force_inline proc($size: uint, marker: ^[size]uint) #no_bounds_check {
+	for i in 0..<size do marker[i] = 0
 }
 
 /* Checks if all bits of one marker (subset) included into other marker.

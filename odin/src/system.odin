@@ -23,7 +23,10 @@ System :: struct {
 	entities : [dynamic]^Entity,
 	/* Callback function that will be invoked each step of the world progress.
 	   Disable system to pause invokation. */
-	callback : SystemCallback
+	callback : SystemCallback,
+	/* Components types list that should match while the system query.
+	   Cloned from definition for further marker set after sorting components. */
+	component_types : []typeid
 }
 
 /* System definition, for mounting. */
@@ -75,4 +78,5 @@ is_task :: #force_inline proc(system: ^System) -> bool {
 @(private="package")
 free_system :: proc(system: ^System) {
 	delete(system.entities)
+	delete(system.component_types)
 }

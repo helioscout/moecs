@@ -74,7 +74,7 @@ mount :: proc(world: ^World, definition: SystemDefinition) {
 	system : ^System = new(System)
 	system^ = { name = definition.name, state = { .ENABLED }, callback = definition.callback,
 				lifetime = card(definition.lifetime) == 0 ? { .DYNAMIC, .STATIC } : definition.lifetime,
-				phase = definition.phase }
+				phase = definition.phase, component_types = slice.clone(definition.components) }
 
 	if len(definition.components) == 0 && len(definition.tags) == 0 {
 		system.state += { .IS_TASK }
@@ -154,11 +154,26 @@ run :: proc(world: ^World) {
 	components_adjust(&world.components)
 
 	if world.components.size > STACK_BUFFER_SIZE do panic("Total components size must be less than STACK_BUFFER_SIZE.")
-	if world.resources.size > STACK_BUFFER_SIZE do panic("Total resources size must be less than STACK_BUFFER_SIZE.")
+
+	/* We must re-set all component markers for systems, because order of components
+	   has been changed during adjustment and as a result components indexes changed. */
+	for system in world.systems {
+		if len(system.component_types) > 0 {
+			marker_clear(COMPONENTS_MARKER_SIZE, &system.components)
+			
+			for type in system.component_types {
+				if idx, ok := component_index(&world.components, type); ok {
+					marker_set(COMPONENTS_MARKER_SIZE, &system.components, idx)
+				}
+			}
+		}
+	}
 
 	if (world.resources.count > 0) {
 		resources_adjust(&world.resources)
 		
+		if world.resources.size > STACK_BUFFER_SIZE do panic("Total resources size must be less than STACK_BUFFER_SIZE.")
+
 		ptr, err := mem.alloc(world.resources.size)
 		if err != .None do panic(fmt.tprintf("Storage memory allocation error: %v", err))
 		world.resources.storage = ptr
