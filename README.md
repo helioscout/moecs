@@ -1,6 +1,6 @@
 This is my modest attempt at creating an ECS (Entity Component System).\
 \
-##Memory concept
+### Memory concept
 The main idea is that memory for components is divided into blocks, and entities belong to two lifetimes:
 - DYNAMIC: usual entities that are spawned and despawned while world exists;
 - STATIC: entities that lives forever (same as the world lifetime), like asteroids, planets, buildings;\
@@ -20,7 +20,7 @@ There is no limitations of entities count, but for components and tags:
 - MAX_COMPONENTS_COUNT: Maximum components count available for adding to entity;
 - MAX_TAGS_COUNT: Maximum tags count available for adding to entity.\
 \
-##Worlds
+### Worlds
 The top container is the space (ecs) that consists of worlds. You can create as much worlds as you want and all of them will be proceeded separately. But as a rule, one world is enough for you.
 ```odin
 import ecs "moecs/src"
