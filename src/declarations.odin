@@ -44,7 +44,8 @@ Element :: enum {
 	   Must be defined as a typedef with a simple fundamental underlying type (typedef Tag = int). */
 	TAG,
 	/* Resource element type for storing data in the world that has only one instance, singleton.
-	   Must be defined as a struct or typedef custom typs. */
+	   Must be defined as a struct or typedef custom type. Resources are not entities without components
+	   as in other ECS, they have own storage and methods. */
 	RESOURCE,
 	/* System element type for running actions at each step of the world progress. */
 	SYSTEM
