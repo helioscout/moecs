@@ -316,10 +316,10 @@ main :: proc() {
 	// 		ecs.despawn(world, entity)
 	// 	})
 
-	// 	// fmt.printfln("-- before: %v", len(world.deffered.despawning))
+	// 	// fmt.printfln("-- before: %v", len(world.deferred.despawning))
 	// 	ecs.perform(world)
 	// 	// fmt.println(world.deleted)
-	// 	// fmt.printfln("-- after: %v", len(world.deffered.despawning))
+	// 	// fmt.printfln("-- after: %v", len(world.deferred.despawning))
 	// }
 
 	// _duration = time.diff(_time, time.now())

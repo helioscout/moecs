@@ -45,14 +45,9 @@ main :: proc() {
 Kinds of elements that the world can consist of represented with `Element` enum.
 | Member         | Description                                                                                  |
 |----------------|----------------------------------------------------------------------------------------------|
-| COMPONENT      | Component element type (`Position`, `Mass`, `Velocity`).                                      
-                   Must be defined as a struct or distinct custom type.                                         |
-| TAG            | Tag element type for marking entities with some kind of characteristic.                       
-                   Must be defined as a `typedef` with a simple fundamental underlying type                      
-                   (`typedef Tag = int`).                                                                       |
-| RESOURCE       | Resource element type for storing data in the world that has only one instance, singleton.    
-                   Must be defined as a struct or `typedef` custom type. Resources are not entities without      
-                   components as in other ECS, they have own storage and methods.                               |
+| COMPONENT      | Component element type (`Position`, `Mass`, `Velocity`). Must be defined as a struct or distinct custom type. |
+| TAG            | Tag element type for marking entities with some kind of characteristic. Must be defined as a `typedef` with a simple fundamental underlying type (`typedef Tag = int`). |
+| RESOURCE       | Resource element type for storing data in the world that has only one instance, singleton. Must be defined as a struct or `typedef` custom type. Resources are not entities without components as in other ECS, they have own storage and methods. |
 | SYSTEM         | System element type for running actions at each step of the world progress.                  |
 
 You must register world elements before running the world.
@@ -80,5 +75,17 @@ main :: proc() {
 | Procedure      | Description                                                                                  |
 |----------------|----------------------------------------------------------------------------------------------|
 | register()     | Registers element type for the world.                                                        |
+
+### Mutability and deferred actions
+There are methods for getting resources and components: `get()` and `get_mut()`. Use `get_mut()` only if you need to modify at least one instance of receiving resource/component types, otherwise use `get()` - it is little bit faster. Also use overloaded procedures to get a bunch of elements by one procedure call, the same is true for setting values with `set()` procedure. Bunch methods gives you more performance because use less memory read/write operations.\
+\
+When you `despawn` entities, these actions will be deferred. We need to keep entities in the archetypes till end of the current progress step, otherwise iterators inside systems code can lead to bugs, as they iterate over collections of the archetypes which we need to delete entities from. Entities will be marked as `DESPAWNING` but despawned (deleted from the block) at performing stage. Also, a new entity can be written in place of a deleted entity, then bugs are inevitable since the reference to the deleted entity will continue to be stored in the archetype collection.\
+\
+When you `add`/`remove` a component, or `set`/`unset` a tag they will still present in current archetypes till end of the current progress step. When `tags`/`components` is being `added`/`removed` to the entity and world is already running, entities should not be moved to other archetypes till end of the current progress step, so this archetyping action is deferred to the perform stage.\
+\
+This means that changes will will be applied only at the next world progress step.\
+But **setting values to resource/components is being applied immediately**.
+
+### Resources
 
 [![Hits](https://hits.sh/sr.ht/~modevstudio/moecs.svg)](https://hits.sh/sr.ht/~modevstudio/moecs/)

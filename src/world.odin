@@ -29,10 +29,10 @@ World :: struct {
 	running : bool,
 	/* Indicates that START phase has already executed. */
 	started : bool,
-	/* Indicates that the world is in performing stage (runs deffered actions). */
+	/* Indicates that the world is in performing stage (runs deferred actions). */
 	performing : bool,
-	/* Deffered actions for the world. */
-	deffered : Deffered
+	/* Deferred actions for the world. */
+	deferred : Deferred
 }
 
 /* Initializes the world.
@@ -202,7 +202,7 @@ despawn_entity :: proc(world: ^World, entity: ^Entity) {
 	if deleted(entity) do return
 	
 	if world.approach == .ARCHETYPE && world.running && !world.performing {
-		append(&world.deffered.despawning, entity)
+		append(&world.deferred.despawning, entity)
 		entity.state += { .DESPAWNING }
 	} else {
 		block_delete(entity.block, entity.chunk_idx)
@@ -413,28 +413,28 @@ step_iteration :: #force_inline proc(world: ^World, systems: ^[dynamic]^System) 
 	}
 }
 
-/* Perform deffered actions for the world.
+/* Perform deferred actions for the world.
    `world` : Pointer to the world. */
 perform :: proc(world: ^World) {
 	world.performing = true
 
-	/* Perform deffered despawning. */
-	for entity in world.deffered.despawning {
+	/* Perform deferred despawning. */
+	for entity in world.deferred.despawning {
 		despawn_entity(world, entity)
 		archetype_remove(entity)
 	}
 
-	clear(&world.deffered.despawning)
+	clear(&world.deferred.despawning)
 
-	/* Perform deffered archetyping. */
-	for entity in world.deffered.archetyping {
+	/* Perform deferred archetyping. */
+	for entity in world.deferred.archetyping {
 		if .ARCHETYPING in entity.state && !deleted(entity) {
 			archetyping(entity)
 			entity.state -= { .ARCHETYPING }
 		}
 	}
 
-	clear(&world.deffered.archetyping)
+	clear(&world.deferred.archetyping)
 
 	/* We need to delete empty archetypes. */
 	archetypes := slice.filter(world.archetypes[:],
@@ -503,8 +503,8 @@ free_world :: proc(world: ^World) {
 	delete(world.schedule.pre_update)
 	delete(world.schedule.update)
 	delete(world.schedule.post_update)
-	delete(world.deffered.despawning)
-	delete(world.deffered.archetyping)
+	delete(world.deferred.despawning)
+	delete(world.deferred.archetyping)
 
 	free(world.resources.storage)
 }

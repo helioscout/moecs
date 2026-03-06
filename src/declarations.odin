@@ -63,9 +63,9 @@ ElementState :: enum {
 	HAS_COMPONENTS,
 	/* Indicates that a system is task, has no components or tags in match query. */
 	IS_TASK,
-	/* Entity should be re-archetyped at deffered (perform) stage. */
+	/* Entity should be re-archetyped at deferred (perform) stage. */
 	ARCHETYPING,
-	/* Entity should be despawned at deffered (perform) stage. */
+	/* Entity should be despawned at deferred (perform) stage. */
 	DESPAWNING
 }
 
@@ -105,8 +105,8 @@ Phase :: enum u8 {
 	post_update : [dynamic]^System
 }
 
-/* Deffered actions for the world. */
-@(private) Deffered :: struct {
+/* Deferred actions for the world. */
+@(private) Deferred :: struct {
 	/* Despawning entities. We need to keep them in the archetypes till end of the current progress step,
 	   otherwise iterators inside systems code can lead to bugs, as they iterate over collections of
 	   the archetypes which we need to delete entities from. Entities will be marked as DESPAWNING but
@@ -115,8 +115,8 @@ Phase :: enum u8 {
 	   continue to be stored in the archetype collection. */
 	despawning : [dynamic]^Entity,
 	/* When tags/components is being added/removed to the entity and world is already running,
-	   entites should not be moved to other archetypes till end of the current progress step,
-	   so this archetyping action is deffered to the perform stage. */
+	   entities should not be moved to other archetypes till end of the current progress step,
+	   so this archetyping action is deferred to the perform stage. */
 	archetyping : [dynamic]^Entity
 }
 

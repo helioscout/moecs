@@ -258,7 +258,7 @@ archetyping :: proc(entity: ^Entity) {
 
 	if world.running && !world.performing {
 		if .ARCHETYPING not_in entity.state {
-			append(&world.deffered.archetyping, entity)
+			append(&world.deferred.archetyping, entity)
 			entity.state += { .ARCHETYPING }
 		}
 
