@@ -45,14 +45,14 @@ main :: proc() {
 Kinds of elements that the world can consist of represented with `Element` enum.
 | Member         | Description                                                                                  |
 |----------------|----------------------------------------------------------------------------------------------|
-| COMPONENT      | Component element type (`Position`, `Mass`, `Velocity`).                                     |
-|                | Must be defined as a struct or distinct custom type.                                         |
-| TAG            | Tag element type for marking entities with some kind of characteristic.                      |
-|                | Must be defined as a `typedef` with a simple fundamental underlying type                     |
-|                | (`typedef Tag = int`).                                                                       |
-| RESOURCE       | Resource element type for storing data in the world that has only one instance, singleton.   |
-|                | Must be defined as a struct or `typedef` custom type. Resources are not entities without     |
-|                | components as in other ECS, they have own storage and methods.                               |
+| COMPONENT      | Component element type (`Position`, `Mass`, `Velocity`).                                      
+                   Must be defined as a struct or distinct custom type.                                         |
+| TAG            | Tag element type for marking entities with some kind of characteristic.                       
+                   Must be defined as a `typedef` with a simple fundamental underlying type                      
+                   (`typedef Tag = int`).                                                                       |
+| RESOURCE       | Resource element type for storing data in the world that has only one instance, singleton.    
+                   Must be defined as a struct or `typedef` custom type. Resources are not entities without      
+                   components as in other ECS, they have own storage and methods.                               |
 | SYSTEM         | System element type for running actions at each step of the world progress.                  |
 
 You must register world elements before running the world.
@@ -64,14 +64,14 @@ main :: proc() {
   world := ecs.new_world()
 
   /* Register components */
-	ecs.register(world, .COMPONENT, Position)
-	ecs.register(world, .COMPONENT, Rotation)
+  ecs.register(world, .COMPONENT, Position)
+  ecs.register(world, .COMPONENT, Rotation)
   /* Register resources. */
-	ecs.register(world, .RESOURCE, GameState)
-	ecs.register(world, .RESOURCE, Sprites)
+  ecs.register(world, .RESOURCE, GameState)
+  ecs.register(world, .RESOURCE, Sprites)
   /* Register tags. */
-	ecs.register(world, .TAG, Player)
-	ecs.register(world, .TAG, Asteroid)
+  ecs.register(world, .TAG, Player)
+  ecs.register(world, .TAG, Asteroid)
 
   ecs.destroy()
 }
