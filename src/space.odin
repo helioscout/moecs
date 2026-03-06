@@ -12,7 +12,7 @@ size :: proc() -> int {
 init :: proc() {
 }
 
-/* Free all worlds of he space. */
+/* Free all worlds of the space. */
 destroy :: proc() {
 	for world in worlds {
 		free_world(world)
