@@ -11,7 +11,7 @@ Because static lifetime entities lives wile the world exists there are no deleti
 \
 ![Static](docs/static.png)\
 \
-There are main constants that you can change when copying ECS into your project to change performance according to your game specific:
+There are main constants that you can change when copying ECS into your project if you want to experiment with performance:
 - DYNAMIC_CHUNK_SIZE: Dynamic lifetime chunk size;
 - STATIC_CHUNK_SIZE: Static lifetime chunk size;\
 \
