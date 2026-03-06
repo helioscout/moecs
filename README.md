@@ -1,4 +1,4 @@
-This is my modest attempt at creating an ECS (Entity Component System).\
+This is my modest attempt at creating an ECS (Entity Component System).
 
 ### Memory concept
 The main idea is that memory for components is divided into blocks, and entities belong to two lifetimes:
@@ -18,7 +18,15 @@ There are main constants that you can change when copying ECS into your project 
 \
 There is no limitations of entities count, but for components and tags:
 - MAX_COMPONENTS_COUNT: Maximum components count available for adding to entity;
-- MAX_TAGS_COUNT: Maximum tags count available for adding to entity.\
+- MAX_TAGS_COUNT: Maximum tags count available for adding to entity.
+
+### Setup
+Clone moecs repository into your project or nearby and import `src` forlder.
+```odin
+import ecs "moecs/src"
+
+main :: proc() { /* ... */ }
+```
 
 ### Worlds
 The top container is the space (ecs) that consists of worlds. You can create as much worlds as you want and all of them will be proceeded separately. But as a rule, one world is enough for you.
@@ -84,8 +92,51 @@ When you `despawn` entities, these actions will be deferred. We need to keep ent
 When you `add`/`remove` a component, or `set`/`unset` a tag they will still present in current archetypes till end of the current progress step. When `tags`/`components` is being `added`/`removed` to the entity and world is already running, entities should not be moved to other archetypes till end of the current progress step, so this archetyping action is deferred to the perform stage.\
 \
 This means that changes will will be applied only at the next world progress step.\
-But **setting values to resource/components is being applied immediately**.
+But **setting values to resource/components is being applied immediately** (is not deferred).
 
 ### Resources
+Resources are data structures that you only need one instance of and represent game state, sprites (textures), physics parameters, etc. You need to `register` their types and `set` their values before `getting` them.
+```odin
+import ecs "moecs/src"
+import b2 "vendor:box2d"
+
+main :: proc() {
+  ecs.init()
+  world := ecs.new_world()
+
+  /* ...register resource types. */
+
+  /* Sets resource value (will be copied into storage). */
+  ecs.set(world, GameState, &GameState {
+    screen     = .Playing,
+    fullscreen = false,
+    zoom       = 1.0,
+    scaled     = time.now()
+	})
+
+  /* Gets resource values (making a copy from storage). */
+  state, sprites := ecs.get(world, GameState, Sprites)
+  /* Gets pointer to resource value (mutable). */
+  physics := ecs.get_mut(world, Physics)
+
+  world_def := b2.DefaultWorldDef()
+  world_def.gravity = { 0.0, 0.0 }
+  /* Mutating resource value (by pointer/in place). */
+  physics.world_id = b2.CreateWorld(world_def)
+
+  ecs.destroy()
+}
+
+```
+| Procedure          | Description                                                                              |
+|--------------------|------------------------------------------------------------------------------------------|
+| set_resource()     | Sets **one** resource value by its type.                                                 |
+| get_resource()     | Gets **one** resource value by its type.                                                 |
+| get_resource_mut() | Gets reference (pointer) to **one** resource value by its type.                          |
+| set()              | Sets a bunch of resource values (*recommended*).                                         |
+| get()              | Gets a bunch of resource values (*recommended*).                                         |
+| get_mut()          | Gets a bunch of pointers to resources for changing resource fields (*recommended*).      |
+
+
 
 [![Hits](https://hits.sh/sr.ht/~modevstudio/moecs.svg)](https://hits.sh/sr.ht/~modevstudio/moecs/)

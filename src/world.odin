@@ -238,7 +238,7 @@ new_block :: proc(world: ^World, lifetime: Lifetime) -> ^Block {
 	return block
 }
 
-/* Gets reference to the resource value by its type.
+/* Gets reference (pointer) to the resource value by its type.
    `world`   : Pointer to the world.
    `$Type`   : Resource type.
    `returns` : Pointer to the resource and operation success. */
