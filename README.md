@@ -15,7 +15,7 @@ Because static lifetime entities lives wile the world exists there are no deleti
 There are main constants that you can change when copying ECS into your project if you want to experiment with performance:
 - DYNAMIC_CHUNK_SIZE: Dynamic lifetime chunk size;
 - STATIC_CHUNK_SIZE: Static lifetime chunk size;\
-This constants defines a number of entity records (entity struct and its component chunk) that will be stored in one memory block. When block is full the memory allocation occurs for the next block.
+This constants defines a number of entity records (entity struct and its component chunk) that will be stored in one memory block. When block is full the memory allocation occurs for the next block.\
 \
 There is no limitations of entities count, but for resource, components, and tags:
 - MAX_RESOURCES_COUNT: Maximum resources count available for adding to the world.
@@ -181,7 +181,7 @@ Entity may has a number of components that less or equals `MAX_COMPONENTS_COUNT`
 \
 Component types must be registered before using in the ecs and world should run before you start adding components.\
 \
-When you add components or set values to previously added components, the changes are stored in the memory immediately and you can read these values at the same world progress step, there are no caching at all. But `adding`/`removing` components defer archetypes binding till the `perform` stage, so your systems match queries will consider them only on the next progress step.\
+When you add components or set values to previously added components, the changes are stored in the memory immediately and you can read these values at the same world progress step, there are no caching at all. But `adding`/`removing` components defer archetypes re-binding (archetyping) till the `perform` stage, so your systems match queries will consider them only on the next progress step.\
 \
 The presence of certain components in an entity is determined by bit flags in a special field of the entity structure. Removing a component from an entity does not cause any memory access, but simply sets the corresponding bit. Reading this bit applies to checking for the presence of a component in an entity.\
 \
@@ -246,6 +246,54 @@ main :: proc() {
 | get_mut()          | Gets a bunch of pointers to components for changing its values (*recommended*).          |
 | remove()           | Removes any number of components by their types (*recommended*).                         |
 | has()              | Checks for presence of any number of components by their types (*recommended*).          |
+
+### Tags
+Tags are just attributes (signs) that can be `set`/`unset` for entities. Just like components, an entity has a special bit field, in which each bit corresponds to a tag. However, unlike components, tags are not stored in memory chunks. Adding/removing a tag simply means setting the corresponding bit in the entity field.\
+\
+Entity may has a number of tags that less or equals `MAX_TAGS_COUNT` constant. By default it equals `128` and if you need more, please, change the value of this constant manually. Tags types must be registered before adding to entities.\
+\
+Settings/unsetting tags defer entity archetypes re-binding (archetyping) till the `perform` stage, so your systems match queries will consider these tags changes only on the next progress step.
+```odin
+main :: proc() {
+  ecs.init()
+  world := ecs.new_world()
+  /* ...register tags and components types here. */
+  ecs.run(world)
+
+  entity := ecs.spawn(world)
+  /* Tags entity as a Player. */
+  ecs.tag(entity, Player)
+
+  entity = ecs.spawn(world)
+  /* Tags entity as a Ship. */
+  ecs.tag(entity, Ship, Sleep)
+  /* Entity is sleeping. */
+  ecs.tag(entity, Sleep)
+
+	ecs.each(world, callback = proc(entity: ^ecs.Entity, lifetime: ecs.Lifetime, world: ^ecs.World) {
+    /* Checks if entity has Player tag. */
+    if ecs.tagged(entity, Player) {
+      ecs.add(entity, Actions, &Actions {})
+    } else {
+      /* Remove tag from entity (unset corresponding bit). */
+      ecs.untag(entity, Sleep)
+    }
+  })
+
+  ecs.destroy()
+}
+```
+| Procedure          | Description                                                                              |
+|--------------------|------------------------------------------------------------------------------------------|
+| set_tag()          | Tags entity with **one** specified tag type.                                             |
+| set_tags()         | Tags entity with **several** passed tag types.                                           |
+| unset_tag()        | Removes **one** tag from entity (unset corresponding bit in entity's marker field).      |
+| unset_tags()       | Removes **several** tags from entity of all passed types.                                |
+| has_tag()          | Checks if the entity is tagged with specified tag type.                                  |
+| has_tags()         | Checks if the entity is tagged with all passed tag types.                                |
+| tag()              | Tags entity with a bunch of tag types (*recommended*).                                   |
+| untag()            | Removes a bunch of tags from the entity (*recommended*).                                 |
+| tagged()           | Checks if the entity is tagged with a bunch of tag types (*recommended*).                |
 
 
 
