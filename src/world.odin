@@ -271,6 +271,8 @@ get_resource :: #force_inline proc(world: ^World, $Type: typeid) -> (Type, bool)
    `$Type`    : Resource type.
    `resource` : Reference to resource value (will be copied into storage). */
 set_resource :: proc(world: ^World, $Type: typeid, resource: ^Type) #no_bounds_check {
+	if !world.running do panic("Run the world first.")
+
 	if r, ok := resources_get(&world.resources, Type); ok {
 		ptr := mem.ptr_offset(cast(^u8)world.resources.storage, r.offset)
 		cell: ^Type = cast(^Type)ptr

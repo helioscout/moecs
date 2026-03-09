@@ -15,8 +15,10 @@ Because static lifetime entities lives wile the world exists there are no deleti
 There are main constants that you can change when copying ECS into your project if you want to experiment with performance:
 - DYNAMIC_CHUNK_SIZE: Dynamic lifetime chunk size;
 - STATIC_CHUNK_SIZE: Static lifetime chunk size;\
+This constants defines a number of entity records (entity struct and its component chunk) that will be stored in one memory block. When block is full the memory allocation occurs for the next block.
 \
-There is no limitations of entities count, but for components and tags:
+There is no limitations of entities count, but for resource, components, and tags:
+- MAX_RESOURCES_COUNT: Maximum resources count available for adding to the world.
 - MAX_COMPONENTS_COUNT: Maximum components count available for adding to entity;
 - MAX_TAGS_COUNT: Maximum tags count available for adding to entity.
 
@@ -95,7 +97,7 @@ This means that changes will will be applied only at the next world progress ste
 But **setting values to resource/components is being applied immediately** (is not deferred).
 
 ### Resources
-Resources are data structures that you only need one instance of and represent game state, sprites (textures), physics parameters, etc. You need to `register` their types and `set` their values before `getting` them.
+Resources are data structures that you only need one instance of and represent game state, sprites (textures), physics parameters, etc. You need to `register` their types and `set` their values before `getting` them. You can add a number of resources that is less or equals `MAX_RESOURCES_COUNT`, if you need more, please, change this constant manually. You must `run` the world before setting values to resources.
 ```odin
 import ecs "moecs/src"
 import b2 "vendor:box2d"
@@ -105,6 +107,9 @@ main :: proc() {
   world := ecs.new_world()
 
   /* ...register resource types. */
+
+  /* You should run the world before meking changes to it. */
+  ecs.run(world)
 
   /* Sets resource value (will be copied into storage). */
   ecs.set(world, GameState, &GameState {
@@ -126,7 +131,6 @@ main :: proc() {
 
   ecs.destroy()
 }
-
 ```
 | Procedure          | Description                                                                              |
 |--------------------|------------------------------------------------------------------------------------------|
@@ -136,6 +140,112 @@ main :: proc() {
 | set()              | Sets a bunch of resource values (*recommended*).                                         |
 | get()              | Gets a bunch of resource values (*recommended*).                                         |
 | get_mut()          | Gets a bunch of pointers to resources for changing resource fields (*recommended*).      |
+
+### Entities
+Entities are the main elements of the world. It is the abstract data structure that can be specified by components and tags. Entity is not just an id and has some fields, but you should not care about them and use procedures to work with it. Internally there are bit-set fields which define what components and/or tags the entity has. Thus, when deleting a component and adding/removing a tag, reading/writing to memory does not occur.\
+\
+When you despawn an entity this action is deferred to the end of the current progress step, so if you want to omit such entities in the current progress step (game frame) use `despawning` procedure to check that state. Also you may want to check that entity is really despawned if you have a pointer to it from previous progress steps, then use `deleted` procedure.\
+\
+All entities have a lifetime (`.DYNAMIC` or `.STATIC`). But you'll not find this data in the entity itself, it is only defined in the memory block the entity belongs to and once entity was spawned its lifetime can't be changed.
+```odin
+import ecs "moecs/src"
+
+main :: proc() {
+  ecs.init()
+  world := ecs.new_world()
+  ecs.run(world)
+
+  /* Spawns static entity. */
+  asteroid: ^ecs.Entity = ecs.spawn(world, .STATIC)
+  /* Spawns dynamic entity (.DYNAMIC lifetime is default). */
+  ship := ecs.spawn(world)
+
+  ecs.destroy()
+}
+```
+| Procedure          | Description                                                                              |
+|--------------------|------------------------------------------------------------------------------------------|
+| spawn()            | Spawns **one** new entity into the world.                                                |
+| despawn_entity()   | Despawns **one** entity from the world.                                                  |
+| despawn_entities() | Despawns **several** entities from the world.                                            |
+| despawn()          | Overloaded procedure for despawning one or several entities (*recommended*).             |
+| despawning()       | Checks if the entity is deferred for despawning at the perform stage.                    |
+| deleted()          | Checks if the entity has been fully deleted (despawned).                                 |
+| is_dynamic()       | Checks if the entity belongs to dynamic lifetime block.                                  |
+| is_static()        | Checks if the entity belongs to static lifetime block.                                   |
+
+### Components 
+Components are stored in the chunks of a block, internally it is continuous block of memory reading/writing to which is implemented with pointer math. We know entity index, components size and block size (`DYNAMIC_CHUNK_SIZE`, `STATIC_CHUNK_SIZE`), so access by pointer is pretty simple.\
+\
+Entity may has a number of components that less or equals `MAX_COMPONENTS_COUNT` constant. By default it equals `128` and if you need more, please, change the value of this constant manually.\
+\
+Component types must be registered before using in the ecs and world should run before you start adding components.\
+\
+When you add components or set values to previously added components, the changes are stored in the memory immediately and you can read these values at the same world progress step, there are no caching at all. But `adding`/`removing` components defer archetypes binding till the `perform` stage, so your systems match queries will consider them only on the next progress step.\
+\
+The presence of certain components in an entity is determined by bit flags in a special field of the entity structure. Removing a component from an entity does not cause any memory access, but simply sets the corresponding bit. Reading this bit applies to checking for the presence of a component in an entity.\
+\
+Prefer using overloaded procedures to `add`/`set`/`get` a bunch of components by one procedure call. Bunch methods gives you more performance because use less memory read/write operations.
+```odin
+import ecs "moecs/src"
+
+main :: proc() {
+  ecs.init()
+  world := ecs.new_world()
+  /* ...register component types here. */
+  ecs.run(world)
+
+  ship := ecs.spawn(world)
+
+  /* Adds components to the entity. */
+  ecs.add(ship,
+    Position, &Position { x = 350, y = 170 },
+    Rotation, &Rotation { angle = 90 },
+    Velocity, &Velocity { 50 },
+    Weapon,   &Weapon   { kind = .Rocket })
+
+  /* Getting one component (mutable method). */
+  if weapon, ok := ecs.get_mut(ship, Weapon); ok {
+    weapon.kind = .Bullet
+  }
+
+  /* Setting values of previously added components. */
+  ecs.set(ship,
+    Position, &Position { x = 700, y = 900 },
+    Rotation, &Rotation { angle = 180 })
+
+  /* Getting several compoents (for reading, making a copy from storage). */
+  pos, rot := ecs.get(ship, Position, Rotation)
+  /* Getting pointers to component values (mutable method). */
+  vel, weapon := ecs.get_mut(ship, Velocity, Weapon)
+
+  /* Removes components from the entity. */
+  ecs.remove(ship, Position, Rotation)
+
+  /* Checks if the entity has a component. */
+  if ecs.has(ship, Position) {
+    ecs.set(ship, Position, &Position { x = 0, y = 0 })
+  }
+
+  ecs.destroy()
+}
+```
+| Procedure          | Description                                                                              |
+|--------------------|------------------------------------------------------------------------------------------|
+| add_component()    | Adds **one** component to the entity by type and instance (initializer).                 |
+| set_component()    | Sets **one** previously added component value.                                           |
+| get_component()    | Gets **one** component value by its type (copy from storage).                            |
+| get_component_mut()| Gets reference to **one** component value by its type.                                   |
+| remove_component() | Removes **one** component from entity by its type.                                       |
+| remove_components()| Removes **several** components from entity of all passed types.                          |
+| has_component()    | Checks if the entity has a component.                                                    |
+| has_components()   | Checks if the entity has all components of passed types.                                 |
+| add()              | Adds a bunch of components (*recommended*).                                              |
+| set()              | Sets a bunch of components (*recommended*).                                              |
+| get()              | Gets a bunch of components (*recommended*).                                              |
+| get_mut()          | Gets a bunch of pointers to components for changing its values (*recommended*).          |
+| remove()           | Removes any number of components by their types (*recommended*).                         |
+| has()              | Checks for presence of any number of components by their types (*recommended*).          |
 
 
 

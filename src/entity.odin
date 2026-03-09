@@ -37,7 +37,7 @@ add_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type, perform:
 	}
 }
 
-/* Sets component value in the entity by its type and instance (initializer).
+/* Sets previously added component value in the entity by its type and instance (initializer).
    `entity`    : Pointer to the entity.
    `$Type`     : Component type.
    `component` : Reference to the component instance." */
@@ -108,7 +108,7 @@ remove_components :: proc(entity: ^Entity, types: ..typeid) {
 	archetyping(entity)
 }
 
-/* Checks if the enity has a component.
+/* Checks if the entity has a component.
    `entity`  : Pointer to the entity.
    `type`    : Component type.
    `returns` : True if entity has a component, otherwise - false. */
@@ -220,14 +220,14 @@ has_tags :: proc(entity: ^Entity, types: ..typeid) -> bool {
 	return has
 }
 
-/* Checks if the entity has been deleted.
+/* Checks if the entity has been fully deleted (despawned).
    `entity`  : Pointer to the entity.
    `returns` : True if entity is deleted, otherwise - false. */
 deleted :: #force_inline proc(entity: ^Entity) -> bool {
 	return .DELETED in entity.state
 }
 
-/* Checks if the entity is being despawned at the perform stage.
+/* Checks if the entity is deferred for despawning at the perform stage.
    `entity`  : Pointer to the entity.
    `returns` : True if entity will be despawned, otherwise - false. */
 despawning :: #force_inline proc(entity: ^Entity) -> bool {

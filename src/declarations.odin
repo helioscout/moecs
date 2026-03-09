@@ -95,13 +95,13 @@ Phase :: enum u8 {
 }
 
 @(private) Schedule :: struct {
-	/* Systems that are being runned at the start phase. */
+	/* Systems that are being ran at the start phase. */
 	start		: [dynamic]^System,
-	/* Systems that are being runned at the pre-update phase. */
+	/* Systems that are being ran at the pre-update phase. */
 	pre_update	: [dynamic]^System,
-	/* Systems that are being runned at the update phase. */
+	/* Systems that are being ran at the update phase. */
 	update		: [dynamic]^System,
-	/* Systems that are being runned at the post-update phase. */
+	/* Systems that are being ran at the post-update phase. */
 	post_update : [dynamic]^System
 }
 
