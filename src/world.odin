@@ -17,7 +17,7 @@ World :: struct {
 	resources : Resources,
 	/* All mounted systems. */
 	systems : [dynamic]^System,
-	/* Systems splitted by phase for running in the pipeline. */
+	/* Systems split by phase for running in the pipeline. */
 	schedule : Schedule,
 	/* Archetypes collection of the world. */
 	archetypes : [dynamic]^Archetype,
@@ -69,7 +69,7 @@ mount :: proc(world: ^World, definition: SystemDefinition) {
 	if named && has_system(world, definition.name) do panic("System with such name has already been mounted.")
 	if !named && definition.phase == .MANUAL do panic("Systems with MANUAL phase must have a name.")
 	if definition.callback == nil do panic("Callback must be provided.")
-	if world.running do panic("You can't change already running world.")
+	if world.running do panic("You can't mount system to already running world.")
 
 	system : ^System = new(System)
 	system^ = { name = definition.name, state = { .ENABLED }, callback = definition.callback,
@@ -144,7 +144,7 @@ remove_system :: proc(world: ^World, systems: ^[dynamic]^System, name: string) -
 	return nil
 }
 
-/* Runs the world, but at first constructs all neccessary data from registered elements.
+/* Runs the world, but at first constructs all necessary data from registered elements.
    World must has at least one registered component, but can has no tags, resources.
    `world` : Pointer to the world. */
 run :: proc(world: ^World) {
@@ -356,7 +356,7 @@ progress :: proc(world: ^World) {
 	
 		each(world, callback = proc(entity: ^Entity, lifetime: Lifetime, world: ^World) {
 			for system in world.systems {
-				if enabled(system) && lifetime in system.lifetime {
+				if system_enabled(system) && lifetime in system.lifetime {
 					if (.HAS_TAGS not_in system.state ||
 					   marker_is_subset(MAX_TAGS_COUNT, TAGS_MARKER_SIZE, entity.tags, system.tags)) &&
 					   (.HAS_COMPONENTS not_in system.state ||
@@ -385,7 +385,7 @@ progress :: proc(world: ^World) {
 @(private="file")
 step_archetype :: #force_inline proc(world: ^World, systems: ^[dynamic]^System) {
 	for system in systems^ {
-		if enabled(system) {
+		if system_enabled(system) {
 			if is_task(system) {
 				system.callback(nil, world)
 			} else {
@@ -409,7 +409,7 @@ step_archetype :: #force_inline proc(world: ^World, systems: ^[dynamic]^System) 
 @(private="file")
 step_iteration :: #force_inline proc(world: ^World, systems: ^[dynamic]^System) {
 	for system in systems^ {
-		if enabled(system) {
+		if system_enabled(system) {
 			system.callback(is_task(system) ? nil : &system.entities, world)
 		}
 	}
@@ -470,6 +470,35 @@ execute :: proc(world: ^World, name: string) {
 				}
 			}
 		}
+	}
+}
+
+/* Checks if the system is enabled.
+   `world` : Pointer to the world.
+   `name`  : System name. */
+enabled :: #force_inline proc(world: ^World, name: string) -> bool {
+	if system, ok := get_system(world, name); ok {
+		return system_enabled(system)
+	}
+
+	return false
+}
+
+/* Enables the system.
+   `world` : Pointer to the world.
+   `name`  : System name. */
+enable :: #force_inline proc(world: ^World, name: string) {
+	if system, ok := get_system(world, name); ok {
+		enable_system(system)
+	}
+}
+
+/* Disables the system.
+   `world` : Pointer to the world.
+   `name`  : System name. */
+disable :: #force_inline proc(world: ^World, name: string) {
+	if system, ok := get_system(world, name); ok {
+		disable_system(system)
 	}
 }
 

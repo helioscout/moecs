@@ -251,6 +251,11 @@ main :: proc() {
 	// ecs.unmount(world, "s2")
 	// fmt.println(ecs.get(world, "s2"))
 
+	// ecs.disable(world, "s2")
+	// fmt.printfln("System s2 enabled: %v", ecs.enabled(world, "s2"))
+	// ecs.enable(world, "s2")
+	// fmt.printfln("System s2 enabled: %v", ecs.enabled(world, "s2"))
+
 	// fmt.println(transmute(u64)typeid_of(Position))
 	// fmt.println(transmute(u64)typeid_of(Center))
 	// fmt.println(transmute(u64)typeid_of(VecType))

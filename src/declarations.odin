@@ -69,20 +69,28 @@ ElementState :: enum {
 	DESPAWNING
 }
 
-/* Query match approach of slection entities for the systems. */
+/* Query match approach of selection entities for the systems. */
 Approach :: enum {
-	/* Using this approach at each progress step all world entites will be iterated
-	   with applying match conditions to select them for each running system. */
+	/* Using this approach at each progress step all world entities will be iterated
+	   with applying match conditions to select them for each running system.
+	   First, iterates through all entities in the world for which the match condition is checked,
+	   and if the entity matches, it is added to the system's collection of entities.
+	   Then, all systems to which the generated collections are passed are executed in turn.
+	   At the beginning of progress each step, these collections are cleared.
+	   This is a very inefficient method, but it does not involve deferred actions. */
 	ITERATION,
 	/* Each entity belongs to some unique archetype that is combination of bit flags
 	   that represent entity's components/tags configuration. At each world progress step
-	   all archetypes will be iterated witch applying match condition of each system. */
+	   all archetypes will be iterated with applying match condition of each system.
+	   If an archetype matches the system query conditions, the system is launched with a list
+	   of entities of that archetype. This is an effective approach, but it requires deferred actions.
+	   The system callback will be invoked for each matching archetype. */
 	ARCHETYPE
 }
 
 /* System running phase, determine when system should run during pipeline. */
 Phase :: enum u8 {
-	/* System will run once at the beggining of the first progress step. */
+	/* System will run once at the beginning of the first progress step. */
 	START       = 1,
 	/* System will run before update phase. */
 	PRE_UPDATE  = 2,
@@ -90,7 +98,7 @@ Phase :: enum u8 {
 	UPDATE      = 0,
 	/* System will run after update phase. */
 	POST_UPDATE = 3,
-	/* System can be executed only manually using its name. */
+	/* System can be executed only manually using its name, excluded from progress pipeline. */
 	MANUAL      = 4
 }
 

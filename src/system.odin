@@ -40,7 +40,7 @@ SystemDefinition :: struct {
 	/* System running phase, order in the pipeline. By default equals UPDATE. */
 	phase : Phase,
 	/* Entities lifetime flag to optimize queries and do not process lifetimes
-	   that you want to avoid for current system. */
+	   that you want to avoid for current system. Not used in ARCHETYPE approach. */
 	lifetime : bit_set[Lifetime; u8],
 	/* Callback function that will be invoked each step of the world progress. */
 	callback : SystemCallback
@@ -49,19 +49,22 @@ SystemDefinition :: struct {
 /* Checks if the system is enabled.
    `system`  : Pointer to the system.
    `returns` : True if system is enabled, otherwise - false. */
-enabled :: #force_inline proc(system: ^System) -> bool {
+@(private="package")
+system_enabled :: #force_inline proc(system: ^System) -> bool {
 	return .ENABLED in system.state
 }
 
 /* Enables the system.
    `system` : Pointer to the system. */
-enable :: #force_inline proc(system: ^System) {
+@(private="package")
+enable_system :: #force_inline proc(system: ^System) {
 	system.state += { .ENABLED }
 }
 
 /* Disables the system.
    `system` : Pointer to the system. */
-disable :: #force_inline proc(system: ^System) {
+@(private="package")
+disable_system :: #force_inline proc(system: ^System) {
 	system.state -= { .ENABLED }
 }
 
