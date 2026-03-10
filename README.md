@@ -315,7 +315,7 @@ There are two query match approaches of selection entities for the systems.
 |--------------------|------------------------------------------------------------------------------------------|
 | ITERATION          | Using this approach at each progress step all world entities will be iterated with applying match conditions to select them for each running system. First, iterates through all entities in the world for which the match condition is checked, and if the entity matches, it is added to the system's collection of entities. Then, all systems to which the generated collections are passed are executed in turn. At the beginning of progress each step, these collections are cleared. This is a very *inefficient* approach, but it does not involve deferred actions.                                                                                     |
 | ARCHETYPE          | Each entity belongs to some unique archetype that is combination of bit flags that represent entity's components/tags configuration. At each world progress step all archetypes will be iterated with applying match condition of each system. If an archetype matches the system query conditions, the system is launched with a list of entities of that archetype. This is an *efficient* approach, but it requires deferred actions. The system callback will be invoked for each matching archetype. *Recommended approach*.                                 |
-\
+
 You can give the system a name to have ability to `get`/`execute`/`enable`/`disable` it manually, but name is just a property, systems with name run in pipeline exactly same way as without it. To exclude system from pipeline its `phase` must be set to `MANUAL`. Disabled systems are not called and no queries are executed for them at each progress step till they will be enabled again.
 ```odin
 import ecs "moecs/src"
@@ -435,7 +435,9 @@ I am writing this project in my spare time, just like all my other hobby gamedev
 \
 Getting (reading) operations executes much faster than setting (writing) ones. Prefer use overloaded `bunch` procedures to process several elements at once, these methods were optimized for performance.\
 \
-Feel free to open a request if you have any suggestions or bug reports. I'd be happy to discuss it.
+Feel free to open an issue if you have any suggestions or bug reports.\
+Also I'd be happy to discuss it at [Odin forum](https://forum.odin-lang.org/t/moecs-simple-entity-component-system).\
+You can find me at discord servers [Karl's Community](https://discord.gg/4FsHgtBmFK) and [Odin](https://discord.gg/vafXTdubwr).
 
 ### Made with moecs
 | Game/App           | Description                                                                              |
