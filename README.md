@@ -435,6 +435,8 @@ I am writing this project in my spare time, just like all my other hobby gamedev
 \
 Getting (reading) operations executes much faster than setting (writing) ones. Prefer use overloaded `bunch` procedures to process several elements at once, these methods were optimized for performance.\
 \
+Use `-o:aggressive` Odin compiler flag, it can speed up operations in 30 times.\
+\
 Feel free to open an issue if you have any suggestions or bug reports.\
 Also I'd be happy to discuss it at [Odin forum](https://forum.odin-lang.org/t/moecs-simple-entity-component-system).\
 You can find me at discord servers [Karl's Community](https://discord.gg/4FsHgtBmFK) and [Odin](https://discord.gg/vafXTdubwr).
