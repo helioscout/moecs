@@ -444,4 +444,4 @@ You can find me at discord servers [Karl's Community](https://discord.gg/4FsHgtB
 ### Made with moecs
 | Game/App           | Description                                                                              |
 |--------------------|------------------------------------------------------------------------------------------|
-| [mouniverse](https://github.com/moscout/mouniverse) | Simple space game, I am making in my spare time for fun and learning.                                         |
+| [mouniverse](https://sr.ht/~helioscout/mouniverse) | Simple space game, I am making in my spare time for fun and learning.                                         |
