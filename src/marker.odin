@@ -65,7 +65,7 @@ marker_equals :: #force_inline proc($count: int, $size: uint, marker1: [size]uin
    `marker`  : Bitset (marker array).
    `returns` : New marker. */
 marker_clone :: #force_inline proc($size: uint, marker: [size]uint) -> [size]uint #no_bounds_check {
-	clone: [size]uint
+	clone: [size]uint = ---
 
 	for i in 0..<size do clone[i] = marker[i]
 
@@ -118,7 +118,7 @@ marker_is_set :: #force_inline proc($size: uint, marker: [size]uint, #any_int id
    `marker2` : Second bitset (marker array).
    `returns` : New marker. */
 marker_and :: #force_inline proc($size: uint, marker1: [size]uint, marker2: [size]uint) -> [size]uint #no_bounds_check {
-	marker: [size]uint
+	marker: [size]uint = ---
 
 	for i in 0..<size do marker[i] = marker1[i] & marker2[i]
 	
@@ -131,7 +131,7 @@ marker_and :: #force_inline proc($size: uint, marker1: [size]uint, marker2: [siz
    `marker2` : Second bitset (marker array).
    `returns` : New marker. */
 marker_or :: #force_inline proc($size: uint, marker1: [size]uint, marker2: [size]uint) -> [size]uint #no_bounds_check {
-	marker: [size]uint
+	marker: [size]uint = ---
 
 	for i in 0..<size do marker[i] = marker1[i] | marker2[i]
 	
@@ -144,7 +144,7 @@ marker_or :: #force_inline proc($size: uint, marker1: [size]uint, marker2: [size
    `marker2` : Second bitset (marker array).
    `returns` : New marker. */
 marker_xor :: #force_inline proc($size: uint, marker1: [size]uint, marker2: [size]uint) -> [size]uint #no_bounds_check {
-	marker: [size]uint
+	marker: [size]uint = ---
 
 	for i in 0..<size do marker[i] = marker1[i] ~ marker2[i]
 	
