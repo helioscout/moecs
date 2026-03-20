@@ -6,6 +6,7 @@ import str "core:strings"
 import sa "core:container/small_array"
 import "core:fmt"
 
+/* World type, main container of the sapce. The world is built of blocks. */
 World :: struct {
 	/* Query match approach. */
 	approach : Approach,
@@ -123,7 +124,7 @@ unmount :: proc(world: ^World, name: string) {
 		remove_system(world, &world.schedule.update, name)
 		remove_system(world, &world.schedule.post_update, name)
 
-		delete(system.entities)
+		free_system(system)
 		free(system)
 	}
 }
@@ -169,7 +170,7 @@ run :: proc(world: ^World) {
 		}
 	}
 
-	if (world.resources.count > 0) {
+	if world.resources.count > 0 {
 		resources_adjust(&world.resources)
 		
 		if world.resources.size > STACK_BUFFER_SIZE do panic("Total resources size must be less than STACK_BUFFER_SIZE.")
@@ -607,6 +608,7 @@ get_sparse_block :: proc(world: ^World, lifetime: Lifetime) -> ^Block {
    `lifetime` : Block lifetime.
    `returns`  : Pointer to free block. */
 @(private="file")
+@(cold)
 get_free_block :: proc(world: ^World, lifetime: Lifetime) -> ^Block {
 	blocks := get_blocks(world, lifetime)
 
@@ -620,7 +622,7 @@ get_free_block :: proc(world: ^World, lifetime: Lifetime) -> ^Block {
 /* Gets blocks collection by its lifetime.
    `world`    : Pointer to the world.
    `lifetime` : Block lifetime.
-   `returns`  : Pointer to free block. */
+   `returns`  : Pointer to blocks collection. */
 @(private="file")
 get_blocks :: #force_inline proc(world: ^World, lifetime: Lifetime) -> ^[dynamic]^Block {
 	switch lifetime {

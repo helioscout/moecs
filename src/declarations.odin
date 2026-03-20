@@ -102,6 +102,7 @@ Phase :: enum u8 {
 	MANUAL      = 4
 }
 
+/* Systems collections for each running phase. */
 @(private) Schedule :: struct {
 	/* Systems that are being ran at the start phase. */
 	start		: [dynamic]^System,

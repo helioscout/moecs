@@ -25,7 +25,7 @@ Tags :: struct {
    `tags` : Tag types collection.
    `type` : Tag type. */
 @(private="package")
-tag_index :: proc(tags: ^Tags, type: typeid) -> (int, bool) {
+tag_index :: #force_inline proc(tags: ^Tags, type: typeid) -> (int, bool) #optional_ok {
 	id: u64 = transmute(u64)type
 
 	for i := 0; i < tags.count; i += 1 {
@@ -54,7 +54,7 @@ tags_add :: proc(tags: ^Tags, type: typeid, tag: Tag) {
    `tags` : Tag types collection.
    `type` : Tag type. */
 @(private="package")
-tags_get :: proc(tags: ^Tags, type: typeid) -> (^Tag, bool) {
+tags_get :: #force_inline proc(tags: ^Tags, type: typeid) -> (^Tag, bool) #optional_ok {
 	if idx, ok := tag_index(tags, type); ok {
 		return &tags.types[idx], true
 	} else {
@@ -67,7 +67,7 @@ tags_get :: proc(tags: ^Tags, type: typeid) -> (^Tag, bool) {
    `type`    : Tag type.
    `returns` : True if type was found, otherwise - false. */
 @(private="package")
-tags_has :: proc(tags: ^Tags, type: typeid) -> bool {
+tags_has :: #force_inline proc(tags: ^Tags, type: typeid) -> bool {
 	_, ok := tag_index(tags, type)
 	return ok
 }

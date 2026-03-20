@@ -15,7 +15,7 @@ Entity :: struct {
 	block : ^Block,
 	/* The index of the entity in the collection (chunk index for its components). */
 	chunk_idx : int,
-	/* Archetype reference which entity belongs to. Is nill for entities without components/tags. */
+	/* Archetype reference which entity belongs to. Is nil for entities without components/tags. */
 	archetype : ^Archetype,
 	/* Entity index in the archetype collection (for fast removing). */
 	arch_idx : int

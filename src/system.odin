@@ -79,7 +79,7 @@ is_task :: #force_inline proc(system: ^System) -> bool {
 /* Free all system resources.
    `system` : Pointer to the system. */
 @(private="package")
-free_system :: proc(system: ^System) {
+free_system :: #force_inline proc(system: ^System) {
 	delete(system.entities)
 	delete(system.component_types)
 }
