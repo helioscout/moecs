@@ -245,7 +245,7 @@ is_dynamic :: #force_inline proc(entity: ^Entity) -> bool {
    `entity`  : Pointer to the entity.
    `returns` : True if entity is static, otherwise - false. */
 is_static :: #force_inline proc(entity: ^Entity) -> bool {
-	return entity.block.lifetime == .DYNAMIC
+	return entity.block.lifetime == .STATIC
 }
 
 /* Bind the entity to appropriate archetype.
