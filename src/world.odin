@@ -340,6 +340,7 @@ progress :: proc(world: ^World) {
 	if !world.running do panic("Run the world first.")
 
 	if world.approach == .ARCHETYPE {
+		/* Run systems with START phase, we should do it only once. */
 		if !world.started {
 			step_archetype(world, &world.schedule.start)
 			world.started = true
@@ -444,7 +445,6 @@ perform :: proc(world: ^World) {
 		proc(archetype: ^Archetype) -> bool { return len(archetype.entities) == 0 })
 
 	for archetype in archetypes {
-		delete(archetype.entities)
 		delete_archetype(world, archetype)
 	}
 
@@ -583,6 +583,7 @@ get_archetype :: proc(world: ^World, components: [COMPONENTS_MARKER_SIZE]uint,
 delete_archetype :: proc(world: ^World, archetype: ^Archetype) {
 	if index, ok := slice.linear_search(world.archetypes[:], archetype); ok {
 		unordered_remove(&world.archetypes, index)
+		free_archetype(archetype)
 		free(archetype)
 	}
 }
