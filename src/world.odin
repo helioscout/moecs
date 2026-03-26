@@ -358,7 +358,7 @@ progress :: proc(world: ^World) {
 	
 		each(world, callback = proc(entity: ^Entity, lifetime: Lifetime, world: ^World) {
 			for system in world.systems {
-				if system_enabled(system) && lifetime in system.lifetime {
+				if system_enabled(system) && !is_task(system) && lifetime in system.lifetime {
 					if (.HAS_TAGS not_in system.state ||
 					   marker_is_subset(MAX_TAGS_COUNT, TAGS_MARKER_SIZE, entity.tags, system.tags)) &&
 					   (.HAS_COMPONENTS not_in system.state ||
