@@ -87,7 +87,6 @@ system1 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 
 		if count < 100 {
 			ecs.add(entity, Position, &Position { x = 111, y = 222 })
-			count += 1
 		}
 	// 	pos, center := ecs.get(entity, Position, Center)
 
@@ -98,10 +97,16 @@ system1 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 			ecs.despawn(world, entity)
 			despawned = true
 		}
+
+		count += 1
 	}
+
+	// fmt.printfln("system1 count: %v", count)
 }
 
 system2 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
+	// count := 0
+
 	for entity in entities {
 		// res1 := ecs.get(world, Resource1)
 		// res2 := ecs.get(world, Resource2)
@@ -145,10 +150,16 @@ system2 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 		// 	Velocity, &Velocity { 50 },
 		// 	VecType, &VecType { 10, 20 },
 		// 	Mutation, &Mutation { skin = 11 })
+
+		// count += 1
 	}
+
+	// fmt.printfln("system2 count: %v", count)
 }
 
 system3 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
+	// count := 0
+
 	for entity in entities {
 		// res1 := ecs.get(world, Resource1)
 		// res2 := ecs.get(world, Resource2)
@@ -192,7 +203,11 @@ system3 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 		// 	Velocity, &Velocity { 50 },
 		// 	VecType, &VecType { 10, 20 },
 		// 	Mutation, &Mutation { skin = 11 })
+
+		// count += 1
 	}
+
+	// fmt.printfln("system3 count: %v", count)
 }
 
 system4 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
@@ -558,6 +573,7 @@ main :: proc() {
 
 	for i in 0..<100 {
 		ecs.progress(world)
+		// fmt.println("step")
 	}
 
 	_duration = time.diff(_time, time.now())
