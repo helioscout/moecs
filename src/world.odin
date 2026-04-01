@@ -75,13 +75,26 @@ mount :: proc(world: ^World, definition: SystemDefinition) {
 	system : ^System = new(System)
 	system^ = { name = definition.name, state = { .ENABLED }, callback = definition.callback,
 				lifetime = card(definition.lifetime) == 0 ? { .DYNAMIC, .STATIC } : definition.lifetime,
-				phase = definition.phase, component_types = slice.clone(definition.components) }
+				phase = definition.phase }
 
-	if len(definition.components) == 0 && len(definition.tags) == 0 {
+	components := slice.clone_to_dynamic(definition.components)
+	tags       := slice.clone_to_dynamic(definition.tags)
+
+	if len(definition.query) > 0 {
+		for type in definition.query {
+			if components_has(&world.components, type) do append(&components, type)
+			if tags_has(&world.tags, type) do append(&tags, type)
+		}
+	}
+
+	system.component_types = slice.clone(components[:])
+
+	if len(components) == 0 && len(tags) == 0 {
+		/* Task is a system without query it will just run with nil entities list. */
 		system.state += { .IS_TASK }
 	} else {
-		if len(definition.components) > 0 {
-			for type in definition.components {
+		if len(components) > 0 {
+			for type in components {
 				if idx, ok := component_index(&world.components, type); ok {
 					marker_set(COMPONENTS_MARKER_SIZE, &system.components, idx)
 				}
@@ -90,8 +103,8 @@ mount :: proc(world: ^World, definition: SystemDefinition) {
 			system.state += { .HAS_COMPONENTS }
 		}
 
-		if len(definition.tags) > 0 {
-			for type in definition.tags {
+		if len(tags) > 0 {
+			for type in tags {
 				if idx, ok := tag_index(&world.tags, type); ok {
 					marker_set(TAGS_MARKER_SIZE, &system.tags, idx)
 				}
@@ -99,7 +112,6 @@ mount :: proc(world: ^World, definition: SystemDefinition) {
 
 			system.state += { .HAS_TAGS }
 		}
-
 	}
 
 	#partial switch definition.phase {
@@ -110,6 +122,9 @@ mount :: proc(world: ^World, definition: SystemDefinition) {
 	}
 	
 	append(&world.systems, system)
+
+	delete(components)
+	delete(tags)
 }
 
 /* Unmounts the system from the world.

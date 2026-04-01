@@ -33,6 +33,10 @@ System :: struct {
 SystemDefinition :: struct {
 	/* Name of the system. It must be unique. Used for getting the system from the world. */
 	name : string,
+	/* Components and tags list that should match while the system query.
+	   You can also separate types using `components` and 'tags' fields of this struct.
+	   Using both approaches simultaneously, or crossing or duplicating types in different fields is safe. */
+	query : []typeid,
 	/* Components list that should match while the system query. */
 	components : []typeid,
 	/* Tags list that should match while the system query. */

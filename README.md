@@ -329,8 +329,9 @@ main :: proc() {
   /* Mount system that will run only once after world starts. */
   ecs.mount(world, { callback = load_world,     phase = .START })
   /* Mount systems which will run in .UPDATE phase (default). */
-  ecs.mount(world, { callback = actions,        components = { Handle, Actions, Weapon, Ship }, tags = { Player } })
+  ecs.mount(world, { callback = actions,        query = { Handle, Actions, Weapon, Ship, Player } })
   ecs.mount(world, { callback = physics,        name = "physics" })
+  /* You can use query or/and components and tags fields to define system query (list of components and tags). */
   ecs.mount(world, { callback = draw,           components = { Position, Rotation, Sprite, Center, Size } })
   ecs.mount(world, { callback = collisions,     components = { Collision, Handle, Position, Center } })
   /* Mount systems to run them manually (phase = .MANUAL). */
