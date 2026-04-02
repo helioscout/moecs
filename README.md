@@ -1,9 +1,6 @@
-<div align="center" width="100%">
-![moecs logo](docs/moecs-logo-small.png)
-</div>
-<div align="center" width="100%">
-**moecs**
-</div>
+|                                          |           |
+|------------------------------------------|-----------|
+| ![moecs logo](docs/moecs-logo-small.png) | **moecs** |
 
 ### Memory concept
 The main idea is that memory for components is divided into blocks, and entities belong to two lifetimes:
