@@ -1,6 +1,7 @@
-|                                          |           |
-|------------------------------------------|-----------|
-| ![moecs logo](docs/moecs-logo-small.png) | **moecs** |
+<img align="left" src="https://git.sr.ht/~helioscout/moecs/blob/master/docs/moecs-logo-small.png">
+
+**moecs** - Easy to use Entity Component System crafted with Odin.\
+*Memory is the honeycomb, blocks, or chunks are the beehive frames, entities are the honeycomb cells, components, and tags are the honey, and systems are the bees.*
 
 ### Memory concept
 The main idea is that memory for components is divided into blocks, and entities belong to two lifetimes:
