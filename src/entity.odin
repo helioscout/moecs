@@ -6,7 +6,7 @@ import "core:mem"
 /* Entity type. */
 Entity :: struct {
 	/* Entity state. */
-	state : bit_set[ElementState; u8],
+	state : bit_set[ElementState; u16],
 	/* Components marker, each set bit specifies that the component exists in the entity. */
 	components : [COMPONENTS_MARKER_SIZE]uint,
 	/* Tags marker, each set bit specifies that the tag exists in the entity. */

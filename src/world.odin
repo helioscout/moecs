@@ -75,7 +75,7 @@ mount :: proc(world: ^World, definition: SystemDefinition) {
 	system : ^System = new(System)
 	system^ = { name = definition.name, state = { .ENABLED }, callback = definition.callback,
 				lifetime = card(definition.lifetime) == 0 ? { .DYNAMIC, .STATIC } : definition.lifetime,
-				phase = definition.phase }
+				phase = definition.phase, without_types = slice.clone(definition.without) }
 
 	components := slice.clone_to_dynamic(definition.components)
 	tags       := slice.clone_to_dynamic(definition.tags)
@@ -89,7 +89,7 @@ mount :: proc(world: ^World, definition: SystemDefinition) {
 
 	system.component_types = slice.clone(components[:])
 
-	if len(components) == 0 && len(tags) == 0 {
+	if len(components) == 0 && len(tags) == 0 && len(definition.without) == 0 {
 		/* Task is a system without query it will just run with nil entities list. */
 		system.state += { .IS_TASK }
 	} else {
@@ -111,6 +111,23 @@ mount :: proc(world: ^World, definition: SystemDefinition) {
 			}
 
 			system.state += { .HAS_TAGS }
+		}
+
+		if len(definition.without) > 0 {
+			has_components, has_tags: bool
+
+			for type in definition.without {
+				if idx, ok := component_index(&world.components, type); ok {
+					marker_set(COMPONENTS_MARKER_SIZE, &system.without_components, idx)
+					has_components = true
+				} else if idx, ok := tag_index(&world.tags, type); ok {
+					marker_set(TAGS_MARKER_SIZE, &system.without_tags, idx)
+					has_tags = true
+				}
+			}
+
+			if has_components do system.state += { .HAS_WITHOUT_COMPONENTS }
+			if has_tags do system.state += { .HAS_WITHOUT_TAGS }
 		}
 	}
 
@@ -174,12 +191,22 @@ run :: proc(world: ^World) {
 	/* We must re-set all component markers for systems, because order of components
 	   has been changed during adjustment and as a result components indexes changed. */
 	for system in world.systems {
-		if len(system.component_types) > 0 {
+		if .HAS_COMPONENTS in system.state {
 			marker_clear(COMPONENTS_MARKER_SIZE, &system.components)
 			
 			for type in system.component_types {
 				if idx, ok := component_index(&world.components, type); ok {
 					marker_set(COMPONENTS_MARKER_SIZE, &system.components, idx)
+				}
+			}
+		}
+
+		if .HAS_WITHOUT_COMPONENTS in system.state {
+			marker_clear(COMPONENTS_MARKER_SIZE, &system.without_components)
+			
+			for type in system.without_types {
+				if idx, ok := component_index(&world.components, type); ok {
+					marker_set(COMPONENTS_MARKER_SIZE, &system.without_components, idx)
 				}
 			}
 		}
@@ -375,9 +402,15 @@ progress :: proc(world: ^World) {
 			for system in world.systems {
 				if system_enabled(system) && !is_task(system) && lifetime in system.lifetime {
 					if (.HAS_TAGS not_in system.state ||
-					   marker_is_subset(MAX_TAGS_COUNT, TAGS_MARKER_SIZE, entity.tags, system.tags)) &&
+					    marker_is_subset(MAX_TAGS_COUNT, TAGS_MARKER_SIZE, entity.tags, system.tags)) &&
 					   (.HAS_COMPONENTS not_in system.state ||
-					   marker_is_subset(MAX_COMPONENTS_COUNT, COMPONENTS_MARKER_SIZE, entity.components, system.components)) {
+					    marker_is_subset(MAX_COMPONENTS_COUNT, COMPONENTS_MARKER_SIZE, entity.components, system.components)) &&
+					   (.HAS_WITHOUT_TAGS not_in system.state ||
+						marker_is_all_unset(MAX_TAGS_COUNT, TAGS_MARKER_SIZE,
+							marker_and(TAGS_MARKER_SIZE, entity.tags, system.without_tags))) &&
+					   (.HAS_WITHOUT_COMPONENTS not_in system.state ||
+						marker_is_all_unset(MAX_COMPONENTS_COUNT, COMPONENTS_MARKER_SIZE,
+							marker_and(COMPONENTS_MARKER_SIZE, entity.components, system.without_components))) {
 						/* Add pointer to entity into system collection of entities for current system call. */
 						append(&system.entities, entity)
 					}
@@ -408,9 +441,15 @@ step_archetype :: #force_inline proc(world: ^World, systems: ^[dynamic]^System) 
 			} else {
 				for archetype in world.archetypes {
 					if (.HAS_TAGS not_in system.state ||
-					   marker_is_subset(MAX_TAGS_COUNT, TAGS_MARKER_SIZE, archetype.tags, system.tags)) &&
+					    marker_is_subset(MAX_TAGS_COUNT, TAGS_MARKER_SIZE, archetype.tags, system.tags)) &&
 					   (.HAS_COMPONENTS not_in system.state ||
-					   marker_is_subset(MAX_COMPONENTS_COUNT, COMPONENTS_MARKER_SIZE, archetype.components, system.components)) {
+					    marker_is_subset(MAX_COMPONENTS_COUNT, COMPONENTS_MARKER_SIZE, archetype.components, system.components)) &&
+					   (.HAS_WITHOUT_TAGS not_in system.state ||
+						marker_is_all_unset(MAX_TAGS_COUNT, TAGS_MARKER_SIZE,
+							marker_and(TAGS_MARKER_SIZE, archetype.tags, system.without_tags))) &&
+					   (.HAS_WITHOUT_COMPONENTS not_in system.state ||
+						marker_is_all_unset(MAX_COMPONENTS_COUNT, COMPONENTS_MARKER_SIZE,
+							marker_and(COMPONENTS_MARKER_SIZE, archetype.components, system.without_components))) {
 					   	/* Call system callback for matched archetype. */
 						system.callback(&archetype.entities, world)
 					}

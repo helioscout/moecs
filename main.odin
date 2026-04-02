@@ -30,6 +30,14 @@ Mutation :: struct {
 
 Velocity :: distinct [1]f32
 
+Component1 :: struct {
+	a : int
+}
+
+Component2 :: struct {
+	b : f32
+}
+
 Resource1 :: struct {
 	enabled : bool
 }
@@ -58,6 +66,8 @@ VecType :: distinct [2]f32
 
 Tag1 :: distinct int
 Tag2 :: distinct int
+Tag3 :: distinct int
+Tag4 :: distinct int
 
 count : uint = 0
 
@@ -244,6 +254,8 @@ main :: proc() {
 	ecs.register(world, .COMPONENT, Health)
 	ecs.register(world, .COMPONENT, Rotation)
 	ecs.register(world, .COMPONENT, Velocity)
+	ecs.register(world, .COMPONENT, Component1)
+	ecs.register(world, .COMPONENT, Component2)
 	ecs.register(world, .RESOURCE, Resource1)
 	ecs.register(world, .RESOURCE, Resource2)
 	ecs.register(world, .RESOURCE, Resource3)
@@ -251,14 +263,19 @@ main :: proc() {
 	ecs.register(world, .RESOURCE, Resource5)
 	ecs.register(world, .TAG, Tag1)
 	ecs.register(world, .TAG, Tag2)
+	ecs.register(world, .TAG, Tag3)
+	ecs.register(world, .TAG, Tag4)
 
 	ecs.mount(world, { callback = startup, phase = .START })
-	ecs.mount(world, { tags = { Tag1 }, callback = system1 })
-	ecs.mount(world, { tags = { Tag2 }, callback = system1 })
-	ecs.mount(world, { components = { Position, Center }, callback = system3 })
-	ecs.mount(world, { query = { Position, Center, Tag1, Tag2 }, components = { Position, Center }, tags = { Tag1, Tag2 }, callback = system3})
-	ecs.mount(world, { name = "s1", query = { Position, Tag1 }, callback = system2 })
-	ecs.mount(world, { name = "s2", components = { Center }, tags = { Tag2 }, callback = system2 })
+	ecs.mount(world, { tags = { Tag1 }, without = { Component1, Component2, Tag3, Tag4 }, callback = system1 })
+	ecs.mount(world, { tags = { Tag2 }, without = { Component1, Component2, Tag3, Tag4 }, callback = system1 })
+	ecs.mount(world, { components = { Position, Center }, without = { Component1, Component2, Tag3, Tag4 }, callback = system3 })
+	ecs.mount(world, { query = { Position, Center, Tag1, Tag2 }, components = { Position, Center },
+		tags = { Tag1, Tag2 }, without = { Component1, Component2, Tag3, Tag4 }, callback = system3})
+	ecs.mount(world, { name = "s1", query = { Position, Tag1 }, without = { Component1, Component2, Tag3, Tag4 },
+		callback = system2 })
+	ecs.mount(world, { name = "s2", components = { Center }, tags = { Tag2 },
+		without = { Component1, Component2, Tag3, Tag4 }, callback = system2 })
 	ecs.mount(world, { name = "m_sys", callback = system4, phase = .MANUAL })
 	ecs.run(world)
 	fmt.println("--- world is running ---")

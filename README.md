@@ -1,6 +1,6 @@
 <img align="left" src="https://git.sr.ht/~helioscout/moecs/blob/master/docs/moecs-logo-small.png" />
 
-**moecs** - easy to use <span style="color: #fcbb30;">**mo**</span>tivated <span style="color: #fcbb30;">**e**</span>ntity <span style="color: #fcbb30;">**c**</span>omponent <span style="color: #fcbb30;">**s**</span>ystem.\
+**moecs** - easy to use **mo**tivated **e**ntity **c**omponent **s**ystem.\
 \
 *Memory is the honeycomb, blocks, or chunks are the beehive frames, entities are the honeycomb cells, components, and tags are the honey, and systems are the bees.*\
 \
@@ -315,7 +315,7 @@ Systems are place where your game/app algorithms are living, processing user inp
 
 Internally systems are represented by structs with all necessary configuration inside. There is `SystemCallback` procedure type that will be called for each system at each world progress step. When you define your system procedure you must follow `SystemCallback` signature, where first parameter is a pointer to dynamic array of pointers to matched entities and second one id pointer to the world.\
 \
-You pass a list of component types and/or tag types when mounting a system and these set is a match query for selection of entities which will be passed to system callback. Entity *must have* all components and tags defined for the system to match its query condition (but it also may have more, it *hasn't to be exact match*). If system has no specified components and tags it is considered as a task, no queries are executed for them at each progress step, and `nil` is passed as first argument of callback procedure (instead of matched entities array).\
+You pass a list of component types and/or tag types when mounting a system and these set is a match query for selection of entities which will be passed to system callback. Entity *must have* all components and tags defined for the system to match its query condition (but it also may have more, it *hasn't to be exact match*). If you need to exclude entities without some components/tags from the query result (entities *mustn't have them added*), you can use `without` condition when mount the system. If system has no specified components/tags and `without` conditions it is considered as a task, no queries are executed for them at each progress step, and `nil` is passed as first argument of callback procedure (instead of matched entities array).\
 \
 There are two query match approaches of selection entities for the systems.
 | Approach           | Description                                                                              |
@@ -341,6 +341,8 @@ main :: proc() {
   /* You can use query or/and components and tags fields to define system query (list of components and tags). */
   ecs.mount(world, { callback = draw,           query = { Position, Rotation, Sprite, Center, Size } })
   ecs.mount(world, { callback = collisions,     components = { Collision, Handle, Position, Center } })
+  /* Use without condition to exclude listed components/tags from system query result. */
+  ecs.mount(world, { callback = materialize,    query = { Position, Rotation }, without = { Handle, Player } })
   /* Mount systems to run them manually (phase = .MANUAL). */
   ecs.mount(world, { callback = load_resources, name = "load-resources", phase = .MANUAL })
   ecs.mount(world, { callback = destroy,        name = "destroy", phase = .MANUAL })

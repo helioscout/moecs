@@ -61,6 +61,10 @@ ElementState :: enum {
 	HAS_TAGS,
 	/* System has components in the match query. */
 	HAS_COMPONENTS,
+	/* System has excluding tags condition in the match query. */
+	HAS_WITHOUT_TAGS,
+	/* System has excluding components condition in the match query. */
+	HAS_WITHOUT_COMPONENTS,
 	/* Indicates that a system is task, has no components or tags in match query. */
 	IS_TASK,
 	/* Entity should be re-archetyped at deferred (perform) stage. */
