@@ -6,7 +6,7 @@
  \
  \
  \
- ---
+ <br>
 
 ### Memory concept
 The main idea is that memory for components is divided into blocks, and entities belong to two lifetimes:
