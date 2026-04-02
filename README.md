@@ -1,5 +1,5 @@
 <div style="text-align: center; width: 100%;">
-<img src="docs/moecs-logo.png" alt="moecs logo">
+<img src="docs/moecs-logo.png" alt="moecs logo" height="200">
 </div>
 
 ### Memory concept
