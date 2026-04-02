@@ -7,6 +7,21 @@
 *“I never am really satisfied that I understand anything; because, understand it well as I may, my comprehension can only be an infinitesimal fraction of all I want to understand about the many connections and relations which occur to me, how the matter in question was first thought of or arrived at, etc., etc.”*\
 *― Ada Lovelace*
 
+[Memory concept](#memory-concept)\
+[Setup](#setup)\
+[Worlds](#worlds)\
+[Elements](#elements)\
+[Mutability and deferred actions](#mutability-and-deferred-actions)\
+[Resources](#resources)
+[Entities](#entities)
+[Components](#components)
+[Tags](#tags)
+[Systems](#systems)
+[Running the world](#running-the-world)
+[Iterating entities](#iterating-entities)
+[Performance](#performance)
+[Made with moecs](#made-with-moecs)
+
 ### Memory concept
 The main idea is that memory for components is divided into blocks, and entities belong to two lifetimes:
 - DYNAMIC: usual entities that are spawned and despawned while world exists;
