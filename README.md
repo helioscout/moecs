@@ -1,6 +1,6 @@
 <img align="left" src="https://git.sr.ht/~helioscout/moecs/blob/master/docs/moecs-logo-small.png" />
 
-**moecs** - easy to use <font color="#fcbb30">mo</font>tivated <font color="#fcbb30">e</font>ntity <font color="#fcbb30">c</font>omponent <font color="#fcbb30">s</font>ystem.\
+**moecs** - easy to use <span style="color: #fcbb30;">**mo**</span>tivated <span style="color: #fcbb30;">**e**</span>ntity <span style="color: #fcbb30;">**c**</span>omponent <span style="color: #fcbb30;">**s**</span>ystem.\
 \
 *Memory is the honeycomb, blocks, or chunks are the beehive frames, entities are the honeycomb cells, components, and tags are the honey, and systems are the bees.*\
 \
