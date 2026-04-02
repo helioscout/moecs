@@ -12,14 +12,14 @@
 [Worlds](#worlds)\
 [Elements](#elements)\
 [Mutability and deferred actions](#mutability-and-deferred-actions)\
-[Resources](#resources)
-[Entities](#entities)
-[Components](#components)
-[Tags](#tags)
-[Systems](#systems)
-[Running the world](#running-the-world)
-[Iterating entities](#iterating-entities)
-[Performance](#performance)
+[Resources](#resources)\
+[Entities](#entities)\
+[Components](#components)\
+[Tags](#tags)\
+[Systems](#systems)\
+[Running the world](#running-the-world)\
+[Iterating entities](#iterating-entities)\
+[Performance](#performance)\
 [Made with moecs](#made-with-moecs)
 
 ### Memory concept
