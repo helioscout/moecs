@@ -3,7 +3,6 @@ package moecs
 import "core:mem"
 import "core:slice"
 import str "core:strings"
-import sa "core:container/small_array"
 import "core:fmt"
 
 /* World type, main container of the sapce. The world is built of blocks. */
@@ -435,7 +434,7 @@ each :: proc(world: ^World, lifetime: bit_set[Lifetime; u8] = { .DYNAMIC, .STATI
 	if .DYNAMIC in lifetime {
 		for block in world.dynamics {
 			for idx in 0..<block.idx {
-				if !slice.contains(sa.slice(&block.deleted), idx) {
+				if !slice.contains(block.deleted[:], idx) {
 					callback(&block.entities[idx], .DYNAMIC, world)
 				}
 			}

@@ -3,7 +3,6 @@ package moecs
 import "core:mem"
 import "base:runtime"
 import "core:slice"
-import sa "core:container/small_array"
 import "core:fmt"
 
 /* Block type, building block of the world. */
@@ -22,7 +21,7 @@ Block :: struct {
 	   A pointer to allocated memory block. */
 	chunks : rawptr,
 	/* Deleted (freed) rows in the dynamic lifetime block. */
-	deleted : sa.Small_Array(DYNAMIC_CHUNK_SIZE, int),
+	deleted : [dynamic; DYNAMIC_CHUNK_SIZE]int,
 	/* Current inserting index in the block (last inserted index + 1).
 	   If it equals chunk size than new block should be inserted to the world. */
 	idx : int,
@@ -45,7 +44,7 @@ block_init :: proc(block: ^Block) {
 @(private="package")
 block_has_free_rows :: proc(block: ^Block) -> bool {
 	switch block.lifetime {
-		case .DYNAMIC: return block.idx < DYNAMIC_CHUNK_SIZE || sa.len(block.deleted) > 0
+		case .DYNAMIC: return block.idx < DYNAMIC_CHUNK_SIZE || len(block.deleted) > 0
 		case .STATIC:  return block.idx < STATIC_CHUNK_SIZE
 	}
 
@@ -57,7 +56,7 @@ block_has_free_rows :: proc(block: ^Block) -> bool {
 @(private="package")
 block_is_full :: proc(block: ^Block) -> bool {
 	switch block.lifetime {
-		case .DYNAMIC: return block.idx == DYNAMIC_CHUNK_SIZE && sa.len(block.deleted) == 0
+		case .DYNAMIC: return block.idx == DYNAMIC_CHUNK_SIZE && len(block.deleted) == 0
 		case .STATIC:  return block.idx == STATIC_CHUNK_SIZE
 	}
 
@@ -69,7 +68,7 @@ block_is_full :: proc(block: ^Block) -> bool {
 @(private="package")
 block_is_free :: proc(block: ^Block) -> bool {
 	switch block.lifetime {
-		case .DYNAMIC: return block.idx == 0 || sa.len(block.deleted) == block.idx
+		case .DYNAMIC: return block.idx == 0 || len(block.deleted) == block.idx
 		case .STATIC:  return block.idx == 0
 	}
 
@@ -94,7 +93,7 @@ block_insert :: proc(block: ^Block) -> ^Entity {
 @(private="package")
 block_delete :: proc(block: ^Block, idx: int) {
 	switch block.lifetime {
-		case .DYNAMIC: sa.append(&block.deleted, idx)
+		case .DYNAMIC: append(&block.deleted, idx)
 		case .STATIC:  panic("Static entities can't be deleted.")
 	}
 }
@@ -109,7 +108,7 @@ block_iter :: #force_inline proc(block: ^Block, iter: ^EntitiesIterator) -> bool
 	idx := iter.entity == nil ? 0 : iter.idx + 1
 
 	for idx < block.idx {
-		if block.lifetime == .DYNAMIC && slice.contains(sa.slice(&block.deleted), idx) {
+		if block.lifetime == .DYNAMIC && slice.contains(block.deleted[:], idx) {
 			idx += 1
 		} else {
 			iter.entity = &block.entities[idx] 
@@ -131,11 +130,11 @@ block_pop_free_index :: proc(block: ^Block) -> int {
 
 	switch block.lifetime {
 		case .DYNAMIC:
-			if sa.len(block.deleted) == 0 {
+			if len(block.deleted) == 0 {
 				idx = block.idx
 				block.idx += 1
 			} else {
-				idx = sa.pop_back(&block.deleted)
+				idx = pop(&block.deleted)
 			}
 		case .STATIC:
 			idx = block.idx
