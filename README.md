@@ -437,11 +437,13 @@ added :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: ty
   switch type {
     case Position:
       pos := cast(^Position)component
+      /* Do not use observers for such purposes, it's just example. */
       pos.x += 50
       pos.y += 50
 
     case Center:
       center := cast(^Center)component
+      /* Component values will be safety changed in place. */
       center.cx += 50
       center.cy += 50
   }
@@ -491,6 +493,8 @@ main :: proc() {
 | turn_on            | Turn on observer for specific event and type.                                            |
 | turn_off           | Turn off observer for specific event and type.                                           |
 | turned_on          | Checks if the observer for specific event and type is turned on.                         |
+
+Do not enable and use observers unless absolutely necessary. Only do so if something can't be done using systems, as observers are very inefficient and reduce the speed of the ECS. For example, if you're developing a library that utilizes the ECS and initializes and runs the game's physics under the hood using specific components. You need to track the addition and modification of these components to make the appropriate changes to the physics engine. In this case observers are really necessary, for game/app logic use systems, it's much more efficient.
 
 ### Running the world
 After you `init` the ecs, create the `world`(s), `register` all resources, components, and tags, mount all systems, you have to call `run` for your world(s). This procedure checks all necessary conditions and makes adjustments required for working with the declared world, allocates memory for resources. So, first you define the world rules, describe it, and then you run it, so you can fill it with resources, entities, components and execute systems.\
