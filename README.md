@@ -17,6 +17,7 @@
 [Components](#components)\
 [Tags](#tags)\
 [Systems](#systems)\
+[Observers](#observers)
 [Running the world](#running-the-world)\
 [Iterating entities](#iterating-entities)\
 [Performance](#performance)\
@@ -112,6 +113,8 @@ main :: proc() {
 There are methods for getting resources and components: `get()` and `get_mut()`. Use `get_mut()` only if you need to modify at least one instance of receiving resource/component types, otherwise use `get()` - it is little bit faster. Also use overloaded procedures to get a bunch of elements by one procedure call, the same is true for setting values with `set()` procedure. Bunch methods gives you more performance because use less memory read/write operations.\
 \
 When you `despawn` entities, these actions will be deferred. We need to keep entities in the archetypes till end of the current progress step, otherwise iterators inside systems code can lead to bugs, as they iterate over collections of the archetypes which we need to delete entities from. Entities will be marked as `DESPAWNING` but despawned (deleted from the block) at performing stage. Also, a new entity can be written in place of a deleted entity, then bugs are inevitable since the reference to the deleted entity will continue to be stored in the archetype collection.\
+\
+If you set observers for despawning entities, callbacks will also be deferred to the performing stage until the actual moment of despawning.\
 \
 When you `add`/`remove` a component, or `set`/`unset` a tag they will still present in current archetypes till end of the current progress step. When `tags`/`components` is being `added`/`removed` to the entity and world is already running, entities should not be moved to other archetypes till end of the current progress step, so this archetyping action is deferred to the perform stage.\
 \
@@ -403,6 +406,92 @@ main :: proc() {
 | enable()           | Enables the system.                                                                      |
 | disable()          | Disables the system.                                                                     |
 
+### Observers
+Observers are a mechanism that allows to subscribe on events of structural and data changes in the world. By default observers are disable for performance reasons, so you need to pass `true` for `observable` argument of `new_world` procedure when you create the world. You also can change `observable` property of the world to turn off/on observers globally.\
+\
+There are different event types that can be handled for entities, components, and tags.
+| Event              | Description                                                                              |
+|--------------------|------------------------------------------------------------------------------------------|
+| SPAWNED            | Entity has been spawned.                                                                 |
+| DESPAWNED          | Entity has been despawned.                                                               |
+| ADDED              | Component has been added to an entity.                                                   |
+| REMOVED            | Component has been removed from an entity.                                               |
+| SET                | Component value has been set (changed).                                                  |
+| TAGGED             | Tag has been added to an entity.                                                         |
+| UNTAGGED           | Tag has been removed from an entity.                                                     |
+
+Keep in mind that when you add/remove a component repeatedly or set/unset a tag repeatedly, the events will also be fired repeatedly for each operation even if you already made it before. It is safe for the data to call `add_component` (for example) procedure several times and pass the same component type to it, but your observers logic can be broken, so you need care about it yourself.\
+\
+You can turn on/off observers for a specific component/tag type or globally for an event type. You can also check whether an observer is set or turned on. Events are not supported for resources.\
+\
+When you set an observer using `observe` you must provide callback procedure that should follow `ObserverCallback` procedure type. `SPAWNED`/`DESPAWNED` events are being thrown for all entities and there are nothing to pass for `type` and `component` parameters, so the will be `nil` for these events in callback. Pointer to event target entity will be passed as `entity` parameter to callback. For `TAGGED`/`UNTAGGED` events tag type will be passed as `type` parameter, but `component` will be equals to `nil`. And finally for `ADDED`/`REMOVED`/`SET` events all callback parameters will be set, and `component` parameter is a pointer to event target component value, you can safety change it's value in place or read it, previously cast `rawptr` to expecting component type pointer.\
+\
+When you provide several `types` in `observe`/`unobserve` procedures the same callback will be assigned as specific event handler for each of these `types`. This is done for convenience, there are no group observers, they are set separately for a specific event and element (component/tag) type.\
+\
+You must set observers *only when* the world is already running, because of necessary indexes sorting made in `run` procedure of the world. Subsequent setting observers for some configuration will replace previous ones.
+```odin
+import ecs "moecs/src"
+
+/* Observer callback procedure declaration. */
+added :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, component: rawptr) {
+  switch type {
+    case Position:
+      pos := cast(^Position)component
+      pos.x += 50
+      pos.y += 50
+
+    case Center:
+      center := cast(^Center)component
+      center.cx += 50
+      center.cy += 50
+  }
+}
+
+main :: proc() {
+  ecs.init()
+  /* Enable observers when create the world. */
+  world := ecs.new_world(observable = true)
+  /* ...register tags and components types here. */
+  ecs.run(world)
+
+  /* Set observers for entity spawning/despawning, you need to provide only callbacks. */
+  ecs.observe(world, event = .SPAWNED, callback = spawned)
+  ecs.observe(world, event = .DESPAWNED, callback = despawned)
+  /* You can set observers for one or several types, subsequent assignments replace previous ones. */
+  ecs.observe(world, event = .ADDED, types = { Rotation }, callback = added_rot)
+  ecs.observe(world, event = .ADDED, types = { Position, Center, Health, Velocity }, callback = added)
+  ecs.observe(world, event = .REMOVED, types = { Center, Position }, callback = removed)
+  ecs.observe(world, event = .SET, types = { Position }, callback = set_pos)
+  ecs.observe(world, event = .SET, types = { Center, Rotation, Health, Velocity }, callback = set)
+  ecs.observe(world, event = .TAGGED, types = { Ship, Asteroid }, callback = tagged)
+  ecs.observe(world, event = .UNTAGGED, types = { Ship, Asteroid }, callback = untagged)
+
+  /* Turn off all added events for all component types. */
+  ecs.turn_off(world, .ADDED)
+  /* Turn off added events for Velocity component type. */
+  ecs.turn_off(world, .ADDED, Velocity)
+
+  if ecs.observable(world, .SET, Position) {
+    /* Remove observer for set event of Position component type. */
+    ecs.unobserve(world, .SET, { Position })
+  }
+
+  /* Turn on all added events for all component types.
+     It is still turned off for Velocity component type. */
+  if !ecs.turned_on(world, .ADDED) do ecs.turn_on(world, .ADDED)
+
+  ecs.destroy()
+}
+```
+| Procedure          | Description                                                                              |
+|--------------------|------------------------------------------------------------------------------------------|
+| observe            | Sets observer for specified event and type(s).                                           |
+| unobserve          | Unsets observer for specified event and type(s).                                         |
+| observable         | Checks if observer is set for specific event and type.                                   |
+| turn_on            | Turn on observer for specific event and type.                                            |
+| turn_off           | Turn off observer for specific event and type.                                           |
+| turned_on          | Checks if the observer for specific event and type is turned on.                         |
+
 ### Running the world
 After you `init` the ecs, create the `world`(s), `register` all resources, components, and tags, mount all systems, you have to call `run` for your world(s). This procedure checks all necessary conditions and makes adjustments required for working with the declared world, allocates memory for resources. So, first you define the world rules, describe it, and then you run it, so you can fill it with resources, entities, components and execute systems.\
 \
@@ -456,7 +545,7 @@ main :: proc() {
 | each()             | Step through each entity reference in the world.                                         |
 
 ### Performance
-I am writing this project in my spare time, just like all my other hobby gamedev. If you want the highest performance, it's best not to use any ECS. I love ECS because it allows you to systematize and separate/parallelize logic/data, move each part of the game into its own system, customize its operation, and generalize logic for entities with different components. moecs only has the basics and doesn't yet have some of the features found in others (hierarchy, relationships, prefabs, events, etc.) and perhaps will never have because of performance overhead. But if you really need some feature you can open an issue. As for speed, it will vary on different computers. You can play around with `main.odin`, and see the benchmarks (I use this code for testing). I'd be interested in seeing your results.\
+I am writing this project in my spare time, just like all my other hobby gamedev. If you want the highest performance, it's best not to use any ECS. I love ECS because it allows you to systematize and separate/parallelize logic/data, move each part of the game into its own system, customize its operation, and generalize logic for entities with different components. moecs only has the basics and doesn't yet have some of the features found in others (hierarchy, relationships, prefabs, etc.) and perhaps will never have because of performance overhead. But if you really need some feature you can open an issue. As for speed, it will vary on different computers. You can play around with `main.odin`, and see the benchmarks (I use this code for testing). I'd be interested in seeing your results.\
 \
 Getting (reading) operations executes much faster than setting (writing) ones. Prefer use overloaded `bunch` procedures to process several elements at once, these methods were optimized for performance.\
 \
@@ -465,4 +554,4 @@ Use `-o:aggressive` Odin compiler flag, it can speed up operations in 30 times.
 ### Made with moecs
 | Game/App           | Description                                                                              |
 |--------------------|------------------------------------------------------------------------------------------|
-| [mouniverse](https://sr.ht/~helioscout/mouniverse) | Simple space game, I am making in my spare time for fun and learning.                                         |
+| [mouniverse](https://github.com/helioscout/mouniverse) | Simple space game, I am making in my spare time for fun and learning.                                                                                                 |

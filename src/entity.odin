@@ -29,11 +29,17 @@ Entity :: struct {
    `perform`   : Perform archetyping of the entity.
 				 You should not change this parameter (inner logic). */
 add_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type, perform: bool = true) {
-	if idx, ok := component_index(&entity.block.world.components, Type); ok {
-		set_component(entity, Type, component)					/* Storing value in the chunk. */
-		marker_set(COMPONENTS_MARKER_SIZE, &entity.components, idx)		/* Setting marker bit. */
+	world : = entity.block.world
+
+	if c, ok := components_get(&world.components, Type); ok {
+		ptr := mem.ptr_offset(cast(^u8)entity.block.chunks, world.components.size * entity.chunk_idx + c.offset)
+		cell: ^Type = cast(^Type)ptr
+		cell^ = component^													/* Storing value in the chunk. */
+
+		marker_set(COMPONENTS_MARKER_SIZE, &entity.components, c.idx)		/* Setting marker bit.         */
 
 		if perform do archetyping(entity)
+		if world.observable do added_event(world, entity, Type, c.idx, cell)
 	}
 }
 
@@ -42,11 +48,14 @@ add_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type, perform:
    `$Type`     : Component type.
    `component` : Reference to the component instance." */
 set_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type) #no_bounds_check {
-	if c, ok := components_get(&entity.block.world.components, Type); ok {
-		ptr := mem.ptr_offset(cast(^u8)entity.block.chunks,
-			entity.block.world.components.size * entity.chunk_idx + c.offset)
+	world : = entity.block.world
+
+	if c, ok := components_get(&world.components, Type); ok {
+		ptr := mem.ptr_offset(cast(^u8)entity.block.chunks, world.components.size * entity.chunk_idx + c.offset)
 		cell: ^Type = cast(^Type)ptr
 		cell^ = component^
+
+		if world.observable do set_event(world, entity, Type, c.idx, cell)
 	}
 }
 
@@ -92,10 +101,18 @@ get_component :: #force_inline proc(entity: ^Entity, $Type: typeid) -> (Type, bo
    `perform` : Perform archetyping of the entity.
 			   You should not change this parameter (inner logic). */
 remove_component :: proc(entity: ^Entity, type: typeid, perform: bool = true) {
-	if idx, ok := component_index(&entity.block.world.components, type); ok {
+	world : = entity.block.world
+
+	if idx, ok := component_index(&world.components, type); ok {
 		marker_unset(COMPONENTS_MARKER_SIZE, &entity.components, idx)
 
 		if perform do archetyping(entity)
+
+		if world.observable {
+			ptr := mem.ptr_offset(cast(^u8)entity.block.chunks,
+				world.components.size * entity.chunk_idx + world.components.types[idx].offset)
+			removed_event(world, entity, type, idx, ptr)
+		}
 	}
 }
 
@@ -144,10 +161,13 @@ has_components :: proc(entity: ^Entity, types: ..typeid) -> bool {
    `perform` : Perform archetyping of the entity.
 			   You should not change this parameter (inner logic). */
 set_tag :: proc(entity: ^Entity, type: typeid, perform: bool = true) {
-	if idx, ok := tag_index(&entity.block.world.tags, type); ok {
+	world : = entity.block.world
+
+	if idx, ok := tag_index(&world.tags, type); ok {
 		marker_set(TAGS_MARKER_SIZE, &entity.tags, idx)
 
 		if perform do archetyping(entity)
+		if world.observable do tagged_event(world, entity, type, idx)
 	}
 }
 
@@ -155,9 +175,13 @@ set_tag :: proc(entity: ^Entity, type: typeid, perform: bool = true) {
    `entity`  : Pointer to the entity.
    `types`   : Tag types. */
 set_tags :: proc(entity: ^Entity, types: ..typeid) {
+	world : = entity.block.world
+
 	for type in types {
-		if idx, ok := tag_index(&entity.block.world.tags, type); ok {
+		if idx, ok := tag_index(&world.tags, type); ok {
 			marker_set(TAGS_MARKER_SIZE, &entity.tags, idx)
+
+			if world.observable do tagged_event(world, entity, type, idx)
 		}
 	}
 	
@@ -170,20 +194,27 @@ set_tags :: proc(entity: ^Entity, types: ..typeid) {
    `perform` : Perform archetyping of the entity.
 			   You should not change this parameter (inner logic). */
 unset_tag :: proc(entity: ^Entity, type: typeid, perform: bool = true) {
-	if idx, ok := tag_index(&entity.block.world.tags, type); ok {
+	world : = entity.block.world
+
+	if idx, ok := tag_index(&world.tags, type); ok {
 		marker_unset(TAGS_MARKER_SIZE, &entity.tags, idx)
+		
+		if perform do archetyping(entity)
+		if world.observable do untagged_event(world, entity, type, idx)
 	}
-	
-	if perform do archetyping(entity)
 }
 
 /* Removes tags from entity of all passed types.
    `entity`  : Pointer to the entity.
    `types`   : Tag types. */
 unset_tags :: proc(entity: ^Entity, types: ..typeid) {
+	world : = entity.block.world
+
 	for type in types {
-		if idx, ok := tag_index(&entity.block.world.tags, type); ok {
+		if idx, ok := tag_index(&world.tags, type); ok {
 			marker_unset(TAGS_MARKER_SIZE, &entity.tags, idx)
+			
+			if world.observable do untagged_event(world, entity, type, idx)
 		}
 	}
 

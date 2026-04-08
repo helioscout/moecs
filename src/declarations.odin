@@ -106,6 +106,24 @@ Phase :: enum u8 {
 	MANUAL      = 4
 }
 
+/* Observer event types. */
+Event :: enum u8 {
+	/* Entity has been spawned. */
+	SPAWNED,
+	/* Entity has been despawned. */
+	DESPAWNED,
+	/* Component has been added to an entity. */
+	ADDED,
+	/* Component has been removed from an entity. */
+	REMOVED,
+	/* Component value has been set (changed). */
+	SET,
+	/* Tag has been added to an entity. */
+	TAGGED,
+	/* Tag has been removed from an entity. */
+	UNTAGGED
+}
+
 /* Systems collections for each running phase. */
 @(private) Schedule :: struct {
 	/* Systems that are being ran at the start phase. */
@@ -147,10 +165,18 @@ Phase :: enum u8 {
    `world`    : Pointer to the world. */
 @(private) IteratorCallback :: proc(entity: ^Entity, lifetime: Lifetime, world: ^World)
 
-/* Callback function for the system.
+/* Callback procedure for the system.
    `entities` : Matched entities for the system.
    `world`    : Pointer to the world. */
 SystemCallback :: proc(entities: ^[dynamic]^Entity, world: ^World)
+
+/* Callback procedure for the observer.
+   `world`     : Pointer to the world.
+   `entity`    : Pointer to the event target entity.
+   `event`     : Emitted event type.
+   `type`      : Event target component/tag type that is adding/setting/removing.
+   `component` : Pointer to the component instance which was added/set/removed. */
+ObserverCallback :: proc(world: ^World, entity: ^Entity, event: Event, type: typeid, component: rawptr)
 
 add :: proc {
 	add_component,
@@ -285,4 +311,24 @@ tagged :: proc {
 despawn :: proc {
 	despawn_entity,
 	despawn_entities
+}
+
+turn_on :: proc {
+	turn_on_event,
+	turn_on_for_type
+}
+
+turn_off :: proc {
+	turn_off_event,
+	turn_off_for_type
+}
+
+turned_on :: proc {
+	turned_on_for_type,
+	turned_on_event
+}
+
+observable :: proc {
+	observable_for_type,
+	observable_event
 }

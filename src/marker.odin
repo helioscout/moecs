@@ -112,6 +112,18 @@ marker_is_set :: #force_inline proc($size: uint, marker: [size]uint, #any_int id
 	return marker[idx / MARKER_BITS_COUNT] & (1 << (idx % MARKER_BITS_COUNT)) != 0
 }
 
+/* Sets all marker's bits to 1.
+   `$count` : Whole marker bits count.
+   `$size`  : Marker (array) size.
+   `marker` : Pointer to bitset (marker array). */
+marker_set_all :: #force_inline proc($count: int, $size: uint, marker: ^[size]uint) #no_bounds_check {
+	for i : uint = 0; i < size - 1; i += 1 {
+		marker[i] = max(uint)
+	}
+
+	marker[size - 1] = uint(count) == MARKER_BITS_COUNT ? max(uint) : max(uint) >> (MARKER_BITS_COUNT - uint(count) % MARKER_BITS_COUNT)
+}
+
 /* Perform bitwise AND over all bits of two markers.
    `$size`   : Markers (arrays) size.
    `marker1` : First bitset (marker array).

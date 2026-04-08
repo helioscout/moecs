@@ -93,6 +93,8 @@ system1 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 	despawned := false
 	count := 0
 	
+	ecs.turn_off(world, .ADDED, Position)
+
 	for entity in entities {
 
 		if count < 100 {
@@ -111,6 +113,8 @@ system1 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 		count += 1
 	}
 
+	ecs.turn_on(world, .ADDED, Position)
+
 	// fmt.printfln("system1 count: %v", count)
 }
 
@@ -124,15 +128,15 @@ system2 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 		// res4 := ecs.get_resource(world, Resource4)
 		// res5 := ecs.get(world, Resource5)
 		// res1, res2, res3, res4, res5 := ecs.get(world, Resource1, Resource2, Resource3, Resource4, Resource5)
-		pos, center, vec, health, vel, rot := ecs.get(entity, Position, Center, VecType, Health, Velocity, Rotation)
+		// pos, center, vec, health, vel, rot := ecs.get(entity, Position, Center, VecType, Health, Velocity, Rotation)
 		// pos, center, vec, health, vel := ecs.get(entity, Position, Center, VecType, Health, Velocity)
 		// pos, center, vec, health := ecs.get(entity, Position, Center, VecType, Health)
 		// pos, center, vec := ecs.get(entity, Position, Center, VecType)
 		// pos, center := ecs.get(entity, Position, Center)
 		// pos := ecs.get(entity, Position)
 
-		pos.x += 1
-		center.cx += 1
+		// pos.x += 1
+		// center.cx += 1
 		// fmt.println("s2: ", pos, center)
 		// res3.data[0] = 3
 		// res4.pos.x += 1
@@ -152,14 +156,14 @@ system2 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 		// 	Resource3, &Resource3 { some = 300 },
 		// 	Resource4, &Resource4 { pos = { x = 1, y = 2 } },
 		// 	Resource5, &Resource5 { arr = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 } })
-		// ecs.add(entity,
-		// 	Position, &Position { x = 10, y = 10 },
-		// 	Center, &Center { cx = 20, cy = 20 },
-		// 	Health, &Health { hp = 30 },
-		// 	Rotation, &Rotation { angle = 90 },
-		// 	Velocity, &Velocity { 50 },
-		// 	VecType, &VecType { 10, 20 },
-		// 	Mutation, &Mutation { skin = 11 })
+		ecs.add(entity,
+			Position, &Position { x = 10, y = 10 },
+			Center, &Center { cx = 20, cy = 20 },
+			Health, &Health { hp = 30 },
+			Rotation, &Rotation { angle = 90 },
+			Velocity, &Velocity { 50 },
+			VecType, &VecType { 10, 20 },
+			Mutation, &Mutation { skin = 11 })
 
 		// count += 1
 	}
@@ -177,15 +181,15 @@ system3 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 		// res4 := ecs.get_resource(world, Resource4)
 		// res5 := ecs.get(world, Resource5)
 		// res1, res2, res3, res4, res5 := ecs.get(world, Resource1, Resource2, Resource3, Resource4, Resource5)
-		pos, center, vec, health, vel, rot := ecs.get(entity, Position, Center, VecType, Health, Velocity, Rotation)
+		// pos, center, vec, health, vel, rot := ecs.get(entity, Position, Center, VecType, Health, Velocity, Rotation)
 		// pos, center, vec, health, vel := ecs.get(entity, Position, Center, VecType, Health, Velocity)
 		// pos, center, vec, health := ecs.get(entity, Position, Center, VecType, Health)
 		// pos, center, vec := ecs.get(entity, Position, Center, VecType)
 		// pos, center := ecs.get(entity, Position, Center)
 		// pos := ecs.get(entity, Position)
 
-		pos.x += 1
-		center.cx += 1
+		// pos.x += 1
+		// center.cx += 1
 		// fmt.println("s3: ", pos, center)
 		// res3.data[0] = 3
 		// res4.pos.x += 1
@@ -205,14 +209,14 @@ system3 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 		// 	Resource3, &Resource3 { some = 300 },
 		// 	Resource4, &Resource4 { pos = { x = 1, y = 2 } },
 		// 	Resource5, &Resource5 { arr = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 } })
-		// ecs.add(entity,
-		// 	Position, &Position { x = 10, y = 10 },
-		// 	Center, &Center { cx = 20, cy = 20 },
-		// 	Health, &Health { hp = 30 },
-		// 	Rotation, &Rotation { angle = 90 },
-		// 	Velocity, &Velocity { 50 },
-		// 	VecType, &VecType { 10, 20 },
-		// 	Mutation, &Mutation { skin = 11 })
+		ecs.add(entity,
+			Position, &Position { x = 10, y = 10 },
+			Center, &Center { cx = 20, cy = 20 },
+			Health, &Health { hp = 30 },
+			Rotation, &Rotation { angle = 90 },
+			Velocity, &Velocity { 50 },
+			VecType, &VecType { 10, 20 },
+			Mutation, &Mutation { skin = 11 })
 
 		// count += 1
 	}
@@ -222,6 +226,59 @@ system3 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 
 system4 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 	fmt.println("-- manual system...")
+}
+
+spawned :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, component: rawptr) {
+	// fmt.println("entity spawned")
+}
+
+despawned :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, component: rawptr) {
+	// fmt.println("entity despawned")
+}
+
+added_pos :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, component: rawptr) {
+	// fmt.printfln("Position added: %v", (cast(^Position)component)^)
+}
+
+added :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, component: rawptr) {
+	// fmt.printfln("%v added", type)
+	switch type {
+		case Position:
+			pos := cast(^Position)component
+			pos.x += 50
+			pos.y += 50
+			
+		case Center:
+			center := cast(^Center)component
+			center.cx += 50
+			center.cy += 50
+	}
+}
+
+set_pos :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, component: rawptr) {
+	// fmt.printfln("Position set: %v", (cast(^Position)component)^)
+}
+
+set :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, component: rawptr) {
+	// fmt.printfln("%v set", type)
+	// switch type {
+	// 	case Position: fmt.printfln("Position set: %v", (cast(^Position)component)^)
+	// 	case Center: fmt.printfln("Center set: %v", (cast(^Center)component)^)
+	// }
+}
+
+removed :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, component: rawptr) {
+	switch type {
+		case Position: fmt.printfln("Position removed: %v", (cast(^Position)component)^)
+		case Center: fmt.printfln("Center removed: %v", (cast(^Center)component)^)
+	}
+}
+
+tagged :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, component: rawptr) {
+	// fmt.printfln("Tagged: %v", type)
+}
+untagged :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, component: rawptr) {
+	fmt.printfln("Untagged: %v", type)
 }
 
 main :: proc() {
@@ -245,7 +302,7 @@ main :: proc() {
 	
 	ecs.init()
 	
-	world : ^ecs.World = ecs.new_world(.ARCHETYPE)
+	world : ^ecs.World = ecs.new_world(approach = .ARCHETYPE, observable = true)
 
 	ecs.register(world, .COMPONENT, Position)
 	ecs.register(world, .COMPONENT, Center)
@@ -279,6 +336,27 @@ main :: proc() {
 	ecs.mount(world, { name = "m_sys", callback = system4, phase = .MANUAL })
 	ecs.run(world)
 	fmt.println("--- world is running ---")
+
+	fmt.printfln("observable ADDED Position: %v", ecs.observable(world, .ADDED, Position))
+
+	ecs.observe(world, event = .SPAWNED, callback = spawned)
+	ecs.observe(world, event = .DESPAWNED, callback = despawned)
+	ecs.observe(world, event = .ADDED, types = { Position }, callback = added_pos)
+	ecs.observe(world, event = .ADDED, types = { Position, Center, Rotation, VecType, Health, Mutation, Velocity }, callback = added)
+	ecs.observe(world, event = .REMOVED, types = { Center, Position }, callback = removed)
+	ecs.observe(world, event = .SET, types = { Position }, callback = set_pos)
+	ecs.observe(world, event = .SET, types = { Position, Center, Rotation, VecType, Health, Mutation, Velocity }, callback = set)
+	ecs.observe(world, event = .TAGGED, types = { Tag1, Tag2, Tag3, Tag4 }, callback = tagged)
+	ecs.observe(world, event = .UNTAGGED, types = { Tag1, Tag2, Tag3, Tag4 }, callback = untagged)
+	
+	ecs.turn_off(world, .ADDED)
+
+	if ecs.observable(world, .SET, Position) {
+		ecs.unobserve(world, .SET, { Position })
+	}
+	
+	fmt.printfln("observable SPAWNED: %v", ecs.observable(world, .SPAWNED))
+	fmt.printfln("observable ADDED Position: %v", ecs.observable(world, .ADDED, Position))
 
 	// ecs.unmount(world, "s2")
 	// fmt.println(ecs.get(world, "s2"))
@@ -457,8 +535,8 @@ main :: proc() {
 		VecType, &VecType { 10, 20 },
 		Mutation, &Mutation { skin = 200 })
 
-	// ecs.remove(e4, Position, Center, int)
-	// ecs.remove(e4, Position)
+	ecs.remove(e4, Position, Center, int)
+	ecs.remove(e4, Position)
 
 	if c, ok := ecs.get(e4, Position); ok { fmt.println(c) } else do fmt.println("Component not found.")
 	if c, ok := ecs.get(e4, Center); ok { fmt.println(c) } else do fmt.println("Component not found.")
@@ -584,6 +662,8 @@ main :: proc() {
 	for archetype in world.archetypes {
 		fmt.printfln("archetype: %v, %v, %v", len(archetype.entities), archetype.components, archetype.tags)
 	}
+
+	if !ecs.turned_on(world, .ADDED) do ecs.turn_on(world, .ADDED)
 
 	_time = time.now()
 	fmt.println("--- progress 100 times ---")

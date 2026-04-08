@@ -1,6 +1,5 @@
 package moecs
 
-import "vendor:x11/xlib"
 /* System type. */
 System :: struct {
 	/* Name of the system. It must be unique. Used for getting the system from the world. */

@@ -31,11 +31,15 @@ add_2_components :: #force_inline proc(entity: ^Entity,
 		offset := world.components.types[i].offset
 
 		if id == id1 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component1, size_of(Type1))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type1, i, ptr)
 		} else if id == id2 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component2, size_of(Type2))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type2, i, ptr)
 		}
 	}
 
@@ -74,14 +78,20 @@ add_3_components :: #force_inline proc(entity: ^Entity,
 		offset := world.components.types[i].offset
 
 		if id == id1 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component1, size_of(Type1))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type1, i, ptr)
 		} else if id == id2 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component2, size_of(Type2))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type2, i, ptr)
 		} else if id == id3 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component3, size_of(Type3))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type3, i, ptr)
 		}
 	}
 
@@ -121,17 +131,25 @@ add_4_components :: #force_inline proc(entity: ^Entity,
 		offset := world.components.types[i].offset
 
 		if id == id1 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component1, size_of(Type1))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type1, i, ptr)
 		} else if id == id2 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component2, size_of(Type2))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type2, i, ptr)
 		} else if id == id3 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component3, size_of(Type3))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type3, i, ptr)
 		} else if id == id4 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component4, size_of(Type4))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type4, i, ptr)
 		}
 	}
 
@@ -173,20 +191,30 @@ add_5_components :: #force_inline proc(entity: ^Entity,
 		offset := world.components.types[i].offset
 
 		if id == id1 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component1, size_of(Type1))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type1, i, ptr)
 		} else if id == id2 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component2, size_of(Type2))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type2, i, ptr)
 		} else if id == id3 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component3, size_of(Type3))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type3, i, ptr)
 		} else if id == id4 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component4, size_of(Type4))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type4, i, ptr)
 		} else if id == id5 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component5, size_of(Type5))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type5, i, ptr)
 		}
 	}
 
@@ -229,23 +257,35 @@ add_6_components :: #force_inline proc(entity: ^Entity,
 		offset := world.components.types[i].offset
 
 		if id == id1 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component1, size_of(Type1))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type1, i, ptr)
 		} else if id == id2 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component2, size_of(Type2))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type2, i, ptr)
 		} else if id == id3 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component3, size_of(Type3))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type3, i, ptr)
 		} else if id == id4 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component4, size_of(Type4))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type4, i, ptr)
 		} else if id == id5 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component5, size_of(Type5))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type5, i, ptr)
 		} else if id == id6 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component6, size_of(Type6))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type6, i, ptr)
 		}
 	}
 
@@ -290,26 +330,40 @@ add_7_components :: #force_inline proc(entity: ^Entity,
 		offset := world.components.types[i].offset
 
 		if id == id1 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component1, size_of(Type1))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type1, i, ptr)
 		} else if id == id2 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component2, size_of(Type2))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type2, i, ptr)
 		} else if id == id3 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component3, size_of(Type3))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type3, i, ptr)
 		} else if id == id4 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component4, size_of(Type4))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type4, i, ptr)
 		} else if id == id5 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component5, size_of(Type5))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type5, i, ptr)
 		} else if id == id6 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component6, size_of(Type6))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type6, i, ptr)
 		} else if id == id7 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component7, size_of(Type7))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component7, size_of(Type7))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type7, i, ptr)
 		}
 	}
 
@@ -355,29 +409,45 @@ add_8_components :: #force_inline proc(entity: ^Entity,
 		offset := world.components.types[i].offset
 
 		if id == id1 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component1, size_of(Type1))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type1, i, ptr)
 		} else if id == id2 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component2, size_of(Type2))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type2, i, ptr)
 		} else if id == id3 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component3, size_of(Type3))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type3, i, ptr)
 		} else if id == id4 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component4, size_of(Type4))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type4, i, ptr)
 		} else if id == id5 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component5, size_of(Type5))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type5, i, ptr)
 		} else if id == id6 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component6, size_of(Type6))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type6, i, ptr)
 		} else if id == id7 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component7, size_of(Type7))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component7, size_of(Type7))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type7, i, ptr)
 		} else if id == id8 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component8, size_of(Type8))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component8, size_of(Type8))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type8, i, ptr)
 		}
 	}
 
@@ -425,32 +495,50 @@ add_9_components :: #force_inline proc(entity: ^Entity,
 		offset := world.components.types[i].offset
 
 		if id == id1 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component1, size_of(Type1))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type1, i, ptr)
 		} else if id == id2 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component2, size_of(Type2))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type2, i, ptr)
 		} else if id == id3 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component3, size_of(Type3))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type3, i, ptr)
 		} else if id == id4 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component4, size_of(Type4))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type4, i, ptr)
 		} else if id == id5 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component5, size_of(Type5))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type5, i, ptr)
 		} else if id == id6 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component6, size_of(Type6))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type6, i, ptr)
 		} else if id == id7 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component7, size_of(Type7))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component7, size_of(Type7))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type7, i, ptr)
 		} else if id == id8 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component8, size_of(Type8))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component8, size_of(Type8))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type8, i, ptr)
 		} else if id == id9 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component9, size_of(Type9))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component9, size_of(Type9))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type9, i, ptr)
 		}
 	}
 
@@ -499,35 +587,55 @@ add_10_components :: #force_inline proc(entity: ^Entity,
 		offset := world.components.types[i].offset
 
 		if id == id1 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component1, size_of(Type1))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type1, i, ptr)
 		} else if id == id2 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component2, size_of(Type2))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type2, i, ptr)
 		} else if id == id3 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component3, size_of(Type3))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type3, i, ptr)
 		} else if id == id4 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component4, size_of(Type4))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type4, i, ptr)
 		} else if id == id5 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component5, size_of(Type5))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type5, i, ptr)
 		} else if id == id6 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component6, size_of(Type6))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type6, i, ptr)
 		} else if id == id7 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component7, size_of(Type7))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component7, size_of(Type7))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type7, i, ptr)
 		} else if id == id8 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component8, size_of(Type8))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component8, size_of(Type8))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type8, i, ptr)
 		} else if id == id9 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component9, size_of(Type9))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component9, size_of(Type9))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type9, i, ptr)
 		} else if id == id10 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component10, size_of(Type10))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component10, size_of(Type10))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type10, i, ptr)
 		}
 	}
 
@@ -578,38 +686,60 @@ add_11_components :: #force_inline proc(entity: ^Entity,
 		offset := world.components.types[i].offset
 
 		if id == id1 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component1, size_of(Type1))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type1, i, ptr)
 		} else if id == id2 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component2, size_of(Type2))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type2, i, ptr)
 		} else if id == id3 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component3, size_of(Type3))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type3, i, ptr)
 		} else if id == id4 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component4, size_of(Type4))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type4, i, ptr)
 		} else if id == id5 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component5, size_of(Type5))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type5, i, ptr)
 		} else if id == id6 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component6, size_of(Type6))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type6, i, ptr)
 		} else if id == id7 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component7, size_of(Type7))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component7, size_of(Type7))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type7, i, ptr)
 		} else if id == id8 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component8, size_of(Type8))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component8, size_of(Type8))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type8, i, ptr)
 		} else if id == id9 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component9, size_of(Type9))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component9, size_of(Type9))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type9, i, ptr)
 		} else if id == id10 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component10, size_of(Type10))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component10, size_of(Type10))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type10, i, ptr)
 		} else if id == id11 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component11, size_of(Type11))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component11, size_of(Type11))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type11, i, ptr)
 		}
 	}
 
@@ -661,41 +791,65 @@ add_12_components :: #force_inline proc(entity: ^Entity,
 		offset := world.components.types[i].offset
 
 		if id == id1 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component1, size_of(Type1))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type1, i, ptr)
 		} else if id == id2 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component2, size_of(Type2))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type2, i, ptr)
 		} else if id == id3 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component3, size_of(Type3))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type3, i, ptr)
 		} else if id == id4 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component4, size_of(Type4))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type4, i, ptr)
 		} else if id == id5 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component5, size_of(Type5))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type5, i, ptr)
 		} else if id == id6 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component6, size_of(Type6))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type6, i, ptr)
 		} else if id == id7 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component7, size_of(Type7))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component7, size_of(Type7))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type7, i, ptr)
 		} else if id == id8 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component8, size_of(Type8))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component8, size_of(Type8))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type8, i, ptr)
 		} else if id == id9 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component9, size_of(Type9))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component9, size_of(Type9))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type9, i, ptr)
 		} else if id == id10 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component10, size_of(Type10))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component10, size_of(Type10))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type10, i, ptr)
 		} else if id == id11 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component11, size_of(Type11))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component11, size_of(Type11))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type11, i, ptr)
 		} else if id == id12 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component12, size_of(Type12))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component12, size_of(Type12))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type12, i, ptr)
 		}
 	}
 
@@ -749,44 +903,70 @@ add_13_components :: #force_inline proc(entity: ^Entity,
 		offset := world.components.types[i].offset
 
 		if id == id1 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component1, size_of(Type1))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type1, i, ptr)
 		} else if id == id2 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component2, size_of(Type2))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type2, i, ptr)
 		} else if id == id3 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component3, size_of(Type3))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type3, i, ptr)
 		} else if id == id4 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component4, size_of(Type4))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type4, i, ptr)
 		} else if id == id5 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component5, size_of(Type5))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type5, i, ptr)
 		} else if id == id6 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component6, size_of(Type6))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type6, i, ptr)
 		} else if id == id7 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component7, size_of(Type7))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component7, size_of(Type7))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type7, i, ptr)
 		} else if id == id8 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component8, size_of(Type8))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component8, size_of(Type8))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type8, i, ptr)
 		} else if id == id9 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component9, size_of(Type9))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component9, size_of(Type9))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type9, i, ptr)
 		} else if id == id10 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component10, size_of(Type10))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component10, size_of(Type10))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type10, i, ptr)
 		} else if id == id11 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component11, size_of(Type11))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component11, size_of(Type11))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type11, i, ptr)
 		} else if id == id12 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component12, size_of(Type12))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component12, size_of(Type12))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type12, i, ptr)
 		} else if id == id13 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component13, size_of(Type13))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component13, size_of(Type13))
 			marker_set(COMPONENTS_MARKER_SIZE, &entity.components, i)
+			if world.observable do added_event(world, entity, Type13, i, ptr)
 		}
 	}
 
@@ -822,9 +1002,13 @@ set_2_components :: #force_inline proc(entity: ^Entity,
 		offset := world.components.types[i].offset
 
 		if id == id1 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component1, size_of(Type1))
+			if world.observable do set_event(world, entity, Type1, i, ptr)
 		} else if id == id2 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component2, size_of(Type2))
+			if world.observable do set_event(world, entity, Type2, i, ptr)
 		}
 	}
 
@@ -860,11 +1044,17 @@ set_3_components :: #force_inline proc(entity: ^Entity,
 		offset := world.components.types[i].offset
 
 		if id == id1 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component1, size_of(Type1))
+			if world.observable do set_event(world, entity, Type1, i, ptr)
 		} else if id == id2 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component2, size_of(Type2))
+			if world.observable do set_event(world, entity, Type2, i, ptr)
 		} else if id == id3 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component3, size_of(Type3))
+			if world.observable do set_event(world, entity, Type3, i, ptr)
 		}
 	}
 
@@ -901,13 +1091,21 @@ set_4_components :: #force_inline proc(entity: ^Entity,
 		offset := world.components.types[i].offset
 
 		if id == id1 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component1, size_of(Type1))
+			if world.observable do set_event(world, entity, Type1, i, ptr)
 		} else if id == id2 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component2, size_of(Type2))
+			if world.observable do set_event(world, entity, Type2, i, ptr)
 		} else if id == id3 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component3, size_of(Type3))
+			if world.observable do set_event(world, entity, Type3, i, ptr)
 		} else if id == id4 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component4, size_of(Type4))
+			if world.observable do set_event(world, entity, Type4, i, ptr)
 		}
 	}
 
@@ -946,15 +1144,25 @@ set_5_components :: #force_inline proc(entity: ^Entity,
 		offset := world.components.types[i].offset
 
 		if id == id1 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component1, size_of(Type1))
+			if world.observable do set_event(world, entity, Type1, i, ptr)
 		} else if id == id2 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component2, size_of(Type2))
+			if world.observable do set_event(world, entity, Type2, i, ptr)
 		} else if id == id3 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component3, size_of(Type3))
+			if world.observable do set_event(world, entity, Type3, i, ptr)
 		} else if id == id4 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component4, size_of(Type4))
+			if world.observable do set_event(world, entity, Type4, i, ptr)
 		} else if id == id5 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component5, size_of(Type5))
+			if world.observable do set_event(world, entity, Type5, i, ptr)
 		}
 	}
 
@@ -994,17 +1202,29 @@ set_6_components :: #force_inline proc(entity: ^Entity,
 		offset := world.components.types[i].offset
 
 		if id == id1 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component1, size_of(Type1))
+			if world.observable do set_event(world, entity, Type1, i, ptr)
 		} else if id == id2 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component2, size_of(Type2))
+			if world.observable do set_event(world, entity, Type2, i, ptr)
 		} else if id == id3 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component3, size_of(Type3))
+			if world.observable do set_event(world, entity, Type3, i, ptr)
 		} else if id == id4 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component4, size_of(Type4))
+			if world.observable do set_event(world, entity, Type4, i, ptr)
 		} else if id == id5 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component5, size_of(Type5))
+			if world.observable do set_event(world, entity, Type5, i, ptr)
 		} else if id == id6 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component6, size_of(Type6))
+			if world.observable do set_event(world, entity, Type6, i, ptr)
 		}
 	}
 
@@ -1046,19 +1266,33 @@ set_7_components :: #force_inline proc(entity: ^Entity,
 		offset := world.components.types[i].offset
 
 		if id == id1 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component1, size_of(Type1))
+			if world.observable do set_event(world, entity, Type1, i, ptr)
 		} else if id == id2 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component2, size_of(Type2))
+			if world.observable do set_event(world, entity, Type2, i, ptr)
 		} else if id == id3 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component3, size_of(Type3))
+			if world.observable do set_event(world, entity, Type3, i, ptr)
 		} else if id == id4 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component4, size_of(Type4))
+			if world.observable do set_event(world, entity, Type4, i, ptr)
 		} else if id == id5 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component5, size_of(Type5))
+			if world.observable do set_event(world, entity, Type5, i, ptr)
 		} else if id == id6 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component6, size_of(Type6))
+			if world.observable do set_event(world, entity, Type6, i, ptr)
 		} else if id == id7 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component7, size_of(Type7))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component7, size_of(Type7))
+			if world.observable do set_event(world, entity, Type7, i, ptr)
 		}
 	}
 
@@ -1101,21 +1335,37 @@ set_8_components :: #force_inline proc(entity: ^Entity,
 		offset := world.components.types[i].offset
 
 		if id == id1 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component1, size_of(Type1))
+			if world.observable do set_event(world, entity, Type1, i, ptr)
 		} else if id == id2 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component2, size_of(Type2))
+			if world.observable do set_event(world, entity, Type2, i, ptr)
 		} else if id == id3 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component3, size_of(Type3))
+			if world.observable do set_event(world, entity, Type3, i, ptr)
 		} else if id == id4 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component4, size_of(Type4))
+			if world.observable do set_event(world, entity, Type4, i, ptr)
 		} else if id == id5 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component5, size_of(Type5))
+			if world.observable do set_event(world, entity, Type5, i, ptr)
 		} else if id == id6 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component6, size_of(Type6))
+			if world.observable do set_event(world, entity, Type6, i, ptr)
 		} else if id == id7 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component7, size_of(Type7))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component7, size_of(Type7))
+			if world.observable do set_event(world, entity, Type7, i, ptr)
 		} else if id == id8 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component8, size_of(Type8))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component8, size_of(Type8))
+			if world.observable do set_event(world, entity, Type8, i, ptr)
 		}
 	}
 
@@ -1160,23 +1410,41 @@ set_9_components :: #force_inline proc(entity: ^Entity,
 		offset := world.components.types[i].offset
 
 		if id == id1 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component1, size_of(Type1))
+			if world.observable do set_event(world, entity, Type1, i, ptr)
 		} else if id == id2 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component2, size_of(Type2))
+			if world.observable do set_event(world, entity, Type2, i, ptr)
 		} else if id == id3 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component3, size_of(Type3))
+			if world.observable do set_event(world, entity, Type3, i, ptr)
 		} else if id == id4 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component4, size_of(Type4))
+			if world.observable do set_event(world, entity, Type4, i, ptr)
 		} else if id == id5 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component5, size_of(Type5))
+			if world.observable do set_event(world, entity, Type5, i, ptr)
 		} else if id == id6 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component6, size_of(Type6))
+			if world.observable do set_event(world, entity, Type6, i, ptr)
 		} else if id == id7 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component7, size_of(Type7))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component7, size_of(Type7))
+			if world.observable do set_event(world, entity, Type7, i, ptr)
 		} else if id == id8 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component8, size_of(Type8))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component8, size_of(Type8))
+			if world.observable do set_event(world, entity, Type8, i, ptr)
 		} else if id == id9 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component9, size_of(Type9))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component9, size_of(Type9))
+			if world.observable do set_event(world, entity, Type9, i, ptr)
 		}
 	}
 
@@ -1222,25 +1490,45 @@ set_10_components :: #force_inline proc(entity: ^Entity,
 		offset := world.components.types[i].offset
 
 		if id == id1 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component1, size_of(Type1))
+			if world.observable do set_event(world, entity, Type1, i, ptr)
 		} else if id == id2 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component2, size_of(Type2))
+			if world.observable do set_event(world, entity, Type2, i, ptr)
 		} else if id == id3 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component3, size_of(Type3))
+			if world.observable do set_event(world, entity, Type3, i, ptr)
 		} else if id == id4 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component4, size_of(Type4))
+			if world.observable do set_event(world, entity, Type4, i, ptr)
 		} else if id == id5 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component5, size_of(Type5))
+			if world.observable do set_event(world, entity, Type5, i, ptr)
 		} else if id == id6 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component6, size_of(Type6))
+			if world.observable do set_event(world, entity, Type6, i, ptr)
 		} else if id == id7 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component7, size_of(Type7))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component7, size_of(Type7))
+			if world.observable do set_event(world, entity, Type7, i, ptr)
 		} else if id == id8 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component8, size_of(Type8))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component8, size_of(Type8))
+			if world.observable do set_event(world, entity, Type8, i, ptr)
 		} else if id == id9 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component9, size_of(Type9))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component9, size_of(Type9))
+			if world.observable do set_event(world, entity, Type9, i, ptr)
 		} else if id == id10 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component10, size_of(Type10))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component10, size_of(Type10))
+			if world.observable do set_event(world, entity, Type10, i, ptr)
 		}
 	}
 
@@ -1288,27 +1576,49 @@ set_11_components :: #force_inline proc(entity: ^Entity,
 		offset := world.components.types[i].offset
 
 		if id == id1 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component1, size_of(Type1))
+			if world.observable do set_event(world, entity, Type1, i, ptr)
 		} else if id == id2 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component2, size_of(Type2))
+			if world.observable do set_event(world, entity, Type2, i, ptr)
 		} else if id == id3 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component3, size_of(Type3))
+			if world.observable do set_event(world, entity, Type3, i, ptr)
 		} else if id == id4 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component4, size_of(Type4))
+			if world.observable do set_event(world, entity, Type4, i, ptr)
 		} else if id == id5 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component5, size_of(Type5))
+			if world.observable do set_event(world, entity, Type5, i, ptr)
 		} else if id == id6 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component6, size_of(Type6))
+			if world.observable do set_event(world, entity, Type6, i, ptr)
 		} else if id == id7 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component7, size_of(Type7))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component7, size_of(Type7))
+			if world.observable do set_event(world, entity, Type7, i, ptr)
 		} else if id == id8 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component8, size_of(Type8))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component8, size_of(Type8))
+			if world.observable do set_event(world, entity, Type8, i, ptr)
 		} else if id == id9 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component9, size_of(Type9))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component9, size_of(Type9))
+			if world.observable do set_event(world, entity, Type9, i, ptr)
 		} else if id == id10 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component10, size_of(Type10))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component10, size_of(Type10))
+			if world.observable do set_event(world, entity, Type10, i, ptr)
 		} else if id == id11 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component11, size_of(Type11))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component11, size_of(Type11))
+			if world.observable do set_event(world, entity, Type11, i, ptr)
 		}
 	}
 
@@ -1357,29 +1667,53 @@ set_12_components :: #force_inline proc(entity: ^Entity,
 		offset := world.components.types[i].offset
 
 		if id == id1 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component1, size_of(Type1))
+			if world.observable do set_event(world, entity, Type1, i, ptr)
 		} else if id == id2 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component2, size_of(Type2))
+			if world.observable do set_event(world, entity, Type2, i, ptr)
 		} else if id == id3 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component3, size_of(Type3))
+			if world.observable do set_event(world, entity, Type3, i, ptr)
 		} else if id == id4 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component4, size_of(Type4))
+			if world.observable do set_event(world, entity, Type4, i, ptr)
 		} else if id == id5 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component5, size_of(Type5))
+			if world.observable do set_event(world, entity, Type5, i, ptr)
 		} else if id == id6 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component6, size_of(Type6))
+			if world.observable do set_event(world, entity, Type6, i, ptr)
 		} else if id == id7 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component7, size_of(Type7))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component7, size_of(Type7))
+			if world.observable do set_event(world, entity, Type7, i, ptr)
 		} else if id == id8 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component8, size_of(Type8))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component8, size_of(Type8))
+			if world.observable do set_event(world, entity, Type8, i, ptr)
 		} else if id == id9 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component9, size_of(Type9))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component9, size_of(Type9))
+			if world.observable do set_event(world, entity, Type9, i, ptr)
 		} else if id == id10 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component10, size_of(Type10))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component10, size_of(Type10))
+			if world.observable do set_event(world, entity, Type10, i, ptr)
 		} else if id == id11 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component11, size_of(Type11))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component11, size_of(Type11))
+			if world.observable do set_event(world, entity, Type11, i, ptr)
 		} else if id == id12 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component12, size_of(Type12))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component12, size_of(Type12))
+			if world.observable do set_event(world, entity, Type12, i, ptr)
 		}
 	}
 
@@ -1430,31 +1764,57 @@ set_13_components :: #force_inline proc(entity: ^Entity,
 		offset := world.components.types[i].offset
 
 		if id == id1 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component1, size_of(Type1))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component1, size_of(Type1))
+			if world.observable do set_event(world, entity, Type1, i, ptr)
 		} else if id == id2 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component2, size_of(Type2))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component2, size_of(Type2))
+			if world.observable do set_event(world, entity, Type2, i, ptr)
 		} else if id == id3 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component3, size_of(Type3))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component3, size_of(Type3))
+			if world.observable do set_event(world, entity, Type3, i, ptr)
 		} else if id == id4 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component4, size_of(Type4))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component4, size_of(Type4))
+			if world.observable do set_event(world, entity, Type4, i, ptr)
 		} else if id == id5 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component5, size_of(Type5))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component5, size_of(Type5))
+			if world.observable do set_event(world, entity, Type5, i, ptr)
 		} else if id == id6 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component6, size_of(Type6))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component6, size_of(Type6))
+			if world.observable do set_event(world, entity, Type6, i, ptr)
 		} else if id == id7 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component7, size_of(Type7))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component7, size_of(Type7))
+			if world.observable do set_event(world, entity, Type7, i, ptr)
 		} else if id == id8 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component8, size_of(Type8))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component8, size_of(Type8))
+			if world.observable do set_event(world, entity, Type8, i, ptr)
 		} else if id == id9 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component9, size_of(Type9))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component9, size_of(Type9))
+			if world.observable do set_event(world, entity, Type9, i, ptr)
 		} else if id == id10 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component10, size_of(Type10))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component10, size_of(Type10))
+			if world.observable do set_event(world, entity, Type10, i, ptr)
 		} else if id == id11 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component11, size_of(Type11))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component11, size_of(Type11))
+			if world.observable do set_event(world, entity, Type11, i, ptr)
 		} else if id == id12 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component12, size_of(Type12))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component12, size_of(Type12))
+			if world.observable do set_event(world, entity, Type12, i, ptr)
 		} else if id == id13 {
-			mem.copy_non_overlapping(mem.ptr_offset(cast(^u8)&buffer, offset), component13, size_of(Type13))
+			ptr := mem.ptr_offset(cast(^u8)&buffer, offset)
+			mem.copy_non_overlapping(ptr, component13, size_of(Type13))
+			if world.observable do set_event(world, entity, Type13, i, ptr)
 		}
 	}
 

@@ -26,6 +26,8 @@ World :: struct {
 	dynamics : [dynamic]^Block,
 	/* Blocks for entities with static lifetime. */
 	statics : [dynamic]^Block,
+	/* Events observers for the world. */
+	observers : Observers,
 	/* Indicates that the world is running. */
 	running : bool,
 	/* Indicates that START phase has already executed. */
@@ -33,13 +35,30 @@ World :: struct {
 	/* Indicates that the world is in performing stage (runs deferred actions). */
 	performing : bool,
 	/* Deferred actions for the world. */
-	deferred : Deferred
+	deferred : Deferred,
+	/* Enables/disables using observers for the world.
+	   Disabled by default for performance reason.*/
+	observable : bool
 }
 
 /* Initializes the world.
    `world` : Pointer to the world. */
 @(private="package")
 world_init :: proc(world: ^World) {
+	/* By default all observers are turned on. */
+	world.observers.turning.spawned = true
+	world.observers.turning.despawned = true
+	world.observers.turning.added_event = true
+	world.observers.turning.removed_event = true
+	world.observers.turning.set_event = true
+	world.observers.turning.tagged_event = true
+	world.observers.turning.untagged_event = true
+
+	marker_set_all(MAX_COMPONENTS_COUNT, COMPONENTS_MARKER_SIZE, &world.observers.turning.added)
+	marker_set_all(MAX_COMPONENTS_COUNT, COMPONENTS_MARKER_SIZE, &world.observers.turning.removed)
+	marker_set_all(MAX_COMPONENTS_COUNT, COMPONENTS_MARKER_SIZE, &world.observers.turning.set)
+	marker_set_all(MAX_TAGS_COUNT, TAGS_MARKER_SIZE, &world.observers.turning.tagged)
+	marker_set_all(MAX_TAGS_COUNT, TAGS_MARKER_SIZE, &world.observers.turning.untagged)
 }
 
 /* Registers element type for the world.
@@ -161,6 +180,99 @@ unmount :: proc(world: ^World, name: string) {
 	}
 }
 
+/* Sets observer for specified event and type(s).
+   `world`    : Pointer to the world.
+   `event`    : Event type.
+   `callback` : Observer callback procedure.
+   `types`    : Event target component/tag types. */
+observe :: proc(world: ^World, event: Event, callback: ObserverCallback, types: []typeid = nil) #no_bounds_check {
+	if callback == nil do panic("Callback must be provided.")
+	if !world.running do panic("Run the world first.")
+
+	if event == .SPAWNED {
+		world.observers.spawned = callback
+		world.observers.setting.spawned = true
+	} else if event == .DESPAWNED {
+		world.observers.despawned = callback
+		world.observers.setting.despawned = true
+	} else {
+		for type in types {
+			#partial switch event {
+				case .ADDED:
+					if idx, ok := component_index(&world.components, type); ok {
+						world.observers.added[idx] = callback
+						marker_set(COMPONENTS_MARKER_SIZE, &world.observers.setting.added, idx)
+					}
+					
+				case .REMOVED:
+					if idx, ok := component_index(&world.components, type); ok {
+						world.observers.removed[idx] = callback
+						marker_set(COMPONENTS_MARKER_SIZE, &world.observers.setting.removed, idx)
+					}
+					
+				case .SET:
+					if idx, ok := component_index(&world.components, type); ok {
+						world.observers.set[idx] = callback
+						marker_set(COMPONENTS_MARKER_SIZE, &world.observers.setting.set, idx)
+					}
+
+				case .TAGGED:
+					if idx, ok := tag_index(&world.tags, type); ok {
+						world.observers.tagged[idx] = callback
+						marker_set(TAGS_MARKER_SIZE, &world.observers.setting.tagged, idx)
+					}
+					
+				case .UNTAGGED:
+					if idx, ok := tag_index(&world.tags, type); ok {
+						world.observers.untagged[idx] = callback
+						marker_set(TAGS_MARKER_SIZE, &world.observers.setting.untagged, idx)
+					}
+			}
+		}
+	}
+}
+
+/* Unsets observer for specified event and type(s).
+   `world`    : Pointer to the world.
+   `event`    : Event type.
+   `types`    : Event target component/tag types. */
+unobserve :: proc(world: ^World, event: Event, types: []typeid = nil) {
+	if !world.running do panic("Run the world first.")
+
+	if event == .SPAWNED do world.observers.setting.spawned = false
+	else if event == .DESPAWNED do world.observers.setting.despawned = false
+	else {
+		for type in types {
+			#partial switch event {
+				case .ADDED:
+					if idx, ok := component_index(&world.components, type); ok {
+						marker_unset(COMPONENTS_MARKER_SIZE, &world.observers.setting.added, idx)
+					}
+					
+				case .REMOVED:
+					if idx, ok := component_index(&world.components, type); ok {
+						marker_unset(COMPONENTS_MARKER_SIZE, &world.observers.setting.removed, idx)
+					}
+					
+				case .SET:
+					if idx, ok := component_index(&world.components, type); ok {
+						marker_unset(COMPONENTS_MARKER_SIZE, &world.observers.setting.set, idx)
+					}
+
+				case .TAGGED:
+					if idx, ok := tag_index(&world.tags, type); ok {
+						marker_unset(TAGS_MARKER_SIZE, &world.observers.setting.tagged, idx)
+					}
+					
+				case .UNTAGGED:
+					if idx, ok := tag_index(&world.tags, type); ok {
+						marker_unset(TAGS_MARKER_SIZE, &world.observers.setting.untagged, idx)
+					}
+			}
+		}
+	}
+}
+
 /* Removes the system from collection.
    `world`   : Pointer to the world.
    `systems` : Collection with systems.
@@ -235,6 +347,8 @@ spawn :: proc(world: ^World, lifetime: Lifetime = .DYNAMIC) -> ^Entity {
 
 	entity: ^Entity = block_insert(get_sparse_block(world, lifetime))
 
+	if world.observable do spawned_event(world, entity)
+
 	return entity
 }
 
@@ -250,6 +364,8 @@ despawn_entity :: proc(world: ^World, entity: ^Entity) {
 	} else {
 		block_delete(entity.block, entity.chunk_idx)
 		entity.state += { .DELETED }
+
+		if world.observable do despawned_event(world, entity)
 	}
 }
 
