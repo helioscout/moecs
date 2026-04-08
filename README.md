@@ -17,7 +17,7 @@
 [Components](#components)\
 [Tags](#tags)\
 [Systems](#systems)\
-[Observers](#observers)
+[Observers](#observers)\
 [Running the world](#running-the-world)\
 [Iterating entities](#iterating-entities)\
 [Performance](#performance)\
