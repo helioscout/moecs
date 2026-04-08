@@ -82,38 +82,49 @@ register :: proc(world: ^World, element: Element, $Type: typeid) {
 
 /* Mounts new system to the world.
    `world`      : Pointer to the world.
-   `definition` : System definition. */
-mount :: proc(world: ^World, definition: SystemDefinition) {
-	named := len(definition.name) > 0
+   `name`       : Name of the system. It must be unique. Used for getting the system from the world.
+   `query`      : Components and tags list that should match while the system query.
+				  You can also separate types using `components` and `tags` params of this proc.
+				  Using both approaches simultaneously, or crossing or duplicating types in different params is safe.
+   `components` : Components list that should match while the system query.
+   `tags`       : Tags list that should match while the system query.
+   `without`    : Components and tags list that should not be added to the entity, so system query
+				  will match entities only without them, even if these components and tags were
+				  included into main query list.
+   `phase`      : System running phase, order in the pipeline. By default equals UPDATE.
+   `lifetime`   : Entities lifetime flag to optimize queries and do not process lifetimes
+				  that you want to avoid for current system. Not used in ARCHETYPE approach.
+   `callback`   : Callback function that will be invoked each step of the world progress. */
+mount :: proc(world: ^World, name: string = "", query: []typeid = nil, components: []typeid = nil,
+	tags: []typeid = nil, without: []typeid = nil, phase: Phase = .UPDATE, lifetime: bit_set[Lifetime; u8] = {},
+	callback: SystemCallback) {
+	named := len(name) > 0
 	
-	if named && has_system(world, definition.name) do panic("System with such name has already been mounted.")
-	if !named && definition.phase == .MANUAL do panic("Systems with MANUAL phase must have a name.")
-	if definition.callback == nil do panic("Callback must be provided.")
-	if world.running do panic("You can't mount system to already running world.")
+	if named && has_system(world, name) do panic("System with such name has already been mounted.")
+	if !named && phase == .MANUAL do panic("Systems with MANUAL phase must have a name.")
+	if callback == nil do panic("Callback must be provided.")
+	if !world.running do panic("Run the world first.")
 
 	system : ^System = new(System)
-	system^ = { name = definition.name, state = { .ENABLED }, callback = definition.callback,
-				lifetime = card(definition.lifetime) == 0 ? { .DYNAMIC, .STATIC } : definition.lifetime,
-				phase = definition.phase, without_types = slice.clone(definition.without) }
+	system^ = { name = name, state = { .ENABLED }, callback = callback,
+				lifetime = card(lifetime) == 0 ? { .DYNAMIC, .STATIC } : lifetime, phase = phase }
 
-	components := slice.clone_to_dynamic(definition.components)
-	tags       := slice.clone_to_dynamic(definition.tags)
+	_components := slice.clone_to_dynamic(components)
+	_tags       := slice.clone_to_dynamic(tags)
 
-	if len(definition.query) > 0 {
-		for type in definition.query {
-			if components_has(&world.components, type) do append(&components, type)
-			if tags_has(&world.tags, type) do append(&tags, type)
+	if len(query) > 0 {
+		for type in query {
+			if components_has(&world.components, type) do append(&_components, type)
+			if tags_has(&world.tags, type) do append(&_tags, type)
 		}
 	}
 
-	system.component_types = slice.clone(components[:])
-
-	if len(components) == 0 && len(tags) == 0 && len(definition.without) == 0 {
+	if len(_components) == 0 && len(_tags) == 0 && len(without) == 0 {
 		/* Task is a system without query it will just run with nil entities list. */
 		system.state += { .IS_TASK }
 	} else {
-		if len(components) > 0 {
-			for type in components {
+		if len(_components) > 0 {
+			for type in _components {
 				if idx, ok := component_index(&world.components, type); ok {
 					marker_set(COMPONENTS_MARKER_SIZE, &system.components, idx)
 				}
@@ -122,8 +133,8 @@ mount :: proc(world: ^World, definition: SystemDefinition) {
 			system.state += { .HAS_COMPONENTS }
 		}
 
-		if len(tags) > 0 {
-			for type in tags {
+		if len(_tags) > 0 {
+			for type in _tags {
 				if idx, ok := tag_index(&world.tags, type); ok {
 					marker_set(TAGS_MARKER_SIZE, &system.tags, idx)
 				}
@@ -132,10 +143,10 @@ mount :: proc(world: ^World, definition: SystemDefinition) {
 			system.state += { .HAS_TAGS }
 		}
 
-		if len(definition.without) > 0 {
+		if len(without) > 0 {
 			has_components, has_tags: bool
 
-			for type in definition.without {
+			for type in without {
 				if idx, ok := component_index(&world.components, type); ok {
 					marker_set(COMPONENTS_MARKER_SIZE, &system.without_components, idx)
 					has_components = true
@@ -150,7 +161,7 @@ mount :: proc(world: ^World, definition: SystemDefinition) {
 		}
 	}
 
-	#partial switch definition.phase {
+	#partial switch phase {
 		case .START: append(&world.schedule.start, system)
 		case .PRE_UPDATE: append(&world.schedule.pre_update, system)
 		case .UPDATE: append(&world.schedule.update, system)
@@ -159,8 +170,8 @@ mount :: proc(world: ^World, definition: SystemDefinition) {
 	
 	append(&world.systems, system)
 
-	delete(components)
-	delete(tags)
+	delete(_components)
+	delete(_tags)
 }
 
 /* Unmounts the system from the world.
@@ -299,30 +310,6 @@ run :: proc(world: ^World) {
 	components_adjust(&world.components)
 
 	if world.components.size > STACK_BUFFER_SIZE do panic("Total components size must be less than STACK_BUFFER_SIZE.")
-
-	/* We must re-set all component markers for systems, because order of components
-	   has been changed during adjustment and as a result components indexes changed. */
-	for system in world.systems {
-		if .HAS_COMPONENTS in system.state {
-			marker_clear(COMPONENTS_MARKER_SIZE, &system.components)
-			
-			for type in system.component_types {
-				if idx, ok := component_index(&world.components, type); ok {
-					marker_set(COMPONENTS_MARKER_SIZE, &system.components, idx)
-				}
-			}
-		}
-
-		if .HAS_WITHOUT_COMPONENTS in system.state {
-			marker_clear(COMPONENTS_MARKER_SIZE, &system.without_components)
-			
-			for type in system.without_types {
-				if idx, ok := component_index(&world.components, type); ok {
-					marker_set(COMPONENTS_MARKER_SIZE, &system.without_components, idx)
-				}
-			}
-		}
-	}
 
 	if world.resources.count > 0 {
 		resources_adjust(&world.resources)

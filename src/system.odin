@@ -29,35 +29,6 @@ System :: struct {
 	entities : [dynamic]^Entity,
 	/* Callback function that will be invoked each step of the world progress.
 	   Disable system to pause invokation. */
-	callback : SystemCallback,
-	/* Cloned from definition for further marker set after sorting components (for internal use). */
-	component_types : []typeid,
-	/* Cloned from definition for further marker set after sorting components (for internal use). */
-	without_types : []typeid
-}
-
-/* System definition, for mounting. */
-SystemDefinition :: struct {
-	/* Name of the system. It must be unique. Used for getting the system from the world. */
-	name : string,
-	/* Components and tags list that should match while the system query.
-	   You can also separate types using `components` and 'tags' fields of this struct.
-	   Using both approaches simultaneously, or crossing or duplicating types in different fields is safe. */
-	query : []typeid,
-	/* Components list that should match while the system query. */
-	components : []typeid,
-	/* Tags list that should match while the system query. */
-	tags : []typeid,
-	/* Components and tags list that should not be added to the entity, so system query
-	   will match entities only without them, even if these components and tags were
-	   included into main query list. */
-	without: []typeid,
-	/* System running phase, order in the pipeline. By default equals UPDATE. */
-	phase : Phase,
-	/* Entities lifetime flag to optimize queries and do not process lifetimes
-	   that you want to avoid for current system. Not used in ARCHETYPE approach. */
-	lifetime : bit_set[Lifetime; u8],
-	/* Callback function that will be invoked each step of the world progress. */
 	callback : SystemCallback
 }
 
@@ -96,6 +67,4 @@ is_task :: #force_inline proc(system: ^System) -> bool {
 @(private="package")
 free_system :: #force_inline proc(system: ^System) {
 	delete(system.entities)
-	delete(system.component_types)
-	delete(system.without_types)
 }

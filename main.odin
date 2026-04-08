@@ -128,15 +128,15 @@ system2 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 		// res4 := ecs.get_resource(world, Resource4)
 		// res5 := ecs.get(world, Resource5)
 		// res1, res2, res3, res4, res5 := ecs.get(world, Resource1, Resource2, Resource3, Resource4, Resource5)
-		// pos, center, vec, health, vel, rot := ecs.get(entity, Position, Center, VecType, Health, Velocity, Rotation)
+		pos, center, vec, health, vel, rot := ecs.get(entity, Position, Center, VecType, Health, Velocity, Rotation)
 		// pos, center, vec, health, vel := ecs.get(entity, Position, Center, VecType, Health, Velocity)
 		// pos, center, vec, health := ecs.get(entity, Position, Center, VecType, Health)
 		// pos, center, vec := ecs.get(entity, Position, Center, VecType)
 		// pos, center := ecs.get(entity, Position, Center)
 		// pos := ecs.get(entity, Position)
 
-		// pos.x += 1
-		// center.cx += 1
+		pos.x += 1
+		center.cx += 1
 		// fmt.println("s2: ", pos, center)
 		// res3.data[0] = 3
 		// res4.pos.x += 1
@@ -156,14 +156,14 @@ system2 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 		// 	Resource3, &Resource3 { some = 300 },
 		// 	Resource4, &Resource4 { pos = { x = 1, y = 2 } },
 		// 	Resource5, &Resource5 { arr = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 } })
-		ecs.add(entity,
-			Position, &Position { x = 10, y = 10 },
-			Center, &Center { cx = 20, cy = 20 },
-			Health, &Health { hp = 30 },
-			Rotation, &Rotation { angle = 90 },
-			Velocity, &Velocity { 50 },
-			VecType, &VecType { 10, 20 },
-			Mutation, &Mutation { skin = 11 })
+		// ecs.add(entity,
+		// 	Position, &Position { x = 10, y = 10 },
+		// 	Center, &Center { cx = 20, cy = 20 },
+		// 	Health, &Health { hp = 30 },
+		// 	Rotation, &Rotation { angle = 90 },
+		// 	Velocity, &Velocity { 50 },
+		// 	VecType, &VecType { 10, 20 },
+		// 	Mutation, &Mutation { skin = 11 })
 
 		// count += 1
 	}
@@ -181,15 +181,15 @@ system3 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 		// res4 := ecs.get_resource(world, Resource4)
 		// res5 := ecs.get(world, Resource5)
 		// res1, res2, res3, res4, res5 := ecs.get(world, Resource1, Resource2, Resource3, Resource4, Resource5)
-		// pos, center, vec, health, vel, rot := ecs.get(entity, Position, Center, VecType, Health, Velocity, Rotation)
+		pos, center, vec, health, vel, rot := ecs.get(entity, Position, Center, VecType, Health, Velocity, Rotation)
 		// pos, center, vec, health, vel := ecs.get(entity, Position, Center, VecType, Health, Velocity)
 		// pos, center, vec, health := ecs.get(entity, Position, Center, VecType, Health)
 		// pos, center, vec := ecs.get(entity, Position, Center, VecType)
 		// pos, center := ecs.get(entity, Position, Center)
 		// pos := ecs.get(entity, Position)
 
-		// pos.x += 1
-		// center.cx += 1
+		pos.x += 1
+		center.cx += 1
 		// fmt.println("s3: ", pos, center)
 		// res3.data[0] = 3
 		// res4.pos.x += 1
@@ -209,14 +209,14 @@ system3 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 		// 	Resource3, &Resource3 { some = 300 },
 		// 	Resource4, &Resource4 { pos = { x = 1, y = 2 } },
 		// 	Resource5, &Resource5 { arr = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 } })
-		ecs.add(entity,
-			Position, &Position { x = 10, y = 10 },
-			Center, &Center { cx = 20, cy = 20 },
-			Health, &Health { hp = 30 },
-			Rotation, &Rotation { angle = 90 },
-			Velocity, &Velocity { 50 },
-			VecType, &VecType { 10, 20 },
-			Mutation, &Mutation { skin = 11 })
+		// ecs.add(entity,
+		// 	Position, &Position { x = 10, y = 10 },
+		// 	Center, &Center { cx = 20, cy = 20 },
+		// 	Health, &Health { hp = 30 },
+		// 	Rotation, &Rotation { angle = 90 },
+		// 	Velocity, &Velocity { 50 },
+		// 	VecType, &VecType { 10, 20 },
+		// 	Mutation, &Mutation { skin = 11 })
 
 		// count += 1
 	}
@@ -242,17 +242,17 @@ added_pos :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type
 
 added :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, component: rawptr) {
 	// fmt.printfln("%v added", type)
-	switch type {
-		case Position:
-			pos := cast(^Position)component
-			pos.x += 50
-			pos.y += 50
+	// switch type {
+	// 	case Position:
+	// 		pos := cast(^Position)component
+	// 		pos.x += 50
+	// 		pos.y += 50
 			
-		case Center:
-			center := cast(^Center)component
-			center.cx += 50
-			center.cy += 50
-	}
+	// 	case Center:
+	// 		center := cast(^Center)component
+	// 		center.cx += 50
+	// 		center.cy += 50
+	// }
 }
 
 set_pos :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, component: rawptr) {
@@ -322,20 +322,20 @@ main :: proc() {
 	ecs.register(world, .TAG, Tag2)
 	ecs.register(world, .TAG, Tag3)
 	ecs.register(world, .TAG, Tag4)
-
-	ecs.mount(world, { callback = startup, phase = .START })
-	ecs.mount(world, { tags = { Tag1 }, without = { Component1, Component2, Tag3, Tag4 }, callback = system1 })
-	ecs.mount(world, { tags = { Tag2 }, without = { Component1, Component2, Tag3, Tag4 }, callback = system1 })
-	ecs.mount(world, { components = { Position, Center }, without = { Component1, Component2, Tag3, Tag4 }, callback = system3 })
-	ecs.mount(world, { query = { Position, Center, Tag1, Tag2 }, components = { Position, Center },
-		tags = { Tag1, Tag2 }, without = { Component1, Component2, Tag3, Tag4 }, callback = system3})
-	ecs.mount(world, { name = "s1", query = { Position, Tag1 }, without = { Component1, Component2, Tag3, Tag4 },
-		callback = system2 })
-	ecs.mount(world, { name = "s2", components = { Center }, tags = { Tag2 },
-		without = { Component1, Component2, Tag3, Tag4 }, callback = system2 })
-	ecs.mount(world, { name = "m_sys", callback = system4, phase = .MANUAL })
 	ecs.run(world)
 	fmt.println("--- world is running ---")
+
+	ecs.mount(world, callback = startup, phase = .START)
+	ecs.mount(world, tags = { Tag1 }, without = { Component1, Component2, Tag3, Tag4 }, callback = system1)
+	ecs.mount(world, tags = { Tag2 }, without = { Component1, Component2, Tag3, Tag4 }, callback = system1)
+	ecs.mount(world, components = { Position, Center }, without = { Component1, Component2, Tag3, Tag4 }, callback = system3)
+	ecs.mount(world, query = { Position, Center, Tag1, Tag2 }, components = { Position, Center },
+		tags = { Tag1, Tag2 }, without = { Component1, Component2, Tag3, Tag4 }, callback = system3)
+	ecs.mount(world, name = "s1", query = { Position, Tag1 }, without = { Component1, Component2, Tag3, Tag4 },
+		callback = system2)
+	ecs.mount(world, name = "s2", components = { Center }, tags = { Tag2 },
+		without = { Component1, Component2, Tag3, Tag4 }, callback = system2)
+	ecs.mount(world, name = "m_sys", callback = system4, phase = .MANUAL)
 
 	fmt.printfln("observable ADDED Position: %v", ecs.observable(world, .ADDED, Position))
 

@@ -341,7 +341,22 @@ There are two query match approaches of selection entities for the systems.
 | ITERATION          | Using this approach at each progress step all world entities will be iterated with applying match conditions to select them for each running system. First, iterates through all entities in the world for which the match condition is checked, and if the entity matches, it is added to the system's collection of entities. Then, all systems to which the generated collections are passed are executed in turn. At the beginning of progress each step, these collections are cleared. This is a very *inefficient* approach, but it does not involve deferred actions.                                                                                     |
 | ARCHETYPE          | Each entity belongs to some unique archetype that is combination of bit flags that represent entity's components/tags configuration. At each world progress step all archetypes will be iterated with applying match condition of each system. If an archetype matches the system query conditions, the system is launched with a list of entities of that archetype. This is an *efficient* approach, but it requires deferred actions. The system callback will be invoked for each matching archetype. *Recommended approach*.                                 |
 
-You can give the system a name to have ability to `get`/`execute`/`enable`/`disable` it manually, but name is just a property, systems with name run in pipeline exactly same way as without it. To exclude system from pipeline its `phase` must be set to `MANUAL`. Disabled systems are not called and no queries are executed for them at each progress step till they will be enabled again.
+You can give the system a `name` to have ability to `get`/`execute`/`enable`/`disable` it manually, but name is just a property, systems with name run in pipeline exactly same way as without it. To exclude system from pipeline its `phase` must be set to `MANUAL`. Disabled systems are not called and no queries are executed for them at each progress step till they will be enabled again.\
+\
+When you mount a system only `callback` parameter is mandatory, in this case system will be a *task* and run in `UPDATE` phase. These are all parameters of `mount` procedure you can use when mounting a system.
+| Parameter          | Description                                                                              |
+|--------------------|------------------------------------------------------------------------------------------|
+| world              | Pointer to the world (used in almost all ecs procedures).                                |
+| name               | Name of the system. It must be unique. Used for getting the system from the world.       |
+| query              | Components and tags list that should match while the system query. You can also separate types using `components` and `tags` parameters of `mount` procedure. Using both approaches simultaneously, or crossing or duplicating types in different params is safe.                                                    |
+| components         | Components list that should match while the system query.                                |
+| tags               | Tags list that should match while the system query.                                      |
+| without            | Components and tags list that should not be added to the entity, so system query will match entities only without them, even if these components and tags were included into main query list.             |
+| phase              | System running phase, order in the pipeline. By default equals UPDATE.                   |
+| lifetime           | Entities lifetime flag to optimize queries and do not process lifetimes that you want to avoid for current system. Not used in ARCHETYPE approach.                                                     |
+| callback           | Callback function that will be invoked each step of the world progress.                  |
+
+You can mount systems *only when* the world is already running, because of necessary indexes sorting made in `run` procedure of the world.
 ```odin
 import ecs "moecs/src"
 import k2 "karl2d"
@@ -350,22 +365,22 @@ main :: proc() {
   ecs.init()
   /* You can pass approach here, default is .ARCHETYPE, recommended. */
   world := ecs.new_world(.ARCHETYPE)
+  /* We must mount systems after the world run. */
+  ecs.run(world)
 
   /* Mount system that will run only once after world starts. */
-  ecs.mount(world, { callback = load_world,     phase = .START })
+  ecs.mount(world, callback = load_world,     phase = .START)
   /* Mount systems which will run in .UPDATE phase (default). */
-  ecs.mount(world, { callback = actions,        components = { Handle, Actions, Weapon, Ship }, tags = { Player } })
-  ecs.mount(world, { callback = physics,        name = "physics" })
+  ecs.mount(world, callback = actions,        components = { Handle, Actions, Weapon, Ship }, tags = { Player })
+  ecs.mount(world, callback = physics,        name = "physics")
   /* You can use query or/and components and tags fields to define system query (list of components and tags). */
-  ecs.mount(world, { callback = draw,           query = { Position, Rotation, Sprite, Center, Size } })
-  ecs.mount(world, { callback = collisions,     components = { Collision, Handle, Position, Center } })
+  ecs.mount(world, callback = draw,           query = { Position, Rotation, Sprite, Center, Size })
+  ecs.mount(world, callback = collisions,     components = { Collision, Handle, Position, Center })
   /* Use without condition to exclude listed components/tags from system query result. */
-  ecs.mount(world, { callback = materialize,    query = { Position, Rotation }, without = { Handle, Player } })
+  ecs.mount(world, callback = materialize,    query = { Position, Rotation }, without = { Handle, Player })
   /* Mount systems to run them manually (phase = .MANUAL). */
-  ecs.mount(world, { callback = load_resources, name = "load-resources", phase = .MANUAL })
-  ecs.mount(world, { callback = destroy,        name = "destroy", phase = .MANUAL })
-  /* We must mount systems before the world run. */
-  ecs.run(world)
+  ecs.mount(world, callback = load_resources, name = "load-resources", phase = .MANUAL)
+  ecs.mount(world, callback = destroy,        name = "destroy", phase = .MANUAL)
 
   /* Execule system by its name. */
   ecs.execute(world, "load-resources")
@@ -497,7 +512,7 @@ main :: proc() {
 Do not enable and use observers unless absolutely necessary. Only do so if something can't be done using systems, as observers are very inefficient and reduce the speed of the ECS. For example, if you're developing a library that utilizes the ECS and initializes and runs the game's physics under the hood using specific components. You need to track the addition and modification of these components to make the appropriate changes to the physics engine. In this case observers are really necessary, for game/app logic use systems, it's much more efficient.
 
 ### Running the world
-After you `init` the ecs, create the `world`(s), `register` all resources, components, and tags, mount all systems, you have to call `run` for your world(s). This procedure checks all necessary conditions and makes adjustments required for working with the declared world, allocates memory for resources. So, first you define the world rules, describe it, and then you run it, so you can fill it with resources, entities, components and execute systems.\
+After you `init` the ecs, create the `world`(s), `register` all resources, components, and tags, you have to call `run` for your world(s). This procedure checks all necessary conditions and makes adjustments required for working with the declared world, allocates memory for resources. So, first you define the world, describe it, and then you run it, so you can mount systems, set observers, fill the world with resources, entities, components and execute systems.\
 \
 You game/app will have main loop where you have to call `progress` procedure for the world. I have called it *world progress step* before, this method runs all systems for all phases. Archetyping and despawning actions is deferred to the end of progress step, when `perform` procedure is called. You also can call it manually, but there should be no reasons to do it. It's very rare that changes can't wait until the next step/frame and calling it manually is inefficient.\
 \
@@ -509,8 +524,9 @@ main :: proc() {
   ecs.init()
   world := ecs.new_world()
   /* ...register resources, tags and components types here. */
-  /* ...mount systems here.                                 */
   ecs.run(world)
+  /* ...mount systems here.                                 */
+  /* ...set observers here.                                 */
 
   for loop() {
     ecs.progress(world)
