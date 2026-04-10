@@ -1,8 +1,6 @@
-<img align="left" src="docs/moecs-logo-small.png" />
+<img align="left" src="docs/moecs-logo-small.png" alt="Memory is the honeycomb, blocks, or chunks are the beehive frames, entities are the honeycomb cells, components, and tags are the honey, and systems are the bees." />
 
 **moecs** - easy to use **mo**tivated **e**ntity **c**omponent **s**ystem.\
-\
-*Memory is the honeycomb, blocks, or chunks are the beehive frames, entities are the honeycomb cells, components, and tags are the honey, and systems are the bees.*\
 \
 *“I never am really satisfied that I understand anything; because, understand it well as I may, my comprehension can only be an infinitesimal fraction of all I want to understand about the many connections and relations which occur to me, how the matter in question was first thought of or arrived at, etc., etc.”*\
 *― Ada Lovelace*
