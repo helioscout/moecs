@@ -1,6 +1,6 @@
 ![moecs](docs/moecs.png)
 
-**moecs** - easy to use entity component system.
+**moecs** - easy to use entity component system (ecs) crafted with odin.
 
 ---
 
@@ -17,8 +17,8 @@
 [Running the world](#running-the-world)\
 [Iterating entities](#iterating-entities)\
 [Performance](#performance)\
-[Made with moecs](#made-with-moecs)
-[Memory concept](#memory-concept)\
+[Made with moecs](#made-with-moecs)\
+[Memory concept](#memory-concept)
 
 ### Setup
 Clone moecs repository into your project or nearby and import `src` folder.
