@@ -540,7 +540,7 @@ main :: proc() {
 | each()             | Step through each entity reference in the world.                                         |
 
 ### Performance
-I am writing this project in my spare time, just like all my other hobby gamedev. If you want the highest performance, it's best not to use any ECS. I love ECS because it allows you to systematize and separate/parallelize logic/data, move each part of the game into its own system, customize its operation, and generalize logic for entities with different components. moecs only has the basics and doesn't yet have some of the features found in others (hierarchy, relationships, prefabs, etc.) and perhaps will never have because of performance overhead. But if you really need some feature you can open an issue. As for speed, it will vary on different computers. You can play around with `main.odin`, and see the benchmarks (I use this code for testing). I'd be interested in seeing your results.\
+I am writing this project in my spare time, just like all my other hobby gamedev. If you want the highest performance, it's best not to use any ECS. I love ECS because it allows you to systematize and separate/parallelize logic/data, move each part of the game into its own system, customize its operation, and generalize logic for entities with different components. As for speed, it will vary on different computers. You can play around with `main.odin`, and see the benchmarks (I use this code for testing). I'd be interested in seeing your results.\
 \
 Getting (reading) operations executes much faster than setting (writing) ones. Prefer use overloaded `bunch` procedures to process several elements at once, these methods were optimized for performance.\
 \
