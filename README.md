@@ -1,13 +1,9 @@
-<img align="left" src="docs/moecs-logo-small.png" />
+![moecs](docs/moecs.png)
 
-**moecs** - easy to use **mo**tivated **e**ntity **c**omponent **s**ystem.\
-\
-*Memory is the honeycomb, blocks, or chunks are the beehive frames, entities are the honeycomb cells, components, and tags are the honey, and systems are the bees.*\
-\
-*“I never am really satisfied that I understand anything; because, understand it well as I may, my comprehension can only be an infinitesimal fraction of all I want to understand about the many connections and relations which occur to me, how the matter in question was first thought of or arrived at, etc., etc.”*\
-*― Ada Lovelace*
+**moecs** - easy to use entity component system.
 
-[Memory concept](#memory-concept)\
+---
+
 [Setup](#setup)\
 [Worlds](#worlds)\
 [Elements](#elements)\
@@ -22,28 +18,7 @@
 [Iterating entities](#iterating-entities)\
 [Performance](#performance)\
 [Made with moecs](#made-with-moecs)
-
-### Memory concept
-The main idea is that memory for components is divided into blocks, and entities belong to two lifetimes:
-- DYNAMIC: usual entities that are spawned and despawned while world exists;
-- STATIC: entities that lives forever (same as the world lifetime), like asteroids, planets, buildings;\
-\
-For DYNAMIC lifetime blocks, components chunks inserted at the end of the block if there are no free rows after previously deleted entities.\
-![Design](docs/design.png)\
-\
-Because static lifetime entities lives wile the world exists there are no deleting mechanism for them in its blocks, and components are simply inserted to the next free row or new block will be inserted if current one is full.\
-\
-![Static](docs/static.png)\
-\
-There are main constants that you can change when copying ECS into your project if you want to experiment with performance:
-- DYNAMIC_CHUNK_SIZE: Dynamic lifetime chunk size;
-- STATIC_CHUNK_SIZE: Static lifetime chunk size;\
-This constants defines a number of entity records (entity struct and its component chunk) that will be stored in one memory block. When block is full the memory allocation occurs for the next block.\
-\
-There is no limitations of entities count, but for resource, components, and tags:
-- MAX_RESOURCES_COUNT: Maximum resources count available for adding to the world.
-- MAX_COMPONENTS_COUNT: Maximum components count available for adding to entity;
-- MAX_TAGS_COUNT: Maximum tags count available for adding to entity.
+[Memory concept](#memory-concept)\
 
 ### Setup
 Clone moecs repository into your project or nearby and import `src` folder.
@@ -575,3 +550,25 @@ Use `-o:aggressive` Odin compiler flag, it can speed up operations in 30 times.
 | Game/App           | Description                                                                              |
 |--------------------|------------------------------------------------------------------------------------------|
 | [mouniverse](https://github.com/helioscout/mouniverse) | Simple space game, I am making in my spare time for fun and learning.                                                                                                 |
+
+### Memory concept
+The main idea is that memory for components is divided into blocks, and entities belong to two lifetimes:
+- DYNAMIC: usual entities that are spawned and despawned while world exists;
+- STATIC: entities that lives forever (same as the world lifetime), like asteroids, planets, buildings;\
+\
+For DYNAMIC lifetime blocks, components chunks inserted at the end of the block if there are no free rows after previously deleted entities.\
+![Design](docs/design.png)\
+\
+Because static lifetime entities lives wile the world exists there are no deleting mechanism for them in its blocks, and components are simply inserted to the next free row or new block will be inserted if current one is full.\
+\
+![Static](docs/static.png)\
+\
+There are main constants that you can change when copying ECS into your project if you want to experiment with performance:
+- DYNAMIC_CHUNK_SIZE: Dynamic lifetime chunk size;
+- STATIC_CHUNK_SIZE: Static lifetime chunk size;\
+This constants defines a number of entity records (entity struct and its component chunk) that will be stored in one memory block. When block is full the memory allocation occurs for the next block.\
+\
+There is no limitations of entities count, but for resource, components, and tags:
+- MAX_RESOURCES_COUNT: Maximum resources count available for adding to the world.
+- MAX_COMPONENTS_COUNT: Maximum components count available for adding to entity;
+- MAX_TAGS_COUNT: Maximum tags count available for adding to entity.
