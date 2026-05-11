@@ -9,6 +9,8 @@ Archetype :: struct {
 	components : [COMPONENTS_MARKER_SIZE]uint,
 	/* Tags marker, each set bit specifies that the tag exists in the archetype. */
 	tags : [TAGS_MARKER_SIZE]uint,
+	/* Relations marker, each set bit specifies that the relation exists in the archetype. */
+	relations: [RELATIONS_MARKER_SIZE]uint,
 	/* Entities that belongs to the archetype. Each entity clould be included only into one archetype. */
 	entities : [dynamic]^Entity
 }

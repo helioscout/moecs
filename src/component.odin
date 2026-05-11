@@ -3,7 +3,7 @@ package moecs
 import "core:slice"
 import "core:mem"
 
-/* Component elment type description. */
+/* Component element type description. */
 @(private="package")
 Component :: struct {
 	/* Type id of the component type. */

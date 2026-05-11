@@ -15,9 +15,10 @@ Block :: struct {
 	/* Entities collection (chunk) for the block.
 	   The index of the entity corresponds to the index of its components in each chunk. */
 	entities : []Entity,
-	/* Component chunks collection for the block.
+	/* Component and relation chunks collection for the block.
 	   Chunk is represented as a block in memory with sequentially recorded component's values.
-	   The order (offset of each component) is defined in Components collection.
+	   And after them sequentially recorded relations with targets values.
+	   The order (offset of each component/relation) is defined in Components/Relations collection.
 	   A pointer to allocated memory block. */
 	chunks : rawptr,
 	/* Deleted (freed) rows in the dynamic lifetime block. */
@@ -34,7 +35,7 @@ Block :: struct {
 block_init :: proc(block: ^Block) {
 	block.entities = make([]Entity, block.size)
 
-	ptr, err := mem.alloc(block.world.components.size * block.size)
+	ptr, err := mem.alloc(block.world.chunk_size * block.size)
 	if err != .None do panic(fmt.tprintf("Storage memory allocation error: %v", err))
 	block.chunks = ptr
 }

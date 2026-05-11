@@ -9,7 +9,7 @@ DYNAMIC_CHUNK_SIZE : int : 500
 STATIC_CHUNK_SIZE  : int : 300
 /* Bytes buffer size used for reading/writing components.
    Must be not less that total size of all registered components. */
-STACK_BUFFER_SIZE : int : 16 * 1024
+STACK_BUFFER_SIZE  : int : 16 * 1024
 
 /* Maximum components count available for adding to entity. */
 MAX_COMPONENTS_COUNT : int : 128
@@ -17,6 +17,8 @@ MAX_COMPONENTS_COUNT : int : 128
 MAX_TAGS_COUNT       : int : 128
 /* Maximum resources count available for adding to the world. */
 MAX_RESOURCES_COUNT  : int : 128
+/* Maximum relations count available for adding to entity. */
+MAX_RELATIONS_COUNT  : int : 64
 
 /* Count of bits in one marker word (element of marker array). */
 @(private) MARKER_BITS_COUNT : uint : size_of(uint) * 8
@@ -24,6 +26,8 @@ MAX_RESOURCES_COUNT  : int : 128
 @(private) COMPONENTS_MARKER_SIZE : uint : (uint(MAX_COMPONENTS_COUNT) + MARKER_BITS_COUNT - 1) / MARKER_BITS_COUNT
 /* Size of tags marker (array of bitset). */
 @(private) TAGS_MARKER_SIZE : uint : (uint(MAX_TAGS_COUNT) + MARKER_BITS_COUNT - 1) / MARKER_BITS_COUNT
+/* Size of relations marker (array of bitset). */
+@(private) RELATIONS_MARKER_SIZE : uint : (uint(MAX_RELATIONS_COUNT) + MARKER_BITS_COUNT - 1) / MARKER_BITS_COUNT
 
 /* Entities/blocks lifetime. */
 Lifetime :: enum u8 {
@@ -48,7 +52,11 @@ Element :: enum {
 	   as in other ECS, they have own storage and methods. */
 	RESOURCE,
 	/* System element type for running actions at each step of the world progress. */
-	SYSTEM
+	SYSTEM,
+	/* Relation between entities. Must be defined as a struct or distinct custom type.
+	   Relation can be associated with data that are used for some game logic.
+	   It's like a component but with target/attached entity. */
+	RELATION
 }
 
 /* The state flags for an element (entity or system). */
@@ -61,10 +69,14 @@ ElementState :: enum {
 	HAS_TAGS,
 	/* System has components in the match query. */
 	HAS_COMPONENTS,
+	/* System has relations in the match query. */
+	HAS_RELATIONS,
 	/* System has excluding tags condition in the match query. */
 	HAS_WITHOUT_TAGS,
 	/* System has excluding components condition in the match query. */
 	HAS_WITHOUT_COMPONENTS,
+	/* System has excluding relations condition in the match query. */
+	HAS_WITHOUT_RELATIONS,
 	/* Indicates that a system is task, has no components or tags in match query. */
 	IS_TASK,
 	/* Entity should be re-archetyped at deferred (perform) stage. */
@@ -107,7 +119,7 @@ Phase :: enum u8 {
 }
 
 /* Observer event types. */
-Event :: enum u8 {
+Event :: enum u16 {
 	/* Entity has been spawned. */
 	SPAWNED,
 	/* Entity has been despawned. */
@@ -121,7 +133,11 @@ Event :: enum u8 {
 	/* Tag has been added to an entity. */
 	TAGGED,
 	/* Tag has been removed from an entity. */
-	UNTAGGED
+	UNTAGGED,
+	/* Entity has been related with a target one. */
+	RELATED,
+	/* Entity has been unrelated with a target one, relationship removed. */
+	UNRELATED
 }
 
 /* Systems collections for each running phase. */
@@ -171,12 +187,19 @@ Event :: enum u8 {
 SystemCallback :: proc(entities: ^[dynamic]^Entity, world: ^World)
 
 /* Callback procedure for the observer.
-   `world`     : Pointer to the world.
-   `entity`    : Pointer to the event target entity.
-   `event`     : Emitted event type.
-   `type`      : Event target component/tag type that is adding/setting/removing.
-   `component` : Pointer to the component instance which was added/set/removed. */
-ObserverCallback :: proc(world: ^World, entity: ^Entity, event: Event, type: typeid, component: rawptr)
+   `world`    : Pointer to the world.
+   `entity`   : Pointer to the event target entity.
+   `event`    : Emitted event type.
+   `type`     : Event target component/tag/relation type that is adding/setting/removing.
+   `element`  : Pointer to the component instance which was added/set/removed
+				 or to the target entity for relation events.
+   `relation` : Pointer to the relation instance (relationship data) for relation events. */
+ObserverCallback :: proc(world: ^World, entity: ^Entity, event: Event, type: typeid, element: rawptr, relation: rawptr)
+
+@(private) ERR_TYPE_ALREADY_REGISTERED :: "Type is already registered for another element kind."
+@(private) ERR_CALLBACK_NOT_PROVIDED :: "Callback must be provided."
+@(private) ERR_WORLD_IS_NOT_RUNNING :: "Run the world first."
+@(private) ERR_SYSTEN_NAME_NOT_PROVIDED :: "System name can't be empty."
 
 add :: proc {
 	add_component,
@@ -310,7 +333,8 @@ tagged :: proc {
 
 despawn :: proc {
 	despawn_entity,
-	despawn_entities
+	despawn_entities,
+	despawn_many
 }
 
 turn_on :: proc {
@@ -331,4 +355,24 @@ turned_on :: proc {
 observable :: proc {
 	observable_for_type,
 	observable_event
+}
+
+relate :: proc {
+	relate_by_type,
+	relate_by_value
+}
+
+parent_of :: proc {
+	parent_of_by_type,
+	parent_of_by_value
+}
+
+child_of :: proc {
+	child_of_by_type,
+	child_of_by_value
+}
+
+unrelate :: proc {
+	unrelate_by,
+	unrelate_with
 }

@@ -9,17 +9,23 @@ System :: struct {
 	                   disable it to pause execution for some reason.
 	   HAS_TAGS:       Query tags has been registered. For optimization if wasn't.
 	   HAS_COMPONENTS: Query components has been registered. For optimization if wasn't.
+	   HAS_RELATIONS:  Query relations has been registered. For optimization if wasn't.
 	   HAS_WITHOUT_TAGS:       Query excluding tags has been registered. For optimization if wasn't.
-	   HAS_WITHOUT_COMPONENTS: Query excluding components has been registered. For optimization if wasn't. */
+	   HAS_WITHOUT_COMPONENTS: Query excluding components has been registered. For optimization if wasn't.
+	   HAS_WITHOUT_RELATIONS:  Query excluding relations has been registered. For optimization if wasn't. */
 	state : bit_set[ElementState; u16],
 	/* Components marker, each set bit specifies component in the system match query. */
 	components : [COMPONENTS_MARKER_SIZE]uint,
 	/* Tags marker, each set bit specifies tag in the system match query. */
 	tags : [TAGS_MARKER_SIZE]uint,
+	/* Relations marker, each set bit specifies relation in the system match query. */
+	relations: [RELATIONS_MARKER_SIZE]uint,
 	/* Excluding components marker, each set bit specifies component in the system match query. */
 	without_components : [COMPONENTS_MARKER_SIZE]uint,
 	/* Excluding tags marker, each set bit specifies tag in the system match query. */
 	without_tags : [TAGS_MARKER_SIZE]uint,
+	/* Excluding relations marker, each set bit specifies relation in the system match query. */
+	without_relations : [RELATIONS_MARKER_SIZE]uint,
 	/* System running phase, order in the pipeline. By default equals UPDATE. */
 	phase : Phase,
 	/* Entities lifetime flag to optimize queries and do not process lifetimes

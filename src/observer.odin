@@ -16,7 +16,11 @@ ObserversSetting :: struct {
 	/* Marker for tag added events set/unset state. */
 	tagged : [TAGS_MARKER_SIZE]uint,
 	/* Marker for tag removed events set/unset state. */
-	untagged : [TAGS_MARKER_SIZE]uint
+	untagged : [TAGS_MARKER_SIZE]uint,
+	/* Marker for entity related events set/unset state. */
+	related : [RELATIONS_MARKER_SIZE]uint,
+	/* Marker for entity unrelated events set/unset state. */
+	unrelated : [RELATIONS_MARKER_SIZE]uint
 }
 
 /* Observers turned on/off state. */
@@ -36,16 +40,24 @@ ObserversTurning :: struct {
 	tagged : [TAGS_MARKER_SIZE]uint,
 	/* Marker for tag removed events turned on/off. */
 	untagged : [TAGS_MARKER_SIZE]uint,
+	/* Marker for entity related events turned on/off. */
+	related : [RELATIONS_MARKER_SIZE]uint,
+	/* Marker for entity unrelated events turned on/off. */
+	unrelated : [RELATIONS_MARKER_SIZE]uint,
 	/* Added event turned on/off. */
-	added_event: bool,
+	added_event : bool,
 	/* Removed event turned on/off. */
-	removed_event: bool,
+	removed_event : bool,
 	/* Set event turned on/off. */
-	set_event: bool,
+	set_event : bool,
 	/* Tagged event turned on/off. */
-	tagged_event: bool,
+	tagged_event : bool,
 	/* Untagged event turned on/off. */
-	untagged_event: bool
+	untagged_event : bool,
+	/* Related event turned on/off. */
+	related_event : bool,
+	/* Unrelated event turned on/off. */
+	unrelated_event : bool
 }
 
 /* Events observers. */
@@ -65,6 +77,10 @@ Observers :: struct {
 	tagged : [MAX_TAGS_COUNT]ObserverCallback,
 	/* Callbacks for tag removed (entity untagged) events. */
 	untagged : [MAX_TAGS_COUNT]ObserverCallback,
+	/* Callbacks for entity related events. */
+	related : [MAX_RELATIONS_COUNT]ObserverCallback,
+	/* Callbacks for entity unrelated events. */
+	unrelated : [MAX_RELATIONS_COUNT]ObserverCallback,
 	/* Observers set/unset states. */
 	setting : ObserversSetting,
 	/* Observers turned on/off states. */
@@ -77,7 +93,7 @@ Observers :: struct {
 @(private="package")
 spawned_event :: #force_inline proc(world: ^World, entity: ^Entity) {
 	if world.observers.setting.spawned && world.observers.turning.spawned {
-		world.observers.spawned(world, entity, .SPAWNED, nil, nil)
+		world.observers.spawned(world, entity, .SPAWNED, nil, nil, nil)
 	}
 }
 
@@ -87,7 +103,7 @@ spawned_event :: #force_inline proc(world: ^World, entity: ^Entity) {
 @(private="package")
 despawned_event :: #force_inline proc(world: ^World, entity: ^Entity) {
 	if world.observers.setting.despawned && world.observers.turning.despawned {
-		world.observers.despawned(world, entity, .DESPAWNED, nil, nil)
+		world.observers.despawned(world, entity, .DESPAWNED, nil, nil, nil)
 	}
 }
 
@@ -103,7 +119,7 @@ added_event :: #force_inline proc(world: ^World, entity: ^Entity, type: typeid, 
 	if marker_is_set(COMPONENTS_MARKER_SIZE, world.observers.setting.added, idx) &&
 	   marker_is_set(COMPONENTS_MARKER_SIZE, world.observers.turning.added, idx) &&
 	   world.observers.turning.added_event {
-		world.observers.added[idx](world, entity, .ADDED, type, component)
+		world.observers.added[idx](world, entity, .ADDED, type, component, nil)
 	}
 }
 
@@ -119,7 +135,7 @@ removed_event :: #force_inline proc(world: ^World, entity: ^Entity, type: typeid
 	if marker_is_set(COMPONENTS_MARKER_SIZE, world.observers.setting.removed, idx) &&
 	   marker_is_set(COMPONENTS_MARKER_SIZE, world.observers.turning.removed, idx) &&
 	   world.observers.turning.removed_event {
-		world.observers.removed[idx](world, entity, .REMOVED, type, component)
+		world.observers.removed[idx](world, entity, .REMOVED, type, component, nil)
 	}
 }
 
@@ -135,7 +151,7 @@ set_event :: #force_inline proc(world: ^World, entity: ^Entity, type: typeid, id
 	if marker_is_set(COMPONENTS_MARKER_SIZE, world.observers.setting.set, idx) &&
 	   marker_is_set(COMPONENTS_MARKER_SIZE, world.observers.turning.set, idx) &&
 	   world.observers.turning.set_event {
-		world.observers.set[idx](world, entity, .SET, type, component)
+		world.observers.set[idx](world, entity, .SET, type, component, nil)
 	}
 }
 
@@ -149,7 +165,7 @@ tagged_event :: #force_inline proc(world: ^World, entity: ^Entity, type: typeid,
 	if marker_is_set(TAGS_MARKER_SIZE, world.observers.setting.tagged, idx) &&
 	   marker_is_set(TAGS_MARKER_SIZE, world.observers.turning.tagged, idx) &&
 	   world.observers.turning.tagged_event {
-		world.observers.tagged[idx](world, entity, .TAGGED, type, nil)
+		world.observers.tagged[idx](world, entity, .TAGGED, type, nil, nil)
 	}
 }
 
@@ -163,7 +179,41 @@ untagged_event :: #force_inline proc(world: ^World, entity: ^Entity, type: typei
 	if marker_is_set(TAGS_MARKER_SIZE, world.observers.setting.untagged, idx) &&
 	   marker_is_set(TAGS_MARKER_SIZE, world.observers.turning.untagged, idx) &&
 	   world.observers.turning.untagged_event {
-		world.observers.untagged[idx](world, entity, .UNTAGGED, type, nil)
+		world.observers.untagged[idx](world, entity, .UNTAGGED, type, nil, nil)
+	}
+}
+
+/* Throws related event (callback) if it was set and turned on.
+   `world`    : Pointer to the world.
+   `entity`   : Pointer to the entity.
+   `type`     : Relation type.
+   `idx`      : Index of the relation in the bitset.
+   `target`   : Pointer to the relation target entity.
+   `relation` : Pointer to the relation instance. */
+@(private="package")
+related_event :: #force_inline proc(world: ^World, entity: ^Entity, type: typeid, idx: int,
+	target: rawptr, relation: rawptr) #no_bounds_check {
+	if marker_is_set(RELATIONS_MARKER_SIZE, world.observers.setting.related, idx) &&
+	   marker_is_set(RELATIONS_MARKER_SIZE, world.observers.turning.related, idx) &&
+	   world.observers.turning.related_event {
+		world.observers.related[idx](world, entity, .RELATED, type, target, relation)
+	}
+}
+
+/* Throws unrelated event (callback) if it was set and turned on.
+   `world`    : Pointer to the world.
+   `entity`   : Pointer to the entity.
+   `type`     : Relation type.
+   `idx`      : Index of the relation in the bitset.
+   `target`   : Pointer to the relation target entity.
+   `relation` : Pointer to the relation instance. */
+@(private="package")
+unrelated_event :: #force_inline proc(world: ^World, entity: ^Entity, type: typeid, idx: int,
+	target: rawptr, relation: rawptr) #no_bounds_check {
+	if marker_is_set(RELATIONS_MARKER_SIZE, world.observers.setting.unrelated, idx) &&
+	   marker_is_set(RELATIONS_MARKER_SIZE, world.observers.turning.unrelated, idx) &&
+	   world.observers.turning.unrelated_event {
+		world.observers.unrelated[idx](world, entity, .UNRELATED, type, target, relation)
 	}
 }
 
@@ -180,13 +230,15 @@ turn_on_event :: proc(world: ^World, event: Event) {
 		case .SET:       world.observers.turning.set_event = true
 		case .TAGGED:    world.observers.turning.tagged_event = true
 		case .UNTAGGED:  world.observers.turning.untagged_event = true
+		case .RELATED:   world.observers.turning.related_event = true
+		case .UNRELATED: world.observers.turning.unrelated_event = true
 	}
 }
 
 /* Turn on observer for specific event and type.
    `world` : Pointer to the world.
    `event` : Event type.
-   `type`  : Event target component/tag type. */
+   `type`  : Event target component/tag/relation type. */
 @(private="package")
 turn_on_for_type :: proc(world: ^World, event: Event, type: typeid) {
 	#partial switch event {
@@ -214,6 +266,16 @@ turn_on_for_type :: proc(world: ^World, event: Event, type: typeid) {
 			if idx, ok := tag_index(&world.tags, type); ok {
 				marker_set(TAGS_MARKER_SIZE, &world.observers.turning.untagged, idx)
 			}
+
+		case .RELATED:
+			if idx, ok := relation_index(&world.relations, type); ok {
+				marker_set(RELATIONS_MARKER_SIZE, &world.observers.turning.related, idx)
+			}
+
+		case .UNRELATED:
+			if idx, ok := relation_index(&world.relations, type); ok {
+				marker_set(RELATIONS_MARKER_SIZE, &world.observers.turning.unrelated, idx)
+			}
 	}
 }
 
@@ -230,13 +292,15 @@ turn_off_event :: proc(world: ^World, event: Event) {
 		case .SET:       world.observers.turning.set_event = false
 		case .TAGGED:    world.observers.turning.tagged_event = false
 		case .UNTAGGED:  world.observers.turning.untagged_event = false
+		case .RELATED:   world.observers.turning.related_event = false
+		case .UNRELATED: world.observers.turning.unrelated_event = false
 	}
 }
 
 /* Turn off observer for specific event and type.
    `world` : Pointer to the world.
    `event` : Event type.
-   `type`  : Event target component/tag type. */
+   `type`  : Event target component/tag/relation type. */
 @(private="package")
 turn_off_for_type :: proc(world: ^World, event: Event, type: typeid) {
 	#partial switch event {
@@ -264,6 +328,16 @@ turn_off_for_type :: proc(world: ^World, event: Event, type: typeid) {
 			if idx, ok := tag_index(&world.tags, type); ok {
 				marker_unset(TAGS_MARKER_SIZE, &world.observers.turning.untagged, idx)
 			}
+
+		case .RELATED:
+			if idx, ok := relation_index(&world.relations, type); ok {
+				marker_unset(RELATIONS_MARKER_SIZE, &world.observers.turning.related, idx)
+			}
+
+		case .UNRELATED:
+			if idx, ok := relation_index(&world.relations, type); ok {
+				marker_unset(RELATIONS_MARKER_SIZE, &world.observers.turning.unrelated, idx)
+			}
 	}
 }
 
@@ -280,6 +354,8 @@ turned_on_event :: proc(world: ^World, event: Event) -> bool {
 		case .SET:       return world.observers.turning.set_event
 		case .TAGGED:    return world.observers.turning.tagged_event
 		case .UNTAGGED:  return world.observers.turning.untagged_event
+		case .RELATED:   return world.observers.turning.related_event
+		case .UNRELATED: return world.observers.turning.unrelated_event
 	}
 
 	return false
@@ -316,6 +392,16 @@ turned_on_for_type :: proc(world: ^World, event: Event, type: typeid) -> bool {
 			if idx, ok := tag_index(&world.tags, type); ok {
 				return marker_is_set(TAGS_MARKER_SIZE, world.observers.turning.untagged, idx)
 			}
+			
+		case .RELATED:
+			if idx, ok := relation_index(&world.relations, type); ok {
+				return marker_is_set(RELATIONS_MARKER_SIZE, world.observers.turning.related, idx)
+			}
+			
+		case .UNRELATED:
+			if idx, ok := relation_index(&world.relations, type); ok {
+				return marker_is_set(RELATIONS_MARKER_SIZE, world.observers.turning.unrelated, idx)
+			}
 	}
 
 	return false
@@ -337,7 +423,7 @@ observable_event :: proc(world: ^World, event: Event) -> bool {
 /* Checks if observer is set for specific event and type.
    `world` : Pointer to the world.
    `event` : Event type.
-   `type`  : Event target component/tag type. */
+   `type`  : Event target component/tag/relation type. */
 @(private="package")
 observable_for_type :: proc(world: ^World, event: Event, type: typeid) -> bool {
 	#partial switch event {
@@ -364,6 +450,16 @@ observable_for_type :: proc(world: ^World, event: Event, type: typeid) -> bool {
 		case .UNTAGGED:
 			if idx, ok := tag_index(&world.tags, type); ok {
 				return marker_is_set(TAGS_MARKER_SIZE, world.observers.setting.untagged, idx)
+			}
+			
+		case .RELATED:
+			if idx, ok := relation_index(&world.relations, type); ok {
+				return marker_is_set(RELATIONS_MARKER_SIZE, world.observers.setting.related, idx)
+			}
+			
+		case .UNRELATED:
+			if idx, ok := relation_index(&world.relations, type); ok {
+				return marker_is_set(RELATIONS_MARKER_SIZE, world.observers.setting.unrelated, idx)
 			}
 	}
 

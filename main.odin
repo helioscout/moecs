@@ -38,6 +38,14 @@ Component2 :: struct {
 	b : f32
 }
 
+Joint :: struct {
+	type : u8,
+	data : [16]f32
+}
+
+Relation1 :: distinct u8
+Relation2 :: distinct u8
+
 Resource1 :: struct {
 	enabled : bool
 }
@@ -226,21 +234,39 @@ system3 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 
 system4 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 	fmt.println("-- manual system...")
+	if entities == nil do return
+
+	for entity in entities {
+		if ecs.related(entity, Joint) {
+			r, target := ecs.relations(entity, Joint)
+			fmt.printfln("relation: %v, count: %v", r, len(target))
+		} else {
+			r, target := ecs.relations(entity, ecs.ParentOf)
+			fmt.printfln("relation: %v, count: %v", r, len(target))
+		}
+	}
 }
 
-spawned :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, component: rawptr) {
+system5 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
+	for entity in entities {
+		// r, target := ecs.relations(entity, Joint)
+		// fmt.printfln("relation: %v, count: %v", r, len(target))
+	}
+}
+
+spawned :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, component: rawptr, relation: rawptr) {
 	// fmt.println("entity spawned")
 }
 
-despawned :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, component: rawptr) {
+despawned :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, component: rawptr, relation: rawptr) {
 	// fmt.println("entity despawned")
 }
 
-added_pos :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, component: rawptr) {
+added_pos :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, component: rawptr, relation: rawptr) {
 	// fmt.printfln("Position added: %v", (cast(^Position)component)^)
 }
 
-added :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, component: rawptr) {
+added :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, component: rawptr, relation: rawptr) {
 	// fmt.printfln("%v added", type)
 	// switch type {
 	// 	case Position:
@@ -255,11 +281,11 @@ added :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: ty
 	// }
 }
 
-set_pos :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, component: rawptr) {
+set_pos :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, component: rawptr, relation: rawptr) {
 	// fmt.printfln("Position set: %v", (cast(^Position)component)^)
 }
 
-set :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, component: rawptr) {
+set :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, component: rawptr, relation: rawptr) {
 	// fmt.printfln("%v set", type)
 	// switch type {
 	// 	case Position: fmt.printfln("Position set: %v", (cast(^Position)component)^)
@@ -267,18 +293,35 @@ set :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: type
 	// }
 }
 
-removed :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, component: rawptr) {
+removed :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, component: rawptr, relation: rawptr) {
 	switch type {
 		case Position: fmt.printfln("Position removed: %v", (cast(^Position)component)^)
 		case Center: fmt.printfln("Center removed: %v", (cast(^Center)component)^)
 	}
 }
 
-tagged :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, component: rawptr) {
+tagged :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, component: rawptr, relation: rawptr) {
 	// fmt.printfln("Tagged: %v", type)
 }
-untagged :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, component: rawptr) {
+
+untagged :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, component: rawptr, relation: rawptr) {
 	fmt.printfln("Untagged: %v", type)
+}
+
+related :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, target: rawptr, relation: rawptr) {
+	// switch type {
+	// 	case ecs.ChildOf: fmt.printfln("Related: %v, %v", type, (cast(^ecs.ChildOf)relation)^)
+	// 	case ecs.ParentOf: fmt.printfln("Related: %v, %v", type, (cast(^ecs.ParentOf)relation)^)
+	// 	case Joint: fmt.printfln("Related: %v, %v", type, (cast(^Joint)relation)^)
+	// }
+}
+
+unrelated :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, target: rawptr, relation: rawptr) {
+	// switch type {
+	// 	case ecs.ChildOf: fmt.printfln("Unrelated: %v, %v", type, (cast(^ecs.ChildOf)relation)^)
+	// 	case ecs.ParentOf: fmt.printfln("Unrelated: %v, %v", type, (cast(^ecs.ParentOf)relation)^)
+	// 	case Joint: fmt.printfln("Unrelated: %v, %v", type, (cast(^Joint)relation)^)
+	// }
 }
 
 main :: proc() {
@@ -318,6 +361,9 @@ main :: proc() {
 	ecs.register(world, .RESOURCE, Resource3)
 	ecs.register(world, .RESOURCE, Resource4)
 	ecs.register(world, .RESOURCE, Resource5)
+	ecs.register(world, .RELATION, Relation1)
+	ecs.register(world, .RELATION, Joint)
+	ecs.register(world, .RELATION, Relation2)
 	ecs.register(world, .TAG, Tag1)
 	ecs.register(world, .TAG, Tag2)
 	ecs.register(world, .TAG, Tag3)
@@ -331,11 +377,13 @@ main :: proc() {
 	ecs.mount(world, components = { Position, Center }, without = { Component1, Component2, Tag3, Tag4 }, callback = system3)
 	ecs.mount(world, query = { Position, Center, Tag1, Tag2 }, components = { Position, Center },
 		tags = { Tag1, Tag2 }, without = { Component1, Component2, Tag3, Tag4 }, callback = system3)
+	ecs.mount(world, tags = { Tag2 }, relations = { Joint },
+		without = { Component1, Component2, Tag3, Tag4 }, callback = system5)
 	ecs.mount(world, name = "s1", query = { Position, Tag1 }, without = { Component1, Component2, Tag3, Tag4 },
 		callback = system2)
 	ecs.mount(world, name = "s2", components = { Center }, tags = { Tag2 },
 		without = { Component1, Component2, Tag3, Tag4 }, callback = system2)
-	ecs.mount(world, name = "m_sys", callback = system4, phase = .MANUAL)
+	ecs.mount(world, name = "m_sys"/*, query = { Joint, ecs.ParentOf }*/, callback = system4, phase = .MANUAL)
 
 	fmt.printfln("observable ADDED Position: %v", ecs.observable(world, .ADDED, Position))
 
@@ -348,6 +396,8 @@ main :: proc() {
 	ecs.observe(world, event = .SET, types = { Position, Center, Rotation, VecType, Health, Mutation, Velocity }, callback = set)
 	ecs.observe(world, event = .TAGGED, types = { Tag1, Tag2, Tag3, Tag4 }, callback = tagged)
 	ecs.observe(world, event = .UNTAGGED, types = { Tag1, Tag2, Tag3, Tag4 }, callback = untagged)
+	ecs.observe(world, event = .RELATED, types = { ecs.ParentOf, ecs.ChildOf, Joint }, callback = related)
+	ecs.observe(world, event = .UNRELATED, types = { ecs.ParentOf, ecs.ChildOf, Joint }, callback = unrelated)
 	
 	ecs.turn_off(world, .ADDED)
 
@@ -514,10 +564,53 @@ main :: proc() {
 
 	e1 : ^ecs.Entity = ecs.spawn(world, .DYNAMIC)
 	e2 : ^ecs.Entity = ecs.spawn(world, .DYNAMIC)
-	e3 : ^ecs.Entity = ecs.spawn(world, .STATIC)
+	e3 : ^ecs.Entity = ecs.spawn(world, .DYNAMIC)
 
+	ecs.parent_of(e1, e2)
+	ecs.relate(e1, ecs.ParentOf { data = nil }, e3)
+	ecs.relate(e1, Joint { type = 7, data = { 0 = 1, 1 = 2, 2..<16 = 3 }}, e3)
+	ecs.relate(e1, Joint, e2)
+
+	fmt.printfln("e1 is parent of e2: %v", ecs.is_parent_of(e1, e2))
+	fmt.printfln("e2 is child of e1: %v", ecs.is_child_of(e2, e1))
+	
 	e4 := ecs.spawn(world, .DYNAMIC)
-	e5 := ecs.spawn(world, .STATIC)
+	e5 := ecs.spawn(world, .DYNAMIC)
+
+	ecs.parent_of(e1, ecs.ParentOf { data = nil }, e3, e4)
+
+	// fmt.printfln("e1 is parent of e2, e3, e4: %v", ecs.related(e1, ecs.ParentOf, e2, e3, e4))
+	// fmt.printfln("e2 has relations: %v", ecs.is_relation(e2))
+	// fmt.printfln("e2 is relation target of e1: %v", ecs.is_relation_of(e2, e1))
+	// fmt.printfln("e2 is relation target of e3: %v", ecs.is_relation_of(e2, e3))
+	// fmt.printfln("e3 with e1 relation of count: %v", ecs.relation_of_count(e3, e1))
+
+	// ecs.unrelate(e1, Joint, e3)
+	// ecs.unrelate_with(e1, ecs.ParentOf, e3)
+	// ecs.unrelate(e1, ecs.ParentOf)
+	// fmt.printfln("e1 is parent of e2, e3, e4: %v", ecs.related(e1, ecs.ParentOf, e2, e3, e4))
+
+	ecs.child_of(e4, e1, e2)
+	// fmt.printfln("e4 is child of e1: %v", ecs.is_child_of(e4, e1))
+	// fmt.printfln("e4 is child of e2: %v", ecs.is_child_of(e4, e2))
+
+	r, e := ecs.relations(e1, ecs.ParentOf)
+	// fmt.println("-- parent relation of e1", r, e)
+
+	rel, targets := ecs.relations(e1, Joint)
+	// fmt.println("-- joint relation of e1", rel, targets)
+
+	p := ecs.parent(e4)
+	// fmt.println("-- parent of e4", p, p == e1)
+	
+	ps := ecs.parents(e4)
+	// fmt.println("-- parents of e4", ps)
+	
+	child := ecs.child(e1)
+	// fmt.println("-- child of e1", child)
+
+	children := ecs.children(e1)
+	// fmt.println("-- children of e1", children)
 
 	ecs.add(e5, Position, &Position { x = 3, y = 4 })
 	// ecs.add(e4, Position, &Position { x = 1, y = 2 })
@@ -577,11 +670,14 @@ main :: proc() {
 	fmt.println(ecs.tagged(e1, Tag1))
 	fmt.println(ecs.tagged(e1, Tag1, Tag2, int))
 
-	// ecs.despawn(world, e1, e2, e4, e5)
+	// ecs.despawn(e1, e2, e4, e5)
+	ecs.turn_off(world, .RELATED, Joint)
 	
 	_time = time.now()
 	fmt.printfln("-- spawning dynamics ( %v )", 100000 + 3)
 
+	sibling: ^ecs.Entity
+	
 	for i in 0..<100000 + 3 {
 		e := ecs.spawn(world, .DYNAMIC)
 		ecs.add(e,
@@ -593,10 +689,16 @@ main :: proc() {
 			VecType, &VecType { 10, 20 },
 			Mutation, &Mutation { skin = 11 })
 		ecs.tag(e, Tag2)
+
+		if sibling != nil do ecs.relate(e, Joint, sibling)
+
+		sibling = e
 	}
 
 	_duration = time.diff(_time, time.now())
 	fmt.printfln("-- ellapsed: %v", _duration)
+
+	ecs.turn_on(world, .RELATED, Joint)
 
 	_time = time.now()
 	fmt.printfln("-- spawning dynamics ( %v )", 500000 + 3)
@@ -657,10 +759,12 @@ main :: proc() {
 
 	// ecs.run(world)
 	// fmt.println("--- world is running ---")
-	ecs.despawn(world, e1, e2, e4)
+	// ecs.despawn(world, e1, e2, e4)
+	// ecs.perform(world)
 
 	for archetype in world.archetypes {
-		fmt.printfln("archetype: %v, %v, %v", len(archetype.entities), archetype.components, archetype.tags)
+		fmt.printfln("archetype: %v, %v, %v, %v", len(archetype.entities), archetype.components,
+			archetype.tags, archetype.relations)
 	}
 
 	if !ecs.turned_on(world, .ADDED) do ecs.turn_on(world, .ADDED)

@@ -16,7 +16,7 @@ add_2_components :: #force_inline proc(entity: ^Entity,
 	world: ^World = entity.block.world
 	buffer: [STACK_BUFFER_SIZE]u8 = ---
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	if world.components.count != 2 {
 		/* We need to read existing components values first to save values of ones
@@ -63,7 +63,7 @@ add_3_components :: #force_inline proc(entity: ^Entity,
 	world: ^World = entity.block.world
 	buffer: [STACK_BUFFER_SIZE]u8 = ---
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	if world.components.count != 3 {
 		/* We need to read existing components values first to save values of ones
@@ -116,7 +116,7 @@ add_4_components :: #force_inline proc(entity: ^Entity,
 	world: ^World = entity.block.world
 	buffer: [STACK_BUFFER_SIZE]u8 = ---
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	if world.components.count != 4 {
 		/* We need to read existing components values first to save values of ones
@@ -176,7 +176,7 @@ add_5_components :: #force_inline proc(entity: ^Entity,
 	world: ^World = entity.block.world
 	buffer: [STACK_BUFFER_SIZE]u8 = ---
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	if world.components.count != 5 {
 		/* We need to read existing components values first to save values of ones
@@ -242,7 +242,7 @@ add_6_components :: #force_inline proc(entity: ^Entity,
 	world: ^World = entity.block.world
 	buffer: [STACK_BUFFER_SIZE]u8 = ---
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	if world.components.count != 6 {
 		/* We need to read existing components values first to save values of ones
@@ -315,7 +315,7 @@ add_7_components :: #force_inline proc(entity: ^Entity,
 	world: ^World = entity.block.world
 	buffer: [STACK_BUFFER_SIZE]u8 = ---
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	if world.components.count != 7 {
 		/* We need to read existing components values first to save values of ones
@@ -394,7 +394,7 @@ add_8_components :: #force_inline proc(entity: ^Entity,
 	world: ^World = entity.block.world
 	buffer: [STACK_BUFFER_SIZE]u8 = ---
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	if world.components.count != 8 {
 		/* We need to read existing components values first to save values of ones
@@ -480,7 +480,7 @@ add_9_components :: #force_inline proc(entity: ^Entity,
 	world: ^World = entity.block.world
 	buffer: [STACK_BUFFER_SIZE]u8 = ---
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	if world.components.count != 9 {
 		/* We need to read existing components values first to save values of ones
@@ -572,7 +572,7 @@ add_10_components :: #force_inline proc(entity: ^Entity,
 	world: ^World = entity.block.world
 	buffer: [STACK_BUFFER_SIZE]u8 = ---
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	if world.components.count != 10 {
 		/* We need to read existing components values first to save values of ones
@@ -671,7 +671,7 @@ add_11_components :: #force_inline proc(entity: ^Entity,
 	world: ^World = entity.block.world
 	buffer: [STACK_BUFFER_SIZE]u8 = ---
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	if world.components.count != 11 {
 		/* We need to read existing components values first to save values of ones
@@ -776,7 +776,7 @@ add_12_components :: #force_inline proc(entity: ^Entity,
 	world: ^World = entity.block.world
 	buffer: [STACK_BUFFER_SIZE]u8 = ---
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	if world.components.count != 12 {
 		/* We need to read existing components values first to save values of ones
@@ -888,7 +888,7 @@ add_13_components :: #force_inline proc(entity: ^Entity,
 	world: ^World = entity.block.world
 	buffer: [STACK_BUFFER_SIZE]u8 = ---
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	if world.components.count != 13 {
 		/* We need to read existing components values first to save values of ones
@@ -987,7 +987,7 @@ set_2_components :: #force_inline proc(entity: ^Entity,
 	world: ^World = entity.block.world
 	buffer: [STACK_BUFFER_SIZE]u8 = ---
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	if world.components.count != 2 {
 		/* We need to read existing components values first to save values of ones
@@ -1029,7 +1029,7 @@ set_3_components :: #force_inline proc(entity: ^Entity,
 	world: ^World = entity.block.world
 	buffer: [STACK_BUFFER_SIZE]u8 = ---
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	if world.components.count != 3 {
 		/* We need to read existing components values first to save values of ones
@@ -1076,7 +1076,7 @@ set_4_components :: #force_inline proc(entity: ^Entity,
 	world: ^World = entity.block.world
 	buffer: [STACK_BUFFER_SIZE]u8 = ---
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	if world.components.count != 4 {
 		/* We need to read existing components values first to save values of ones
@@ -1129,7 +1129,7 @@ set_5_components :: #force_inline proc(entity: ^Entity,
 	world: ^World = entity.block.world
 	buffer: [STACK_BUFFER_SIZE]u8 = ---
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	if world.components.count != 5 {
 		/* We need to read existing components values first to save values of ones
@@ -1187,7 +1187,7 @@ set_6_components :: #force_inline proc(entity: ^Entity,
 	world: ^World = entity.block.world
 	buffer: [STACK_BUFFER_SIZE]u8 = ---
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	if world.components.count != 6 {
 		/* We need to read existing components values first to save values of ones
@@ -1251,7 +1251,7 @@ set_7_components :: #force_inline proc(entity: ^Entity,
 	world: ^World = entity.block.world
 	buffer: [STACK_BUFFER_SIZE]u8 = ---
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	if world.components.count != 7 {
 		/* We need to read existing components values first to save values of ones
@@ -1320,7 +1320,7 @@ set_8_components :: #force_inline proc(entity: ^Entity,
 	world: ^World = entity.block.world
 	buffer: [STACK_BUFFER_SIZE]u8 = ---
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	if world.components.count != 8 {
 		/* We need to read existing components values first to save values of ones
@@ -1395,7 +1395,7 @@ set_9_components :: #force_inline proc(entity: ^Entity,
 	world: ^World = entity.block.world
 	buffer: [STACK_BUFFER_SIZE]u8 = ---
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	if world.components.count != 9 {
 		/* We need to read existing components values first to save values of ones
@@ -1475,7 +1475,7 @@ set_10_components :: #force_inline proc(entity: ^Entity,
 	world: ^World = entity.block.world
 	buffer: [STACK_BUFFER_SIZE]u8 = ---
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	if world.components.count != 10 {
 		/* We need to read existing components values first to save values of ones
@@ -1561,7 +1561,7 @@ set_11_components :: #force_inline proc(entity: ^Entity,
 	world: ^World = entity.block.world
 	buffer: [STACK_BUFFER_SIZE]u8 = ---
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	if world.components.count != 11 {
 		/* We need to read existing components values first to save values of ones
@@ -1652,7 +1652,7 @@ set_12_components :: #force_inline proc(entity: ^Entity,
 	world: ^World = entity.block.world
 	buffer: [STACK_BUFFER_SIZE]u8 = ---
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	if world.components.count != 12 {
 		/* We need to read existing components values first to save values of ones
@@ -1749,7 +1749,7 @@ set_13_components :: #force_inline proc(entity: ^Entity,
 	world: ^World = entity.block.world
 	buffer: [STACK_BUFFER_SIZE]u8 = ---
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	if world.components.count != 13 {
 		/* We need to read existing components values first to save values of ones
@@ -2426,7 +2426,7 @@ get_2_components_mut :: #force_inline proc(entity: ^Entity,
 
 	world: ^World = entity.block.world
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	for i := 0; i < world.components.count; i += 1 {
 		id := world.components.ids[i]
@@ -2456,7 +2456,7 @@ get_2_components :: #force_inline proc(entity: ^Entity,
 
 	world: ^World = entity.block.world
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	for i := 0; i < world.components.count; i += 1 {
 		id := world.components.ids[i]
@@ -2484,7 +2484,7 @@ get_3_components_mut :: #force_inline proc(entity: ^Entity,
 
 	world: ^World = entity.block.world
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	for i := 0; i < world.components.count; i += 1 {
 		id := world.components.ids[i]
@@ -2518,7 +2518,7 @@ get_3_components :: #force_inline proc(entity: ^Entity,
 
 	world: ^World = entity.block.world
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	for i := 0; i < world.components.count; i += 1 {
 		id := world.components.ids[i]
@@ -2549,7 +2549,7 @@ get_4_components_mut :: #force_inline proc(entity: ^Entity,
 
 	world: ^World = entity.block.world
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	for i := 0; i < world.components.count; i += 1 {
 		id := world.components.ids[i]
@@ -2587,7 +2587,7 @@ get_4_components :: #force_inline proc(entity: ^Entity,
 
 	world: ^World = entity.block.world
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	for i := 0; i < world.components.count; i += 1 {
 		id := world.components.ids[i]
@@ -2621,7 +2621,7 @@ get_5_components_mut :: #force_inline proc(entity: ^Entity,
 
 	world: ^World = entity.block.world
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	for i := 0; i < world.components.count; i += 1 {
 		id := world.components.ids[i]
@@ -2663,7 +2663,7 @@ get_5_components :: #force_inline proc(entity: ^Entity,
 
 	world: ^World = entity.block.world
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	for i := 0; i < world.components.count; i += 1 {
 		id := world.components.ids[i]
@@ -2700,7 +2700,7 @@ get_6_components_mut :: #force_inline proc(entity: ^Entity,
 
 	world: ^World = entity.block.world
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	for i := 0; i < world.components.count; i += 1 {
 		id := world.components.ids[i]
@@ -2746,7 +2746,7 @@ get_6_components :: #force_inline proc(entity: ^Entity,
 
 	world: ^World = entity.block.world
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	for i := 0; i < world.components.count; i += 1 {
 		id := world.components.ids[i]
@@ -2788,7 +2788,7 @@ get_7_components_mut :: #force_inline proc(entity: ^Entity,
 
 	world: ^World = entity.block.world
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	for i := 0; i < world.components.count; i += 1 {
 		id := world.components.ids[i]
@@ -2839,7 +2839,7 @@ get_7_components :: #force_inline proc(entity: ^Entity,
 
 	world: ^World = entity.block.world
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	for i := 0; i < world.components.count; i += 1 {
 		id := world.components.ids[i]
@@ -2884,7 +2884,7 @@ get_8_components_mut :: #force_inline proc(entity: ^Entity,
 
 	world: ^World = entity.block.world
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	for i := 0; i < world.components.count; i += 1 {
 		id := world.components.ids[i]
@@ -2939,7 +2939,7 @@ get_8_components :: #force_inline proc(entity: ^Entity,
 
 	world: ^World = entity.block.world
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	for i := 0; i < world.components.count; i += 1 {
 		id := world.components.ids[i]
@@ -2987,7 +2987,7 @@ get_9_components_mut :: #force_inline proc(entity: ^Entity,
 
 	world: ^World = entity.block.world
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	for i := 0; i < world.components.count; i += 1 {
 		id := world.components.ids[i]
@@ -3046,7 +3046,7 @@ get_9_components :: #force_inline proc(entity: ^Entity,
 
 	world: ^World = entity.block.world
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	for i := 0; i < world.components.count; i += 1 {
 		id := world.components.ids[i]
@@ -3097,7 +3097,7 @@ get_10_components_mut :: #force_inline proc(entity: ^Entity,
 
 	world: ^World = entity.block.world
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	for i := 0; i < world.components.count; i += 1 {
 		id := world.components.ids[i]
@@ -3160,7 +3160,7 @@ get_10_components :: #force_inline proc(entity: ^Entity,
 
 	world: ^World = entity.block.world
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	for i := 0; i < world.components.count; i += 1 {
 		id := world.components.ids[i]
@@ -3214,7 +3214,7 @@ get_11_components_mut :: #force_inline proc(entity: ^Entity,
 
 	world: ^World = entity.block.world
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	for i := 0; i < world.components.count; i += 1 {
 		id := world.components.ids[i]
@@ -3281,7 +3281,7 @@ get_11_components :: #force_inline proc(entity: ^Entity,
 
 	world: ^World = entity.block.world
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	for i := 0; i < world.components.count; i += 1 {
 		id := world.components.ids[i]
@@ -3338,7 +3338,7 @@ get_12_components_mut :: #force_inline proc(entity: ^Entity,
 
 	world: ^World = entity.block.world
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	for i := 0; i < world.components.count; i += 1 {
 		id := world.components.ids[i]
@@ -3409,7 +3409,7 @@ get_12_components :: #force_inline proc(entity: ^Entity,
 
 	world: ^World = entity.block.world
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	for i := 0; i < world.components.count; i += 1 {
 		id := world.components.ids[i]
@@ -3471,7 +3471,7 @@ get_13_components_mut :: #force_inline proc(entity: ^Entity,
 
 	world: ^World = entity.block.world
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	for i := 0; i < world.components.count; i += 1 {
 		id := world.components.ids[i]
@@ -3548,7 +3548,7 @@ get_13_components :: #force_inline proc(entity: ^Entity,
 
 	world: ^World = entity.block.world
 	storage: ^u8 = cast(^u8)entity.block.chunks
-	chunk_offset := world.components.size * entity.chunk_idx
+	chunk_offset := world.chunk_size * entity.chunk_idx
 
 	for i := 0; i < world.components.count; i += 1 {
 		id := world.components.ids[i]
