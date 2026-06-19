@@ -500,9 +500,8 @@ Do not enable and use observers unless absolutely necessary. Only do so if somet
 
 ### Relations
 Relations between entities (and only entities) can be set as following kinds:
-- One-to-one - one entity related with one other entity by some type and data.
-- One-to-many - one entity related with any number of other entities.\
-\
+* One-to-one - one entity related with one other entity by some type and data.
+* One-to-many - one entity related with any number of other entities.\
 You should not care about what kind of relation entity have, you just add/remove relations and ecs will process this internally storing either one pointer to the related entity or a dynamic array of them. In the memory relations are stored right after components in the same chunks and have similar logic of removing/adding.\
 \
 The important thing about this you should remember is that *when you relate one entity with many others, you will always have only one instance of `relationship data`* that is stored in the relation type (struct that you use to create relations). That data will be updated every time when you add new `target` entity to current relation (relate entity with some other, not related before with, using same relation type). `Target` entity I call the entity which current one is related with (the entity on the other end of the connection/relationship).
@@ -518,11 +517,10 @@ There are three predefined relation types:
 For `ParentOf` and `ChildOf` relation types you can assign any data to `data` field that is of `rawptr` type.\
 \
 If entity is `despawned` relations are updated and child entities despawned:
-- If entity is a `child` all relations to it will be destroyed in its parents.
-- If entity is a `parent` all child entities will be despawned (destroyed) **but only if they have no more parents**. This mean that child can have many parents and is alive while at least one parent still alive. It is logical as while child **still** have parents it should continue living event if one of its parent is despawned.
-- If entity is a custom (defined by you, not predefined) relation target of some other, this relation will be destroyed for that entity.
-- If entity has any other custom relations (besides `ChildOf` and `ParentOf`, read **all**) they will be destroyed.\
-\
+* If entity is a `child` all relations to it will be destroyed in its parents.
+* If entity is a `parent` all child entities will be despawned (destroyed) **but only if they have no more parents**. This mean that child can have many parents and is alive while at least one parent still alive. It is logical as while child **still** have parents it should continue living event if one of its parent is despawned.
+* If entity is a custom (defined by you, not predefined) relation target of some other, this relation will be destroyed for that entity.
+* If entity has any other custom relations (besides `ChildOf` and `ParentOf`, read **all**) they will be destroyed.\
 It may sounds very difficult but in practice you should not care about all these, just use relations as you wish.\
 \
 You can use relations in system queries using separated `relations` list or add relation `types` to general `query` list, also there is an ability to exclude relations by adding them to `without` list of the system match query. The logic will be same as with components and you have to get necessary relation target entities and relationship data using according procedures inside system callback procedure code block.
