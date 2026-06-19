@@ -14,6 +14,7 @@
 [Tags](#tags)\
 [Systems](#systems)\
 [Observers](#observers)\
+[Relations](#relations)\
 [Running the world](#running-the-world)\
 [Iterating entities](#iterating-entities)\
 [Performance](#performance)\
@@ -57,6 +58,7 @@ Kinds of elements that the world can consist of represented with `Element` enum.
 | TAG            | Tag element type for marking entities with some kind of characteristic. Must be defined as a `typedef` with a simple fundamental underlying type (`typedef Tag = int`).                                     |
 | RESOURCE       | Resource element type for storing data in the world that has only one instance, singleton. Must be defined as a struct or `typedef` custom type. Resources are not entities without components as in other ECS, they have own storage and methods.                                                                            |
 | SYSTEM         | System element type for running actions at each step of the world progress.                  |
+| RELATION       | Relation between entities. Must be defined as a struct or distinct custom type. Relation can be associated with data that are used for some game logic. It's like a component but with target/attached entity.|
 
 You must register world elements before running the world.
 ```odin
@@ -75,6 +77,8 @@ main :: proc() {
   /* Register tags. */
   ecs.register(world, .TAG, Player)
   ecs.register(world, .TAG, Asteroid)
+  /* Register relations. */
+	ecs.register(world, .RELATION, Joint)
 
   ecs.destroy()
 }
@@ -91,10 +95,10 @@ When you `despawn` entities, these actions will be deferred. We need to keep ent
 \
 If you set observers for despawning entities, callbacks will also be deferred to the performing stage until the actual moment of despawning.\
 \
-When you `add`/`remove` a component, or `set`/`unset` a tag they will still present in current archetypes till end of the current progress step. When `tags`/`components` is being `added`/`removed` to the entity and world is already running, entities should not be moved to other archetypes till end of the current progress step, so this archetyping action is deferred to the perform stage.\
+When you `add`/`remove` a component, or `set`/`unset` a tag, or `relate`/`unrelate` entities they will still present in current archetypes till end of the current progress step. When `tags`/`components`/`relations` is being `added`/`removed` to the entity and world is already running, entities should not be moved to other archetypes till end of the current progress step, so this `archetyping` action is deferred to the perform stage.\
 \
 This means that changes will will be applied only at the next world progress step.\
-But **setting values to resource/components is being applied immediately** (is not deferred).
+But **setting values to resource/components/relationships is being applied immediately** (is not deferred).
 
 ### Resources
 Resources are data structures that you only need one instance of and represent game state, sprites (textures), physics parameters, etc. You need to `register` their types and `set` their values before `getting` them. You can add a number of resources that is less or equals `MAX_RESOURCES_COUNT`, if you need more, please, change this constant manually. You must `run` the world before setting values to resources.
@@ -142,9 +146,9 @@ main :: proc() {
 | get_mut()          | Gets a bunch of pointers to resources for changing resource fields (*recommended*).      |
 
 ### Entities
-Entities are the main elements of the world. It is the abstract data structure that can be specified by components and tags. Entity is not just an id and has some fields, but you should not care about them and use procedures to work with it. Internally there are bit-set fields which define what components and/or tags the entity has. Thus, when deleting a component and adding/removing a tag, reading/writing to memory does not occur.\
+Entities are the main elements of the world. It is the abstract data structure that can be specified by components and tags, and related each with others. Entity is not just an id and has some fields, but you should not care about them and use procedures to work with it. Internally there are bit-set fields which define what components and/or tags, and/or relations the entity has. Thus, when deleting a component/relation and adding/removing a tag, reading/writing to memory does not occur.\
 \
-When you despawn an entity this action is deferred to the end of the current progress step, so if you want to omit such entities in the current progress step (game frame) use `despawning` procedure to check that state. Also you may want to check that entity is really despawned if you have a pointer to it from previous progress steps, then use `deleted` procedure.\
+When you `despawn` an entity this action is deferred to the end of the current progress step, so if you want to omit such entities in the current progress step (game frame) use `despawning` procedure to check that state. Also you may want to check that entity is really despawned if you have a pointer to it from previous progress steps, then use `deleted` procedure.\
 \
 All entities have a lifetime (`.DYNAMIC` or `.STATIC`). But you'll not find this data in the entity itself, it is only defined in the memory block the entity belongs to and once entity was spawned its lifetime can't be changed.
 ```odin
@@ -308,7 +312,7 @@ Systems are place where your game/app algorithms are living, processing user inp
 
 Internally systems are represented by structs with all necessary configuration inside. There is `SystemCallback` procedure type that will be called for each system at each world progress step. When you define your system procedure you must follow `SystemCallback` signature, where first parameter is a pointer to dynamic array of pointers to matched entities and second one id pointer to the world.\
 \
-You pass a list of component types and/or tag types when mounting a system and these set is a match query for selection of entities which will be passed to system callback. Entity *must have* all components and tags defined for the system to match its query condition (but it also may have more, it *hasn't to be exact match*). If you need to exclude entities without some components/tags from the query result (entities *mustn't have them added*), you can use `without` condition when mount the system. If system has no specified components/tags and `without` conditions it is considered as a task, no queries are executed for them at each progress step, and `nil` is passed as first argument of callback procedure (instead of matched entities array).\
+You pass a list of component types and/or tag types, and/or relation types when mounting a system and these set is a match query for selection of entities which will be passed to system callback. Entity *must have* all components, relations, and tags defined for the system to match its query condition (but it also may have more, it *hasn't to be exact match*). If you need to exclude entities without some components/tags/relations from the query result (entities *mustn't have them added*), you can use `without` condition when mount the system. If system has no specified components/tags/relations and `without` conditions it is considered as a task, no queries are executed for them at each progress step, and `nil` is passed as first argument of callback procedure (instead of matched entities array).\
 \
 There are two query match approaches of selection entities for the systems.
 | Approach           | Description                                                                              |
@@ -323,10 +327,11 @@ When you mount a system only `callback` parameter is mandatory, in this case sys
 |--------------------|------------------------------------------------------------------------------------------|
 | world              | Pointer to the world (used in almost all ecs procedures).                                |
 | name               | Name of the system. It must be unique. Used for getting the system from the world.       |
-| query              | Components and tags list that should match while the system query. You can also separate types using `components` and `tags` parameters of `mount` procedure. Using both approaches simultaneously, or crossing or duplicating types in different params is safe.                                                    |
+| query              | Components, tags and relations list that should match while the system query. You can also separate types using `components`, `tags` and `relations` parameters of `mount` procedure. Using both approaches simultaneously, or crossing or duplicating types in different params is safe.                                 |
 | components         | Components list that should match while the system query.                                |
 | tags               | Tags list that should match while the system query.                                      |
-| without            | Components and tags list that should not be added to the entity, so system query will match entities only without them, even if these components and tags were included into main query list.             |
+| relations          | Relations list that should match while the system query.                                 |
+| without            | Components, tags and relations list that should not be added to the entity, so system query will match entities only without them, even if these components, tags or relations were included into main query list.                                                                                                         |
 | phase              | System running phase, order in the pipeline. By default equals UPDATE.                   |
 | lifetime           | Entities lifetime flag to optimize queries and do not process lifetimes that you want to avoid for current system. Not used in ARCHETYPE approach.                                                     |
 | callback           | Callback function that will be invoked each step of the world progress.                  |
@@ -353,6 +358,8 @@ main :: proc() {
   ecs.mount(world, callback = collisions,     components = { Collision, Handle, Position, Center })
   /* Use without condition to exclude listed components/tags from system query result. */
   ecs.mount(world, callback = materialize,    query = { Position, Rotation }, without = { Handle, Player })
+  /* You can query entities with relations to get secific entities. */
+  ecs.mount(world, callback = drive,          query = { Position, Rotation, Joint, ecs.ParentOf }, tags = { Car })
   /* Mount systems to run them manually (phase = .MANUAL). */
   ecs.mount(world, callback = load_resources, name = "load-resources", phase = .MANUAL)
   ecs.mount(world, callback = destroy,        name = "destroy", phase = .MANUAL)
@@ -397,7 +404,7 @@ main :: proc() {
 | disable()          | Disables the system.                                                                     |
 
 ### Observers
-Observers are a mechanism that allows to subscribe on events of structural and data changes in the world. By default observers are disable for performance reasons, so you need to pass `true` for `observable` argument of `new_world` procedure when you create the world. You also can change `observable` property of the world to turn off/on observers globally.\
+Observers are a mechanism that allows to subscribe on events of structural, relational and data changes in the world. By default observers are disable for performance reasons, so you need to pass `true` for `observable` argument of `new_world` procedure when you create the world. You also can change `observable` property of the world to turn off/on observers globally.\
 \
 There are different event types that can be handled for entities, components, and tags.
 | Event              | Description                                                                              |
@@ -409,30 +416,33 @@ There are different event types that can be handled for entities, components, an
 | SET                | Component value has been set (changed).                                                  |
 | TAGGED             | Tag has been added to an entity.                                                         |
 | UNTAGGED           | Tag has been removed from an entity.                                                     |
+| RELATED            | Entity has been related with a target one.                                               |
+| UNRELATED          | Entity has been unrelated with a target one, relationship removed.                       |
 
 Keep in mind that when you add/remove a component repeatedly or set/unset a tag repeatedly, the events will also be fired repeatedly for each operation even if you already made it before. It is safe for the data to call `add_component` (for example) procedure several times and pass the same component type to it, but your observers logic can be broken, so you need care about it yourself.\
 \
-You can turn on/off observers for a specific component/tag type or globally for an event type. You can also check whether an observer is set or turned on. Events are not supported for resources.\
+You can turn on/off observers for a specific component/tag/relation type or globally for an event type. You can also check whether an observer is set or turned on. Events are not supported for resources.\
 \
-When you set an observer using `observe` you must provide callback procedure that should follow `ObserverCallback` procedure type. `SPAWNED`/`DESPAWNED` events are being thrown for all entities and there are nothing to pass for `type` and `component` parameters, so the will be `nil` for these events in callback. Pointer to event target entity will be passed as `entity` parameter to callback. For `TAGGED`/`UNTAGGED` events tag type will be passed as `type` parameter, but `component` will be equals to `nil`. And finally for `ADDED`/`REMOVED`/`SET` events all callback parameters will be set, and `component` parameter is a pointer to event target component value, you can safety change it's value in place or read it, previously cast `rawptr` to expecting component type pointer.\
+When you set an observer using `observe` you must provide callback procedure that should follow `ObserverCallback` procedure type. `SPAWNED`/`DESPAWNED` events are being thrown for all entities and there are nothing to pass for `type`, `element` and `relation` parameters, so they will be `nil` for these events in callback. Pointer to event target entity will be passed as `entity` parameter to callback. For `TAGGED`/`UNTAGGED` events tag type will be passed as `type` parameter, but `element` and `relation` will be equals to `nil`. For `ADDED`/`REMOVED`/`SET` events `relation` parameter will be `nil`. And finally for `RELATED`/`UNRELATED` events all callback parameters will be set. For two last cases `element` parameter is a pointer to event/relation target component/entity value, you can safety change it's value in place or read it, previously cast `rawptr` to expecting component/entity type pointer.\
 \
-When you provide several `types` in `observe`/`unobserve` procedures the same callback will be assigned as specific event handler for each of these `types`. This is done for convenience, there are no group observers, they are set separately for a specific event and element (component/tag) type.\
+When you provide several `types` in `observe`/`unobserve` procedures the same callback will be assigned as specific event handler for each of these `types`. This is done for convenience, there are no group observers, they are set separately for a specific event and element (component/tag/relation) type.\
 \
 You must set observers *only when* the world is already running, because of necessary indexes sorting made in `run` procedure of the world. Subsequent setting observers for some configuration will replace previous ones.
 ```odin
 import ecs "moecs/src"
 
 /* Observer callback procedure declaration. */
-added :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, component: rawptr) {
+added :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, element: rawptr,
+  relation: rawptr) {
   switch type {
     case Position:
-      pos := cast(^Position)component
+      pos := cast(^Position)element
       /* Do not use observers for such purposes, it's just example. */
       pos.x += 50
       pos.y += 50
 
     case Center:
-      center := cast(^Center)component
+      center := cast(^Center)element
       /* Component values will be safety changed in place. */
       center.cx += 50
       center.cy += 50
@@ -447,16 +457,18 @@ main :: proc() {
   ecs.run(world)
 
   /* Set observers for entity spawning/despawning, you need to provide only callbacks. */
-  ecs.observe(world, event = .SPAWNED, callback = spawned)
+  ecs.observe(world, event = .SPAWNED,   callback = spawned)
   ecs.observe(world, event = .DESPAWNED, callback = despawned)
   /* You can set observers for one or several types, subsequent assignments replace previous ones. */
-  ecs.observe(world, event = .ADDED, types = { Rotation }, callback = added_rot)
-  ecs.observe(world, event = .ADDED, types = { Position, Center, Health, Velocity }, callback = added)
-  ecs.observe(world, event = .REMOVED, types = { Center, Position }, callback = removed)
-  ecs.observe(world, event = .SET, types = { Position }, callback = set_pos)
-  ecs.observe(world, event = .SET, types = { Center, Rotation, Health, Velocity }, callback = set)
-  ecs.observe(world, event = .TAGGED, types = { Ship, Asteroid }, callback = tagged)
-  ecs.observe(world, event = .UNTAGGED, types = { Ship, Asteroid }, callback = untagged)
+  ecs.observe(world, event = .ADDED,     types = { Rotation }, callback = added_rot)
+  ecs.observe(world, event = .ADDED,     types = { Position, Center, Health, Velocity }, callback = added)
+  ecs.observe(world, event = .REMOVED,   types = { Center, Position }, callback = removed)
+  ecs.observe(world, event = .SET,       types = { Position }, callback = set_pos)
+  ecs.observe(world, event = .SET,       types = { Center, Rotation, Health, Velocity }, callback = set)
+  ecs.observe(world, event = .TAGGED,    types = { Ship, Asteroid }, callback = tagged)
+  ecs.observe(world, event = .UNTAGGED,  types = { Ship, Asteroid }, callback = untagged)
+  ecs.observe(world, event = .RELATED,   types = { ecs.ParentOf, ecs.ChildOf, Joint }, callback = related)
+  ecs.observe(world, event = .UNRELATED, types = { ecs.ParentOf, ecs.ChildOf, Joint }, callback = unrelated)
 
   /* Turn off all added events for all component types. */
   ecs.turn_off(world, .ADDED)
@@ -486,8 +498,148 @@ main :: proc() {
 
 Do not enable and use observers unless absolutely necessary. Only do so if something can't be done using systems, as observers are very inefficient and reduce the speed of the ECS. For example, if you're developing a library that utilizes the ECS and initializes and runs the game's physics under the hood using specific components. You need to track the addition and modification of these components to make the appropriate changes to the physics engine. In this case observers are really necessary, for game/app logic use systems, it's much more efficient.
 
+### Relations
+Relations between entities (and only entities) can be set as following kinds:
+- One-to-one - one entity related with one other entity by some type and data.
+- One-to-many - one entity related with any number of other entities.
+You should not care about what kind of relation entity have, you just add/remove relations and ecs will process this internally storing either one pointer to the related entity or a dynamic array of them. In the memory relations are stored right after components in the same chunks and have similar logic of removing/adding.\
+\
+The important thing about this you should remember is that *when you relate one entity with many others, you will always have only one instance of `relationship data`* that is stored in the relation type (struct that you use to create relations). That data will be updated every time when you add new `target` entity to current relation (relate entity with some other, not related before with, using same relation type). `Target` entity I call the entity which current one is related with (the entity on the other end of the connection/relationship).
+\
+There are three predefined relation types:
+| Relation           | Description                                                                              |
+|--------------------|------------------------------------------------------------------------------------------|
+| ChildOf            | Relation type that describes child->parent relationship. *Entity may have many children.*|
+| ParentOf           | Relation type that describes parent->child relationship. *Entity may have many parents!* |
+| RelationOf         | Relation type that describes whether an entity has dependencies on relationships with other entities (is their relations target). We need it when deleting an entity, then we must remove relation to it from other entities, pointers to which are stored in this type of relation.                                        |
+
+For `ParentOf` and `ChildOf` relation types you can assign any data to `data` field that is of `rawptr` type.\
+\
+If entity is `despawned` relations are updated and child entities despawned:
+- If entity is a `child` all relations to it will be destroyed in its parents.
+- If entity is a `parent` all child entities will be despawned (destroyed) **but only if they have no more parents**. This mean that child can have many parents and is alive while at least one parent still alive. It is logical as while child **still** have parents it should continue living event if one of its parent is despawned.
+- If entity is a custom (defined by you, not predefined) relation target of some other, this relation will be destroyed for that entity.
+- If entity has any other custom relations (besides `ChildOf` and `ParentOf`, read **all**) they will be destroyed.
+It may sounds very difficult but in practice you should not care about all these, just use relations as you wish.\
+\
+You can use relations in system queries using separated `relations` list or add relation `types` to general `query` list, also there is an ability to exclude relations by adding them to `without` list of the system match query. The logic will be same as with components and you have to get necessary relation target entities and relationship data using according procedures inside system callback procedure code block.
+```odin
+import ecs "moecs/src"
+
+Joint :: struct {
+  type : u8,
+  data : [16]f32
+}
+
+/* Related event callback. Relation of `type` is set from `entity` to `target` using `relation` data. */
+related :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: typeid, target: rawptr,
+  relation: rawptr) {
+	switch type {
+		case ecs.ChildOf: fmt.printfln("Related: %v, %v", type, (cast(^ecs.ChildOf)relation)^)
+		case ecs.ParentOf: fmt.printfln("Related: %v, %v", type, (cast(^ecs.ParentOf)relation)^)
+		case Joint: fmt.printfln("Related: %v, %v", type, (cast(^Joint)relation)^)
+	}
+}
+
+main :: proc() {
+  arr := [3]int{ 3, 7, 14 }
+  
+  ecs.init()
+  world := ecs.new_world()
+  /* ...register tags and components types here. */
+  /* You have to register relation type. */
+  ecs.register(world, .RELATION, Joint)
+  ecs.run(world)
+
+  /* You can query entities with relations as you made for components/tags in systems. */
+  ecs.mount(world, query = { Joint, ecs.ParentOf }, callback = drive)
+  /* You can set observers for creating/destroying relations between entities. */
+  ecs.observe(world, event = .RELATED,   types = { ecs.ParentOf, ecs.ChildOf, Joint }, callback = related)
+  ecs.observe(world, event = .UNRELATED, types = { ecs.ParentOf, ecs.ChildOf, Joint }, callback = unrelated)
+
+  e1 : ^ecs.Entity = ecs.spawn(world, .DYNAMIC)
+  e2 : ^ecs.Entity = ecs.spawn(world, .DYNAMIC)
+  e3 : ^ecs.Entity = ecs.spawn(world, .DYNAMIC)
+
+  /* Set e1 as parent of e2. */
+  ecs.parent_of(e1, e2)
+  /* Set e1 as parent of e3 and add relation data. */
+  ecs.relate(e1, ecs.ParentOf { data = nil }, e3)
+  /* Relate e1 with e3 by Joint relation and add relationship data. */
+  ecs.relate(e1, Joint { type = 7, data = { 0 = 1, 1 = 2, 2..<16 = 3 }}, e3)
+  /* Relate e1 with e2 by Joint (add e2 to this relation targets list),
+     relationship data is replaced, here by zeroed struct (Joint {}). */
+  ecs.relate(e1, Joint, e2)
+
+  fmt.printfln("e1 is parent of e2: %v", ecs.is_parent_of(e1, e2))
+  fmt.printfln("e2 is child of e1: %v", ecs.is_child_of(e2, e1))
+
+  e4 := ecs.spawn(world, .DYNAMIC)
+  e5 := ecs.spawn(world, .DYNAMIC)
+
+  /* Make e1 also parent of e4 (e3 is still a child), data replaced. */
+  ecs.parent_of(e1, ecs.ParentOf { data = &arr }, e3, e4)
+
+  fmt.printfln("e1 is parent of e2, e3, e4: %v", ecs.related(e1, ecs.ParentOf, e2, e3, e4))
+  fmt.printfln("e2 has relations: %v", ecs.is_relation(e2))
+  fmt.printfln("e2 is relation target of e1: %v", ecs.is_relation_of(e2, e1))
+  fmt.printfln("e2 is relation target of e3: %v", ecs.is_relation_of(e2, e3))
+  fmt.printfln("e3 with e1 relation of count: %v", ecs.relation_of_count(e3, e1))
+
+  /* Remove Joint relation between e1 and e3. */
+  ecs.unrelate(e1, Joint, e3)
+  /* Remove relation ParentOf between e1 and e3 using specific proc. */
+  ecs.unrelate_with(e1, ecs.ParentOf, e3)
+  /* Remove all parent relations with all e1 children. */
+  ecs.unrelate(e1, ecs.ParentOf)
+  
+  fmt.printfln("e1 is parent of e2, e3, e4: %v", ecs.related(e1, ecs.ParentOf, e2, e3, e4))
+
+  /* Set e1 and e2 as parents of e4. */
+  ecs.child_of(e4, e1, e2)
+  
+  fmt.printfln("e4 is child of e1: %v", ecs.is_child_of(e4, e1))
+  fmt.printfln("e4 is child of e2: %v", ecs.is_child_of(e4, e2))
+
+  /* Get all ParentOf relations of e1, e is a slice to entity pointers, r - relation data pointer. */
+  r, e := ecs.relations(e1, ecs.ParentOf)
+  /* Get first parent of e4, parent is pointer to the entity. */
+  parent := ecs.parent(e4)
+  /* Get all parents of e4, parents is a slice of pointers to the entities. */
+  parents := ecs.parents(e4)
+  /* Get first child entity of e1, child is pointer to the entity. */
+  child := ecs.child(e1)
+  /* Get all children of e1, children is a slice of entity pointers. */
+  children := ecs.children(e1)
+
+  ecs.destroy()
+}
+```
+| Procedure          | Description                                                                              |
+|--------------------|------------------------------------------------------------------------------------------|
+| relate             | Relate the entity with the target one using relation type. *or*\ Relate the entity with the target one using relation instance (relationship data). It's safe to relate with same target entity several times, in this case relation data will be overwritten with no changes to target entities list.                       |
+| parent_of          | Set entity's `ParentOf` relation with any number of targets (children).                  |
+| child_of           | Set entity's `ChildOf` relation with any number of targets (parents).                    |
+| is_child_of        | Checks if the entity has `ChildOf` relation with (is a child of) another one.            |
+| is_parent_of       | Checks if the entity has `ParentOf` relation with (is a parent of) another one.          |
+| is_child           | Checks if the entity has `ChildOf` relation to some other.                               |
+| is_parent          | Checks if the entity has `ParentOf` relation to some other.                              |
+| related            | Checks if the entity has relation of specified type, and, if provided, with every of listed target entities.                                                                                              |
+| is_relation        | Checks if an entity has relationships with other entities (is their relations target).   |
+| is_relation_of     | Checks if the entity has `RelationOf` relation with (is it's relation target) another one.|
+| unrelate_by        | Removes all entity relations with all target entities by specified type.                 |
+| unrelate_with      | Removes entity relation with target entity by specified type.                            |
+| unrelate           | Removes entity relations (overloaded procedure of previous two).                         |
+| relation_of_count  | Count of dependencies on relationships with other entity, how much times target appears as relation target for an entity.                                                                                |
+| relation           | Gets entity relation (one-to-one) of specified type. Even if a relation has many targets, only first will be returned.                                                                                  |
+| relations          | Gets entity relations (one to many) of specified type. Even if a relation has one target, it will be wrapped into slice.                                                                                   |
+| parent             | Gets parent entity. If entity has many parents, only first will be returned.             |
+| parents            | Gets parent entities. If entity has one parent, it will be wrapped into slice.           |
+| child              | Gets child entity. If entity has many children, only first will be returned.             |
+| children           | Gets child entities. If entity has one child, it will be wrapped into slice.             |
+
 ### Running the world
-After you `init` the ecs, create the `world`(s), `register` all resources, components, and tags, you have to call `run` for your world(s). This procedure checks all necessary conditions and makes adjustments required for working with the declared world, allocates memory for resources. So, first you define the world, describe it, and then you run it, so you can mount systems, set observers, fill the world with resources, entities, components and execute systems.\
+After you `init` the ecs, create the `world`(s), `register` all resources, components, tags and relations, you have to call `run` for your world(s). This procedure checks all necessary conditions and makes adjustments required for working with the declared world, allocates memory for resources. So, first you define the world, describe it, and then you run it, so you can mount systems, set observers, fill the world with resources, entities, components, relations and execute systems.\
 \
 You game/app will have main loop where you have to call `progress` procedure for the world. I have called it *world progress step* before, this method runs all systems for all phases. Archetyping and despawning actions is deferred to the end of progress step, when `perform` procedure is called. You also can call it manually, but there should be no reasons to do it. It's very rare that changes can't wait until the next step/frame and calling it manually is inefficient.\
 \
@@ -572,3 +724,4 @@ There is no limitations of entities count, but for resource, components, and tag
 - MAX_RESOURCES_COUNT: Maximum resources count available for adding to the world.
 - MAX_COMPONENTS_COUNT: Maximum components count available for adding to entity;
 - MAX_TAGS_COUNT: Maximum tags count available for adding to entity.
+- MAX_RELATIONS_COUNT: Maximum relations count available for adding to entity.

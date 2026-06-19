@@ -317,6 +317,7 @@ relate_by_value :: proc(entity: ^Entity, relation: $Type, target: ^Entity) {
 			t^ = target
 
 			marker_set(RELATIONS_MARKER_SIZE, &entity.relations, r.idx)
+			archetyping(entity)
 		}
 
 		if world.observable do related_event(world, entity, type, r.idx, target, ptr_relation)
@@ -546,6 +547,7 @@ unrelate_by :: proc(entity: ^Entity, $Type: typeid) {
 			}
 
 			marker_unset(RELATIONS_MARKER_SIZE, &entity.relations, idx)
+			archetyping(entity)
 		}
 	}
 }
@@ -648,6 +650,7 @@ unrelate_with :: proc(entity: ^Entity, $Type: typeid, target: ^Entity) {
 
 				if t^ == target {
 					marker_unset(RELATIONS_MARKER_SIZE, &entity.relations, idx)
+					archetyping(entity)
 
 					if world.observable {
 						ptr_relation := mem.ptr_offset(cast(^u8)entity.block.chunks,
@@ -708,6 +711,7 @@ unrelate_by_idx :: proc(entity: ^Entity, idx: int, target: ^Entity) {
 
 			if t^ == target {
 				marker_unset(RELATIONS_MARKER_SIZE, &entity.relations, idx)
+				archetyping(entity)
 				
 				if world.observable {
 					type := world.relations.types[idx]
