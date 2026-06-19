@@ -507,6 +507,7 @@ You should not care about what kind of relation entity have, you just add/remove
 The important thing about this you should remember is that *when you relate one entity with many others, you will always have only one instance of `relationship data`* that is stored in the relation type (struct that you use to create relations). That data will be updated every time when you add new `target` entity to current relation (relate entity with some other, not related before with, using same relation type). `Target` entity I call the entity which current one is related with (the entity on the other end of the connection/relationship).
 \
 There are three predefined relation types:
+
 | Relation           | Description                                                                              |
 |--------------------|------------------------------------------------------------------------------------------|
 | ChildOf            | Relation type that describes child->parent relationship. *Entity may have many children.*|
