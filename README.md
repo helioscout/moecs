@@ -729,3 +729,6 @@ There is no limitations of entities count, but for resource, components, tags an
  * MAX_COMPONENTS_COUNT: Maximum components count available for adding to entity;
  * MAX_TAGS_COUNT: Maximum tags count available for adding to entity.
  * MAX_RELATIONS_COUNT: Maximum relations count available for adding to entity.
+
+[![Support](https://img.shields.io/liberapay/patrons/modev.svg?logo=liberapay)](https://liberapay.com/modev)
+[![Buy me a coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-orange?logo=buy-me-a-coffee)](https://buymeacoffee.com/helioscout)
