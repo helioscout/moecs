@@ -19,7 +19,9 @@
 [Iterating entities](#iterating-entities)\
 [Performance](#performance)\
 [Made with moecs](#made-with-moecs)\
-[Memory concept](#memory-concept)
+[Memory concept](#memory-concept)\
+[Why a bee](#why-a-bee)\
+[Quotes](#quotes)
 
 ### Setup
 Clone moecs repository into your project or nearby and import `src` folder.
@@ -729,6 +731,21 @@ There is no limitations of entities count, but for resource, components, tags an
  * MAX_COMPONENTS_COUNT: Maximum components count available for adding to entity;
  * MAX_TAGS_COUNT: Maximum tags count available for adding to entity.
  * MAX_RELATIONS_COUNT: Maximum relations count available for adding to entity.
+
+### Why a bee
+I like bees, they are smart, organized, hardworking and make a lot of useful products. Also I have and analogy:\
+\
+*Memory is the **honeycomb**; blocks, or chunks are the **beehive frames**; entities are the **honeycomb cells**; components, and tags are the **honey**; and systems are the **bees**.*
+
+### Quotes
+*“I never am really satisfied that I understand anything; because, understand it well as I may, my comprehension can only be an infinitesimal fraction of all I want to understand about the many connections and relations which occur to me, how the matter in question was first thought of or arrived at, etc., etc.”*\
+**― Ada Lovelace**\
+\
+*“The only way to learn a new programming language is by writing programs in it.”*\
+**― Dennis Ritchie**\
+\
+*“Programs are about transforming data into other forms of data.”*\
+**― [Odin design principles](https://odin-lang.org/docs/faq/#what-are-the-guiding-principles-behind-the-design-of-odin)**
 
 [![Support](https://img.shields.io/liberapay/patrons/modev.svg?logo=liberapay)](https://liberapay.com/modev)
 [![Buy me a coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-orange?logo=buy-me-a-coffee)](https://buymeacoffee.com/helioscout)
