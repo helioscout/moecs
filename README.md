@@ -733,7 +733,7 @@ There is no limitations of entities count, but for resource, components, tags an
  * MAX_RELATIONS_COUNT: Maximum relations count available for adding to entity.
 
 ### Why a bee
-I like bees, they are smart, organized, hardworking and make a lot of useful products. Also I have and analogy:\
+I like bees, they are smart, organized, hardworking and make a lot of useful products. Also I have an analogy:\
 \
 *Memory is the **honeycomb**; blocks, or chunks are the **beehive frames**; entities are the **honeycomb cells**; components, and tags are the **honey**; and systems are the **bees**.*
 
