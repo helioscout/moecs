@@ -379,9 +379,9 @@ main :: proc() {
 		tags = { Tag1, Tag2 }, without = { Component1, Component2, Tag3, Tag4 }, callback = system3)
 	ecs.mount(world, tags = { Tag2 }, relations = { Joint },
 		without = { Component1, Component2, Tag3, Tag4 }, callback = system5)
-	ecs.mount(world, name = "s1", query = { Position, Tag1 }, without = { Component1, Component2, Tag3, Tag4 },
+	ecs.mount(world, name = "s1", query = { Position, Center, Tag1 }, without = { Component1, Component2, Tag3, Tag4 },
 		callback = system2)
-	ecs.mount(world, name = "s2", components = { Center }, tags = { Tag2 },
+	ecs.mount(world, name = "s2", components = { Position, Center }, tags = { Tag2 },
 		without = { Component1, Component2, Tag3, Tag4 }, callback = system2)
 	ecs.mount(world, name = "m_sys"/*, query = { Joint, ecs.ParentOf }*/, callback = system4, phase = .MANUAL)
 
@@ -488,7 +488,7 @@ main :: proc() {
 	// }
 
 	// _duration = time.diff(_time, time.now())
-	// fmt.printfln("-- ellapsed: %v", _duration)
+	// fmt.printfln("-- elapsed: %v", _duration)
 	// fmt.printfln("-- dynamic blocks count: %v", len(world.dynamics))
 
 	// _time = time.now()
@@ -512,7 +512,7 @@ main :: proc() {
 	// }
 
 	// _duration = time.diff(_time, time.now())
-	// fmt.printfln("-- ellapsed: %v", _duration)
+	// fmt.printfln("-- elapsed: %v", _duration)
 	// fmt.printfln("-- static blocks count: %v", len(world.statics))
 
 	ecs.set(world,
@@ -696,7 +696,7 @@ main :: proc() {
 	}
 
 	_duration = time.diff(_time, time.now())
-	fmt.printfln("-- ellapsed: %v", _duration)
+	fmt.printfln("-- elapsed: %v", _duration)
 
 	ecs.turn_on(world, .RELATED, Joint)
 
@@ -722,7 +722,7 @@ main :: proc() {
 	}
 
 	_duration = time.diff(_time, time.now())
-	fmt.printfln("-- ellapsed: %v", _duration)
+	fmt.printfln("-- elapsed: %v", _duration)
 
 	_time = time.now()
 	fmt.printfln("-- spawning statics ( %v )", 300000 + 3)
@@ -740,7 +740,7 @@ main :: proc() {
 	}
 
 	_duration = time.diff(_time, time.now())
-	fmt.printfln("-- ellapsed: %v", _duration)
+	fmt.printfln("-- elapsed: %v", _duration)
 
 	// buffer: [10]byte
 	// os.read(os.stdin, buffer[:])
@@ -749,13 +749,17 @@ main :: proc() {
 	fmt.println("--- iterating ---")
 
 	ecs.each(world, callback = proc(entity: ^ecs.Entity, lifetime: ecs.Lifetime, world: ^ecs.World) {
-		pos, center := ecs.get(entity, Position, Center)
+		pos, center := ecs.get_mut(entity, Position, Center)
+
+		if ecs.has(entity, Position) do pos.x += pos.y
+		if ecs.has(entity, Center) do center.cx += center.cy
+		
 		count += 1
 		// fmt.println(pos, center)
 	})
 
 	_duration = time.diff(_time, time.now())
-	fmt.printfln("-- ellapsed: %v, count: %v", _duration, count)
+	fmt.printfln("-- elapsed: %v, count: %v", _duration, count)
 
 	// ecs.run(world)
 	// fmt.println("--- world is running ---")
@@ -778,8 +782,8 @@ main :: proc() {
 	}
 
 	_duration = time.diff(_time, time.now())
-	fmt.printfln("-- ellapsed: %v ms", time.duration_milliseconds(_duration))
-	fmt.printfln("-- ellapsed: %v", _duration)
+	fmt.printfln("-- elapsed: %v ms", time.duration_milliseconds(_duration))
+	fmt.printfln("-- elapsed: %v", _duration)
 
 	ecs.execute(world, "m_sys")
 
