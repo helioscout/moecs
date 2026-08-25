@@ -51,8 +51,8 @@ component_index :: #force_inline proc(components: ^Components, type: typeid) -> 
    `component`  : Instance of the component type. */
 @(private="package")
 components_add :: proc(components: ^Components, type: typeid, component: Component) {
-	if components_has(components, type) do panic("Component already registered.")
-	if components.count == MAX_COMPONENTS_COUNT do panic("The maximum count of components has been reached.")
+	if components_has(components, type) do panic(ERR_COMPONENT_ALREADY_REGISTERED)
+	if components.count == MAX_COMPONENTS_COUNT do panic(ERR_MAX_COMPONENTS_COUNT)
 
 	components.ids[components.count] = transmute(u64)type
 	components.types[components.count] = component

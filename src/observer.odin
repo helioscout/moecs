@@ -417,7 +417,7 @@ observable_event :: proc(world: ^World, event: Event) -> bool {
 		case .DESPAWNED: return world.observers.setting.despawned
 	}
 
-	panic("Use procedure with type parameter for this event type.")
+	panic(ERR_OBSERVABLE_PROC_TYPE)
 }
 
 /* Checks if observer is set for specific event and type.

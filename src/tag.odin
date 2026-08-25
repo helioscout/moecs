@@ -41,8 +41,8 @@ tag_index :: #force_inline proc(tags: ^Tags, type: typeid) -> (int, bool) #optio
    `tag`  : Instance of the tag type. */
 @(private="package")
 tags_add :: proc(tags: ^Tags, type: typeid, tag: Tag) {
-	if tags_has(tags, type) do panic("Tag already registered.")
-	if tags.count == MAX_TAGS_COUNT do panic("The maximum count of tags has been reached.")
+	if tags_has(tags, type) do panic(ERR_TAG_ALREADY_REGISTERED)
+	if tags.count == MAX_TAGS_COUNT do panic(ERR_MAX_TAGS_COUNT)
 
 	tags.ids[tags.count] = transmute(u64)type
 	tags.types[tags.count] = tag

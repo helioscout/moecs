@@ -75,8 +75,8 @@ relation_index :: #force_inline proc(relations: ^Relations, type: typeid) -> (in
    `relation`  : Instance of the relation type. */
 @(private="package")
 relations_add :: proc(relations: ^Relations, type: typeid, relation: Relation) {
-	if relations_has(relations, type) do panic("Relation already registered.")
-	if relations.count == MAX_RELATIONS_COUNT do panic("The maximum count of relations has been reached.")
+	if relations_has(relations, type) do panic(ERR_RELATION_ALREADY_REGISTERED)
+	if relations.count == MAX_RELATIONS_COUNT do panic(ERR_MAX_RELATIONS_COUNT)
 
 	relations.ids[relations.count] = transmute(u64)type
 	relations.types[relations.count] = relation

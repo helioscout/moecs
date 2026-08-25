@@ -78,7 +78,7 @@ world_init :: proc(world: ^World) {
 	register(world, .RELATION, RelationOf)
 
 	err := vmem.arena_init_growing(&world.arena)
-	if err != .None do panic(fmt.tprintf("Arena initialization error: %v", err))
+	if err != .None do panic(fmt.tprintf(ERR_ARENA_INIT, err))
 	world.allocator = vmem.arena_allocator(&world.arena)
 }
 
@@ -140,8 +140,8 @@ mount :: proc(world: ^World, name: string = "", query: []typeid = nil, component
 	lifetime: bit_set[Lifetime; u8] = {}, callback: SystemCallback) {
 	named := len(name) > 0
 	
-	if named && has_system(world, name) do panic("System with such name has already been mounted.")
-	if !named && phase == .MANUAL do panic("Systems with MANUAL phase must have a name.")
+	if named && has_system(world, name) do panic(ERR_SYSTEM_ALREADY_MOUNTED)
+	if !named && phase == .MANUAL do panic(ERR_MANUAL_SYSTEM_NAME_NOT_PROVIDED)
 	if callback == nil do panic(ERR_CALLBACK_NOT_PROVIDED)
 	if !world.running do panic(ERR_WORLD_IS_NOT_RUNNING)
 
@@ -383,12 +383,12 @@ remove_system :: proc(world: ^World, systems: ^[dynamic]^System, name: string) -
    World must has at least one registered component, but can has no tags, resources.
    `world` : Pointer to the world. */
 run :: proc(world: ^World) {
-	if world.components.count == 0 do panic("The world has no registered components.")
+	if world.components.count == 0 do panic(ERR_WORLD_HAS_NO_COMPONENTS)
 	if world.running do return
 
 	components_adjust(&world.components)
 
-	if world.components.size > STACK_BUFFER_SIZE do panic("Total components size must be less than STACK_BUFFER_SIZE.")
+	if world.components.size > STACK_BUFFER_SIZE do panic(ERR_COMPONENTS_SIZE_INVALID)
 
 	relations_adjust(world)
 
@@ -397,10 +397,10 @@ run :: proc(world: ^World) {
 	if world.resources.count > 0 {
 		resources_adjust(&world.resources)
 		
-		if world.resources.size > STACK_BUFFER_SIZE do panic("Total resources size must be less than STACK_BUFFER_SIZE.")
+		if world.resources.size > STACK_BUFFER_SIZE do panic(ERR_RESOURCES_SIZE_INVALID)
 
 		ptr, err := mem.alloc(world.resources.size)
-		if err != .None do panic(fmt.tprintf("Storage memory allocation error: %v", err))
+		if err != .None do panic(fmt.tprintf(ERR_STORAGE_ALLOCATION, err))
 		world.resources.storage = ptr
 	}
 

@@ -200,6 +200,23 @@ ObserverCallback :: proc(world: ^World, entity: ^Entity, event: Event, type: typ
 @(private) ERR_CALLBACK_NOT_PROVIDED :: "Callback must be provided."
 @(private) ERR_WORLD_IS_NOT_RUNNING :: "Run the world first."
 @(private) ERR_SYSTEN_NAME_NOT_PROVIDED :: "System name can't be empty."
+@(private) ERR_ARENA_INIT :: "Arena initialization error: %v"
+@(private) ERR_SYSTEM_ALREADY_MOUNTED :: "System with such name has already been mounted."
+@(private) ERR_MANUAL_SYSTEM_NAME_NOT_PROVIDED :: "Systems with MANUAL phase must have a name."
+@(private) ERR_WORLD_HAS_NO_COMPONENTS :: "The world has no registered components."
+@(private) ERR_COMPONENTS_SIZE_INVALID :: "Total components size must be less than STACK_BUFFER_SIZE."
+@(private) ERR_RESOURCES_SIZE_INVALID :: "Total resources size must be less than STACK_BUFFER_SIZE."
+@(private) ERR_STORAGE_ALLOCATION :: "Storage memory allocation error: %v"
+@(private) ERR_COMPONENT_ALREADY_REGISTERED :: "Component already registered."
+@(private) ERR_MAX_COMPONENTS_COUNT :: "The maximum count of components has been reached."
+@(private) ERR_TAG_ALREADY_REGISTERED :: "Tag already registered."
+@(private) ERR_MAX_TAGS_COUNT :: "The maximum count of tags has been reached."
+@(private) ERR_RESOURCE_ALREADY_REGISTERED :: "Resource already registered."
+@(private) ERR_MAX_RESOURCES_COUNT :: "The maximum count of resources has been reached."
+@(private) ERR_RELATION_ALREADY_REGISTERED :: "Relation already registered."
+@(private) ERR_MAX_RELATIONS_COUNT :: "The maximum count of relations has been reached."
+@(private) ERR_OBSERVABLE_PROC_TYPE :: "Use procedure with type parameter for this event type."
+@(private) ERR_STATIC_ENTITY_DELETION :: "Static entities can't be deleted."
 
 add :: proc {
 	add_component,

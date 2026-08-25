@@ -3,7 +3,8 @@ package moecs
 
 import "core:fmt"
 
-/* Archetype for components/tags configuration. */
+/* Archetype for components/tags configuration. It does not stores components in tables.
+   It is used for processing queries.*/
 Archetype :: struct {
 	/* Components marker, each set bit specifies that the component exists in the archetype. */
 	components : [COMPONENTS_MARKER_SIZE]uint,
@@ -21,6 +22,7 @@ archetype_remove :: #force_inline proc(entity: ^Entity) {
 		unordered_remove(&entity.archetype.entities, entity.arch_idx)
 		/* We need to correct moved (if it was) entity index in the archetype collection. */
 		if len(entity.archetype.entities) > 0 && entity.arch_idx < len(entity.archetype.entities) {
+			/* Last entity moved to removed one's position and we update it's index to removed one. */
 			entity.archetype.entities[entity.arch_idx].arch_idx = entity.arch_idx
 		}
 

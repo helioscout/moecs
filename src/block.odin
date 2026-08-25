@@ -36,7 +36,7 @@ block_init :: proc(block: ^Block) {
 	block.entities = make([]Entity, block.size)
 
 	ptr, err := mem.alloc(block.world.chunk_size * block.size)
-	if err != .None do panic(fmt.tprintf("Storage memory allocation error: %v", err))
+	if err != .None do panic(fmt.tprintf(ERR_STORAGE_ALLOCATION, err))
 	block.chunks = ptr
 }
 
@@ -95,7 +95,7 @@ block_insert :: proc(block: ^Block) -> ^Entity {
 block_delete :: proc(block: ^Block, idx: int) {
 	switch block.lifetime {
 		case .DYNAMIC: append(&block.deleted, idx)
-		case .STATIC:  panic("Static entities can't be deleted.")
+		case .STATIC:  panic(ERR_STATIC_ENTITY_DELETION)
 	}
 }
 

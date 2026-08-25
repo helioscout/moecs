@@ -51,8 +51,8 @@ resource_index :: #force_inline proc(resources: ^Resources, type: typeid) -> (in
    `resource`  : Instance of the resource type. */
 @(private="package")
 resources_add :: proc(resources: ^Resources, type: typeid, resource: Resource) {
-	if resources_has(resources, type) do panic("Resource already registered.")
-	if resources.count == MAX_RESOURCES_COUNT do panic("The maximum count of resources has been reached.")
+	if resources_has(resources, type) do panic(ERR_RESOURCE_ALREADY_REGISTERED)
+	if resources.count == MAX_RESOURCES_COUNT do panic(ERR_MAX_RESOURCES_COUNT)
 
 	resources.ids[resources.count] = transmute(u64)type
 	resources.types[resources.count] = resource
