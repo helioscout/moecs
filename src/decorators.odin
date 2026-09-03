@@ -978,7 +978,7 @@ add_13_components :: #force_inline proc(entity: ^Entity,
 /* Sets 2 components values in the entity by their types and instances (initializers).
    `entity`     : Pointer to the entity.
    `$TypeN`     : N-th component type.
-   `componentN` : Reference to the N-th component instance." */
+   `componentN` : Reference to the N-th component instance. */
 set_2_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2) #no_bounds_check {
 	id1: u64 = transmute(u64)typeid_of(Type1)
@@ -1018,7 +1018,7 @@ set_2_components :: #force_inline proc(entity: ^Entity,
 /* Sets 3 components values in the entity by their types and instances (initializers).
    `entity`     : Pointer to the entity.
    `$TypeN`     : N-th component type.
-   `componentN` : Reference to the N-th component instance." */
+   `componentN` : Reference to the N-th component instance. */
 set_3_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2,
 	$Type3: typeid, component3: ^Type3) #no_bounds_check {
@@ -1064,7 +1064,7 @@ set_3_components :: #force_inline proc(entity: ^Entity,
 /* Sets 4 components values in the entity by their types and instances (initializers).
    `entity`     : Pointer to the entity.
    `$TypeN`     : N-th component type.
-   `componentN` : Reference to the N-th component instance." */
+   `componentN` : Reference to the N-th component instance. */
 set_4_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2,
 	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4) #no_bounds_check {
@@ -1115,7 +1115,7 @@ set_4_components :: #force_inline proc(entity: ^Entity,
 /* Sets 5 components values in the entity by their types and instances (initializers).
    `entity`     : Pointer to the entity.
    `$TypeN`     : N-th component type.
-   `componentN` : Reference to the N-th component instance." */
+   `componentN` : Reference to the N-th component instance. */
 set_5_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2,
 	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4,
@@ -1172,7 +1172,7 @@ set_5_components :: #force_inline proc(entity: ^Entity,
 /* Sets 6 components values in the entity by their types and instances (initializers).
    `entity`     : Pointer to the entity.
    `$TypeN`     : N-th component type.
-   `componentN` : Reference to the N-th component instance." */
+   `componentN` : Reference to the N-th component instance. */
 set_6_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2,
 	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4,
@@ -1234,7 +1234,7 @@ set_6_components :: #force_inline proc(entity: ^Entity,
 /* Sets 7 components values in the entity by their types and instances (initializers).
    `entity`     : Pointer to the entity.
    `$TypeN`     : N-th component type.
-   `componentN` : Reference to the N-th component instance." */
+   `componentN` : Reference to the N-th component instance. */
 set_7_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2,
 	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4,
@@ -1302,7 +1302,7 @@ set_7_components :: #force_inline proc(entity: ^Entity,
 /* Sets 8 components values in the entity by their types and instances (initializers).
    `entity`     : Pointer to the entity.
    `$TypeN`     : N-th component type.
-   `componentN` : Reference to the N-th component instance." */
+   `componentN` : Reference to the N-th component instance. */
 set_8_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2,
 	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4,
@@ -1375,7 +1375,7 @@ set_8_components :: #force_inline proc(entity: ^Entity,
 /* Sets 9 components values in the entity by their types and instances (initializers).
    `entity`     : Pointer to the entity.
    `$TypeN`     : N-th component type.
-   `componentN` : Reference to the N-th component instance." */
+   `componentN` : Reference to the N-th component instance. */
 set_9_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2,
 	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4,
@@ -1454,7 +1454,7 @@ set_9_components :: #force_inline proc(entity: ^Entity,
 /* Sets 10 components values in the entity by their types and instances (initializers).
    `entity`     : Pointer to the entity.
    `$TypeN`     : N-th component type.
-   `componentN` : Reference to the N-th component instance." */
+   `componentN` : Reference to the N-th component instance. */
 set_10_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2,
 	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4,
@@ -1538,7 +1538,7 @@ set_10_components :: #force_inline proc(entity: ^Entity,
 /* Sets 11 components values in the entity by their types and instances (initializers).
    `entity`     : Pointer to the entity.
    `$TypeN`     : N-th component type.
-   `componentN` : Reference to the N-th component instance." */
+   `componentN` : Reference to the N-th component instance. */
 set_11_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2,
 	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4,
@@ -1628,7 +1628,7 @@ set_11_components :: #force_inline proc(entity: ^Entity,
 /* Sets 12 components values in the entity by their types and instances (initializers).
    `entity`     : Pointer to the entity.
    `$TypeN`     : N-th component type.
-   `componentN` : Reference to the N-th component instance." */
+   `componentN` : Reference to the N-th component instance. */
 set_12_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2,
 	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4,
@@ -1723,7 +1723,7 @@ set_12_components :: #force_inline proc(entity: ^Entity,
 /* Sets 13 components values in the entity by their types and instances (initializers).
    `entity`     : Pointer to the entity.
    `$TypeN`     : N-th component type.
-   `componentN` : Reference to the N-th component instance." */
+   `componentN` : Reference to the N-th component instance. */
 set_13_components :: #force_inline proc(entity: ^Entity,
 	$Type1: typeid, component1: ^Type1, $Type2: typeid, component2: ^Type2,
 	$Type3: typeid, component3: ^Type3, $Type4: typeid, component4: ^Type4,
