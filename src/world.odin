@@ -927,7 +927,10 @@ delete_archetype :: proc(world: ^World, archetype: ^Archetype) {
 get_sparse_block :: proc(world: ^World, lifetime: Lifetime) -> ^Block {
 	blocks := get_blocks(world, lifetime)
 	
-	for block in blocks^ {
+	/* The newest block is normally the only partially filled one. Searching backward
+	   avoids walking every older full block for each spawned entity. */
+	for i := len(blocks) - 1; i >= 0; i -= 1 {
+		block := blocks[i]
 		if block_has_free_rows(block) do return block
 	}
 

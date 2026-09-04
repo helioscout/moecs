@@ -136,7 +136,7 @@ system2 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 		// res4 := ecs.get_resource(world, Resource4)
 		// res5 := ecs.get(world, Resource5)
 		// res1, res2, res3, res4, res5 := ecs.get(world, Resource1, Resource2, Resource3, Resource4, Resource5)
-		pos, center, vec, health, vel, rot := ecs.get(entity, Position, Center, VecType, Health, Velocity, Rotation)
+		pos, center, vec, health, vel, rot := ecs.get_mut(entity, Position, Center, VecType, Health, Velocity, Rotation)
 		// pos, center, vec, health, vel := ecs.get(entity, Position, Center, VecType, Health, Velocity)
 		// pos, center, vec, health := ecs.get(entity, Position, Center, VecType, Health)
 		// pos, center, vec := ecs.get(entity, Position, Center, VecType)
@@ -149,7 +149,9 @@ system2 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 		// res3.data[0] = 3
 		// res4.pos.x += 1
 
-		// ecs.set(entity, Position, &Position { x = 10, y = 20 })
+		// ecs.set(entity,
+		// 	Position, &Position { x = pos.x + 1, y = pos.y },
+		// 	Center,   &Center { cx = center.cx + 1, cy = center.cy })
 		// ecs.set(entity,
 		// 	Position, &Position { x = 10, y = 10 },
 		// 	Center, &Center { cx = 20, cy = 20 },
@@ -189,7 +191,7 @@ system3 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 		// res4 := ecs.get_resource(world, Resource4)
 		// res5 := ecs.get(world, Resource5)
 		// res1, res2, res3, res4, res5 := ecs.get(world, Resource1, Resource2, Resource3, Resource4, Resource5)
-		pos, center, vec, health, vel, rot := ecs.get(entity, Position, Center, VecType, Health, Velocity, Rotation)
+		pos, center, vec, health, vel, rot := ecs.get_mut(entity, Position, Center, VecType, Health, Velocity, Rotation)
 		// pos, center, vec, health, vel := ecs.get(entity, Position, Center, VecType, Health, Velocity)
 		// pos, center, vec, health := ecs.get(entity, Position, Center, VecType, Health)
 		// pos, center, vec := ecs.get(entity, Position, Center, VecType)
@@ -202,6 +204,9 @@ system3 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 		// res3.data[0] = 3
 		// res4.pos.x += 1
 
+		// ecs.set(entity,
+		// 	Position, &Position { x = pos.x + 1, y = pos.y },
+		// 	Center,   &Center { cx = center.cx + 1, cy = center.cy })
 		// ecs.set(entity, Position, &Position { x = 10, y = 20 })
 		// ecs.set(entity,
 		// 	Position, &Position { x = 10, y = 10 },
