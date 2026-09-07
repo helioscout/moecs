@@ -77,6 +77,7 @@ Tag2 :: distinct int
 Tag3 :: distinct int
 Tag4 :: distinct int
 
+ecount : uint = 0
 count : uint = 0
 
 MAX_COUNT :: 130
@@ -130,6 +131,8 @@ system2 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 	// count := 0
 
 	for entity in entities {
+		// ecount += 1
+		
 		// res1 := ecs.get(world, Resource1)
 		// res2 := ecs.get(world, Resource2)
 		// res3 := ecs.get_resource(world, Resource3)
@@ -185,6 +188,8 @@ system3 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 	// count := 0
 
 	for entity in entities {
+		// ecount += 1
+
 		// res1 := ecs.get(world, Resource1)
 		// res2 := ecs.get(world, Resource2)
 		// res3 := ecs.get_resource(world, Resource3)
@@ -719,7 +724,7 @@ main :: proc() {
 			/*Center, &Center { cx = 20, cy = 20 }*/)
 		ecs.tag(e, Tag1)
 		
-		if i >= 100 && i < 105 {
+		if i >= 100 && i < 100100 {
 			ecs.add(e, Center, &Center { cx = i, cy = i + 1 })
 			ecs.tag(e, Tag2)
 		}
@@ -782,8 +787,11 @@ main :: proc() {
 	fmt.println("--- progress 100 times ---")
 
 	for i in 0..<100 {
+		// ecount = 0
+		
 		ecs.progress(world)
 		// fmt.println("step")
+		// fmt.println("step entities count: %v", ecount)
 	}
 
 	_duration = time.diff(_time, time.now())
