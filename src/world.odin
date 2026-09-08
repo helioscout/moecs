@@ -600,7 +600,7 @@ each :: proc(world: ^World, lifetime: bit_set[Lifetime; u8] = { .DYNAMIC, .STATI
    `name`    : System name.
    `returns` : True if system exists, otherwise - false. */
 has_system :: #force_inline proc(world: ^World, name: string) -> bool  {
-	if len(name) == 0 do panic(ERR_SYSTEN_NAME_NOT_PROVIDED)
+	if len(name) == 0 do panic(ERR_SYSTEM_NAME_NOT_PROVIDED)
 
 	for system in world.systems {
 		if str.compare(system.name, name) == 0 do return true
@@ -614,7 +614,7 @@ has_system :: #force_inline proc(world: ^World, name: string) -> bool  {
    `name`    : System name.
    `returns` : Pointer to the system and operation success. */
 get_system :: #force_inline proc(world: ^World, name: string) -> (^System, bool) #optional_ok {
-	if len(name) == 0 do panic(ERR_SYSTEN_NAME_NOT_PROVIDED)
+	if len(name) == 0 do panic(ERR_SYSTEM_NAME_NOT_PROVIDED)
 
 	for system in world.systems {
 		if str.compare(system.name, name) == 0 do return system, true

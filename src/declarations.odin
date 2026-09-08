@@ -199,7 +199,7 @@ ObserverCallback :: proc(world: ^World, entity: ^Entity, event: Event, type: typ
 @(private) ERR_TYPE_ALREADY_REGISTERED :: "Type is already registered for another element kind."
 @(private) ERR_CALLBACK_NOT_PROVIDED :: "Callback must be provided."
 @(private) ERR_WORLD_IS_NOT_RUNNING :: "Run the world first."
-@(private) ERR_SYSTEN_NAME_NOT_PROVIDED :: "System name can't be empty."
+@(private) ERR_SYSTEM_NAME_NOT_PROVIDED :: "System name can't be empty."
 @(private) ERR_ARENA_INIT :: "Arena initialization error: %v"
 @(private) ERR_SYSTEM_ALREADY_MOUNTED :: "System with such name has already been mounted."
 @(private) ERR_MANUAL_SYSTEM_NAME_NOT_PROVIDED :: "Systems with MANUAL phase must have a name."
