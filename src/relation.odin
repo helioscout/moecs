@@ -121,7 +121,7 @@ relations_adjust :: proc(world: ^World) {
 		relations.types[idx].idx = idx
 	}
 
-	/* Relations are sroted right after components. */
+	/* Relations are stored right after components. */
 	relations.types[0].offset = world.components.size
 
 	ptr_info := type_info_of(rawptr)

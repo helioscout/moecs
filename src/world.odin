@@ -85,7 +85,7 @@ world_init :: proc(world: ^World) {
 /* Registers element type for the world.
    `world`   : Pointer to the world.
    `element` : World element kind.
-   `$Type`   : Element (component/tag/resource) type. */
+   `$Type`   : Element (component/tag/resource/relation) type. */
 register :: proc(world: ^World, element: Element, $Type: typeid) {
 	if world.running do return
 
