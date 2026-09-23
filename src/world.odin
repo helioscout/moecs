@@ -416,6 +416,7 @@ spawn :: proc(world: ^World) -> ^Entity {
 /* Despawns entity and all children from the world.
    `world`  : Pointer to the world.
    `entity` : Reference to the entity. */
+@(private="package")
 despawn_entity :: proc(world: ^World, entity: ^Entity) {
 	if deleted(entity) do return
 	
@@ -487,6 +488,7 @@ despawn_entity :: proc(world: ^World, entity: ^Entity) {
 /* Despawns entities from the world.
    `world`    : Pointer to the world.
    `entities` : References to the entities. */
+@(private="package")
 despawn_entities :: #force_inline proc(world: ^World, entities: ..^Entity) {
 	for entity in entities do despawn_entity(world, entity)
 }
@@ -516,6 +518,7 @@ new_block :: proc(world: ^World) -> ^Block {
    `world`   : Pointer to the world.
    `$Type`   : Resource type.
    `returns` : Pointer to the resource and operation success. */
+@(private="package")
 get_resource_mut :: #force_inline proc(world: ^World, $Type: typeid) -> (^Type, bool) #no_bounds_check #optional_ok {
 	if r, ok := resources_get(&world.resources, Type); ok {
 		ptr := mem.ptr_offset(cast(^u8)world.resources.storage, r.offset)
@@ -529,6 +532,7 @@ get_resource_mut :: #force_inline proc(world: ^World, $Type: typeid) -> (^Type, 
    `world`   : Pointer to the world.
    `$Type`   : Resource type.
    `returns` : Resource value and operation success. */
+@(private="package")
 get_resource :: #force_inline proc(world: ^World, $Type: typeid) -> (Type, bool) #no_bounds_check #optional_ok {
 	resource: Type = ---
 
@@ -544,6 +548,7 @@ get_resource :: #force_inline proc(world: ^World, $Type: typeid) -> (Type, bool)
    `world`    : Pointer to the world.
    `$Type`    : Resource type.
    `resource` : Reference to resource value (will be copied into storage). */
+@(private="package")
 set_resource :: proc(world: ^World, $Type: typeid, resource: ^Type) #no_bounds_check {
 	if !world.running do panic(ERR_WORLD_IS_NOT_RUNNING)
 
@@ -570,6 +575,7 @@ each :: proc(world: ^World, callback: IteratorCallback) #no_bounds_check {
    `world`   : Pointer to the world.
    `name`    : System name.
    `returns` : True if system exists, otherwise - false. */
+@(private="package")
 has_system :: #force_inline proc(world: ^World, name: string) -> bool  {
 	if len(name) == 0 do panic(ERR_SYSTEM_NAME_NOT_PROVIDED)
 
@@ -584,6 +590,7 @@ has_system :: #force_inline proc(world: ^World, name: string) -> bool  {
    `world`   : Pointer to the world.
    `name`    : System name.
    `returns` : Pointer to the system and operation success. */
+@(private="package")
 get_system :: #force_inline proc(world: ^World, name: string) -> (^System, bool) #optional_ok {
 	if len(name) == 0 do panic(ERR_SYSTEM_NAME_NOT_PROVIDED)
 

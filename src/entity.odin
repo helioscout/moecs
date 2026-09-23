@@ -34,6 +34,7 @@ Entity :: struct {
    `component` : Reference to the component instance.
    `perform`   : Perform archetyping of the entity.
 				 You should not change this parameter (inner logic). */
+@(private="package")
 add_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type, perform: bool = true) {
 	world : = entity.block.world
 
@@ -53,6 +54,7 @@ add_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type, perform:
    `entity`    : Pointer to the entity.
    `$Type`     : Component type.
    `component` : Reference to the component instance." */
+@(private="package")
 set_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type) #no_bounds_check {
 	world : = entity.block.world
 
@@ -69,6 +71,7 @@ set_component :: proc(entity: ^Entity, $Type: typeid, component: ^Type) #no_boun
    `entity`  : Pointer to the entity.
    `$Type`   : Component type.
    `returns` : Pointer to the component and operation success. */
+@(private="package")
 get_component_mut :: #force_inline proc(entity: ^Entity, $Type: typeid) -> (^Type, bool) #no_bounds_check #optional_ok {
 	if c, ok := components_get(&entity.block.world.components, Type); ok {
 		if marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, c.idx) {
@@ -85,6 +88,7 @@ get_component_mut :: #force_inline proc(entity: ^Entity, $Type: typeid) -> (^Typ
    `entity`  : Pointer to the entity.
    `$Type`   : Component type.
    `returns` : Component value and operation success. */
+@(private="package")
 get_component :: #force_inline proc(entity: ^Entity, $Type: typeid) -> (Type, bool) #no_bounds_check #optional_ok {
 	component: Type = ---
 	
@@ -106,6 +110,7 @@ get_component :: #force_inline proc(entity: ^Entity, $Type: typeid) -> (Type, bo
    `type`    : Component type.
    `perform` : Perform archetyping of the entity.
 			   You should not change this parameter (inner logic). */
+@(private="package")
 remove_component :: proc(entity: ^Entity, type: typeid, perform: bool = true) {
 	world : = entity.block.world
 
@@ -125,6 +130,7 @@ remove_component :: proc(entity: ^Entity, type: typeid, perform: bool = true) {
 /* Removes components from entity of all passed types.
    `entity` : Pointer to the entity.
    `types`  : Companent types. */
+@(private="package")
 remove_components :: proc(entity: ^Entity, types: ..typeid) {
 	for type in types do remove_component(entity, type, false)
 
@@ -135,6 +141,7 @@ remove_components :: proc(entity: ^Entity, types: ..typeid) {
    `entity`  : Pointer to the entity.
    `type`    : Component type.
    `returns` : True if entity has a component, otherwise - false. */
+@(private="package")
 has_component :: #force_inline proc(entity: ^Entity, type: typeid) -> bool {
 	if idx, ok := component_index(&entity.block.world.components, type); ok {
 		return marker_is_set(COMPONENTS_MARKER_SIZE, entity.components, idx)
@@ -147,6 +154,7 @@ has_component :: #force_inline proc(entity: ^Entity, type: typeid) -> bool {
    `entity`  : Pointer to the entity.
    `types`   : Companent types.
    `returns` : True if entity has all components, otherwise - false. */
+@(private="package")
 has_components :: #force_inline proc(entity: ^Entity, types: ..typeid) -> bool {
 	has := true
 
@@ -166,6 +174,7 @@ has_components :: #force_inline proc(entity: ^Entity, types: ..typeid) -> bool {
    `type`    : Tag type.
    `perform` : Perform archetyping of the entity.
 			   You should not change this parameter (inner logic). */
+@(private="package")
 set_tag :: proc(entity: ^Entity, type: typeid, perform: bool = true) {
 	world : = entity.block.world
 
@@ -180,6 +189,7 @@ set_tag :: proc(entity: ^Entity, type: typeid, perform: bool = true) {
 /* Tags entity with all passed tag types.
    `entity`  : Pointer to the entity.
    `types`   : Tag types. */
+@(private="package")
 set_tags :: proc(entity: ^Entity, types: ..typeid) {
 	world : = entity.block.world
 
@@ -199,6 +209,7 @@ set_tags :: proc(entity: ^Entity, types: ..typeid) {
    `type`    : Tag type.
    `perform` : Perform archetyping of the entity.
 			   You should not change this parameter (inner logic). */
+@(private="package")
 unset_tag :: proc(entity: ^Entity, type: typeid, perform: bool = true) {
 	world : = entity.block.world
 
@@ -213,6 +224,7 @@ unset_tag :: proc(entity: ^Entity, type: typeid, perform: bool = true) {
 /* Removes tags from entity of all passed types.
    `entity`  : Pointer to the entity.
    `types`   : Tag types. */
+@(private="package")
 unset_tags :: proc(entity: ^Entity, types: ..typeid) {
 	world : = entity.block.world
 
@@ -231,6 +243,7 @@ unset_tags :: proc(entity: ^Entity, types: ..typeid) {
    `entity`  : Pointer to the entity.
    `type`    : Tag type.
    `returns` : True if the entity has tag, otherwise - false. */
+@(private="package")
 has_tag :: #force_inline proc(entity: ^Entity, type: typeid) -> bool {
 	if idx, ok := tag_index(&entity.block.world.tags, type); ok {
 		return marker_is_set(TAGS_MARKER_SIZE, entity.tags, idx)
@@ -243,6 +256,7 @@ has_tag :: #force_inline proc(entity: ^Entity, type: typeid) -> bool {
    `entity`  : Pointer to the entity.
    `types`   : Tag types.
    `returns` : True if entity is tagged with all types, otherwise - false. */
+@(private="package")
 has_tags :: #force_inline proc(entity: ^Entity, types: ..typeid) -> bool {
 	has := true
 
@@ -506,6 +520,7 @@ is_relation_of :: proc(target: ^Entity, entity: ^Entity) -> bool #no_bounds_chec
 /* Removes all entity relations with all target entities by specified type.
    `entity` : Pointer to the entity.
    `$Type`  : Relation type. */
+@(private="package")
 unrelate_by :: proc(entity: ^Entity, $Type: typeid) {
 	type := typeid_of(Type)
 	world := entity.block.world
@@ -605,6 +620,7 @@ unrelate_all_by_idx :: proc(entity: ^Entity, idx: int) {
    `entity` : Pointer to the entity.
    `$Type`  : Relation type.
    'target' : Pointer to relationship target entity. */
+@(private="package")
 unrelate_with :: proc(entity: ^Entity, $Type: typeid, target: ^Entity) {
 	if entity == target do return
 

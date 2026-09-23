@@ -91,7 +91,7 @@ main :: proc() {
 | register()     | Registers element type for the world.                                                        |
 
 ### Mutability and deferred actions
-There are methods for getting resources and components: `get()` and `get_mut()`. Use `get_mut()` only if you need to modify at least one instance of receiving resource/component types, otherwise use `get()` - it is little bit faster. Also use overloaded procedures to get a bunch of elements by one procedure call, the same is true for setting values with `set()` procedure. Bunch methods gives you more performance because use less memory read/write operations.\
+There are methods for getting resources and components: `get()` and `get_mut()`. Use `get_mut()` only if you need to modify at least one instance of receiving resource/component types, otherwise use `get()` - it is little bit faster.\
 \
 When you `despawn` entities, these actions will be deferred. We need to keep entities in the archetypes till end of the current progress step, otherwise iterators inside systems code can lead to bugs, as they iterate over collections of the archetypes which we need to delete entities from. Entities will be marked as `DESPAWNING` but despawned (deleted from the block) at performing stage. Also, a new entity can be written in place of a deleted entity, then bugs are inevitable since the reference to the deleted entity will continue to be stored in the archetype collection.\
 \
@@ -140,12 +140,9 @@ main :: proc() {
 ```
 | Procedure          | Description                                                                              |
 |--------------------|------------------------------------------------------------------------------------------|
-| set_resource()     | Sets **one** resource value by its type.                                                 |
-| get_resource()     | Gets **one** resource value by its type.                                                 |
-| get_resource_mut() | Gets reference (pointer) to **one** resource value by its type.                          |
-| set()              | Sets a bunch of resource values (*recommended*).                                         |
-| get()              | Gets a bunch of resource values (*recommended*).                                         |
-| get_mut()          | Gets a bunch of pointers to resources for changing resource fields (*recommended*).      |
+| set()              | Sets one or a bunch of resource values by its type.                                      |
+| get()              | Gets one or a bunch of resource values by its type.                                      |
+| get_mut()          | Gets one or a bunch of pointers to resource values by its type for changing resource fields.|
 
 ### Entities
 Entities are the main elements of the world. It is the abstract data structure that can be specified by components and tags, and related each with others. Entity is not just an id and has some fields, but you should not care about them and use procedures to work with it. Internally there are bit-set fields which define what components and/or tags, and/or relations the entity has. Thus, when deleting a component/relation and adding/removing a tag, reading/writing to memory does not occur.\
@@ -170,9 +167,7 @@ main :: proc() {
 | Procedure          | Description                                                                              |
 |--------------------|------------------------------------------------------------------------------------------|
 | spawn()            | Spawns **one** new entity into the world.                                                |
-| despawn_entity()   | Despawns **one** entity from the world.                                                  |
-| despawn_entities() | Despawns **several** entities from the world.                                            |
-| despawn()          | Overloaded procedure for despawning one or several entities (*recommended*).             |
+| despawn()          | Despawns one or several entities.                                                        |
 | despawning()       | Checks if the entity is deferred for despawning at the perform stage.                    |
 | deleted()          | Checks if the entity has been fully deleted (despawned).                                 |
 
@@ -185,9 +180,7 @@ Component types must be registered before using in the ecs and world should run 
 \
 When you add components or set values to previously added components, the changes are stored in the memory immediately and you can read these values at the same world progress step, there are no caching at all. But `adding`/`removing` components defer archetypes re-binding (archetyping) till the `perform` stage, so your systems match queries will consider them only on the next progress step.\
 \
-The presence of certain components in an entity is determined by bit flags in a special field of the entity structure. Removing a component from an entity does not cause any memory access, but simply sets the corresponding bit. Reading this bit applies to checking for the presence of a component in an entity.\
-\
-Prefer using overloaded procedures to `add`/`set`/`get` a bunch of components by one procedure call. Bunch methods gives you more performance because use less memory read/write operations.
+The presence of certain components in an entity is determined by bit flags in a special field of the entity structure. Removing a component from an entity does not cause any memory access, but simply sets the corresponding bit. Reading this bit applies to checking for the presence of a component in an entity.
 ```odin
 import ecs "moecs/src"
 
@@ -234,20 +227,12 @@ main :: proc() {
 ```
 | Procedure          | Description                                                                              |
 |--------------------|------------------------------------------------------------------------------------------|
-| add_component()    | Adds **one** component to the entity by type and instance (initializer).                 |
-| set_component()    | Sets **one** previously added component value.                                           |
-| get_component()    | Gets **one** component value by its type (copy from storage).                            |
-| get_component_mut()| Gets reference to **one** component value by its type.                                   |
-| remove_component() | Removes **one** component from entity by its type.                                       |
-| remove_components()| Removes **several** components from entity of all passed types.                          |
-| has_component()    | Checks if the entity has a component.                                                    |
-| has_components()   | Checks if the entity has all components of passed types.                                 |
-| add()              | Adds a bunch of components (*recommended*).                                              |
-| set()              | Sets a bunch of components (*recommended*).                                              |
-| get()              | Gets a bunch of components (*recommended*).                                              |
-| get_mut()          | Gets a bunch of pointers to components for changing its values (*recommended*).          |
-| remove()           | Removes any number of components by their types (*recommended*).                         |
-| has()              | Checks for presence of any number of components by their types (*recommended*).          |
+| add()              | Adds one or a bunch of components to the entity by type and instance (initializer).      |
+| set()              | Sets one or a bunch of previously added component values.                                |
+| get()              | Gets one or a bunch of component values by its type (copy from storage).                 |
+| get_mut()          | Gets one or a bunch of pointers to component values by its type for changing its values. |
+| remove()           | Removes any number of components from entity by their types.                             |
+| has()              | Checks for presence of (if the entity has) any number of components by their types.      |
 
 ### Tags
 Tags are just attributes (signs) that can be `set`/`unset` for entities. Just like components, an entity has a special bit field, in which each bit corresponds to a tag. However, unlike components, tags are not stored in memory chunks. Adding/removing a tag simply means setting the corresponding bit in the entity field.\
@@ -288,15 +273,9 @@ main :: proc() {
 ```
 | Procedure          | Description                                                                              |
 |--------------------|------------------------------------------------------------------------------------------|
-| set_tag()          | Tags entity with **one** specified tag type.                                             |
-| set_tags()         | Tags entity with **several** passed tag types.                                           |
-| unset_tag()        | Removes **one** tag from entity (unset corresponding bit in entity's marker field).      |
-| unset_tags()       | Removes **several** tags from entity of all passed types.                                |
-| has_tag()          | Checks if the entity is tagged with specified tag type.                                  |
-| has_tags()         | Checks if the entity is tagged with all passed tag types.                                |
-| tag()              | Tags entity with a bunch of tag types (*recommended*).                                   |
-| untag()            | Removes a bunch of tags from the entity (*recommended*).                                 |
-| tagged()           | Checks if the entity is tagged with a bunch of tag types (*recommended*).                |
+| tag()              | Tags entity with one or several tag types.                                               |
+| untag()            | Removes one or a bunch of tags from the entity (unset corresponding bit(s) in entity's marker field).                                                                                                       |
+| tagged()           | Checks if the entity is tagged with one or a bunch of tag types.                         |
 
 ### Systems
 Systems are place where your game/app algorithms are living, processing user input, drawing, physics, collisions, effects, entities behavior and anything else can be split into separate systems. They are being ran in the order they were mounted to the world for each phase in the progress pipeline.
@@ -386,10 +365,8 @@ main :: proc() {
 |--------------------|------------------------------------------------------------------------------------------|
 | mount()            | Mounts new system to the world.                                                          |
 | unmount()          | Unmounts the system from the world.                                                      |
-| has_system()       | Checks if system with specific name was mounted.                                         |
-| get_system()       | Gets reference to the system by its name.                                                |
-| has()              | Overloaded procedure for checking system existence (*recommended*).                      |
-| get()              | Overloaded procedure for getting system (*recommended*).                                 |
+| has()              | Checks if system with specific name was mounted.                                         |
+| get()              | Gets reference to the system by its name.                                                |
 | execute()          | Execute system by its name.                                                              |
 | enabled()          | Checks if the system is enabled.                                                         |
 | enable()           | Enables the system.                                                                      |
@@ -622,9 +599,7 @@ main :: proc() {
 | related            | Checks if the entity has relation of specified type, and, if provided, with every of listed target entities.                                                                                              |
 | is_relation        | Checks if an entity has relationships with other entities (is their relations target).   |
 | is_relation_of     | Checks if the entity has `RelationOf` relation with (is it's relation target) another one.|
-| unrelate_by        | Removes all entity relations with all target entities by specified type.                 |
-| unrelate_with      | Removes entity relation with target entity by specified type.                            |
-| unrelate           | Removes entity relations (overloaded procedure of previous two).                         |
+| unrelate           | Removes entity relation(s) with target entity (all target entities) by specified type.   |
 | relation_of_count  | Count of dependencies on relationships with other entity, how much times target appears as relation target for an entity.                                                                                |
 | relation           | Gets entity relation (one-to-one) of specified type. Even if a relation has many targets, only first will be returned.                                                                                  |
 | relations          | Gets entity relations (one to many) of specified type. Even if a relation has one target, it will be wrapped into slice.                                                                                   |
@@ -689,7 +664,7 @@ main :: proc() {
 ### Performance
 I am writing this project in my spare time, just like all my other hobby gamedev. If you want the highest performance, it's best not to use any ECS. I love ECS because it allows you to systematize and separate/parallelize logic/data, move each part of the game into its own system, customize its operation, and generalize logic for entities with different components. As for speed, it will vary on different computers. You can play around with `main.odin`, and see the benchmarks (I use this code for testing). I'd be interested in seeing your results.\
 \
-Getting (reading) operations executes much faster than setting (writing) ones. Prefer use overloaded `bunch` procedures to process several elements at once, these methods were optimized for performance.\
+Getting (reading) operations executes much faster than setting (writing) ones.\
 \
 Use `-o:aggressive` Odin compiler flag, it can speed up operations in 30 times.
 
