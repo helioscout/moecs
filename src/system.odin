@@ -28,9 +28,6 @@ System :: struct {
 	without_relations : [RELATIONS_MARKER_SIZE]uint,
 	/* System running phase, order in the pipeline. By default equals UPDATE. */
 	phase : Phase,
-	/* Entities lifetime flag to optimize queries and do not process lifetimes
-	   that you want to avoid for current system. Not used in ARCHETYPE approach. */
-	lifetime : bit_set[Lifetime; u8],
 	/* Matched entities list (query result) for current system run. Not used in ARCHETYPE approach. */
 	entities : [dynamic]^Entity,
 	/* Callback function that will be invoked each step of the world progress.

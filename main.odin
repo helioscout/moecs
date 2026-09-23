@@ -114,7 +114,7 @@ system1 :: proc(entities: ^[dynamic]^ecs.Entity, world: ^ecs.World) {
 	// 	if pos != nil do pos.x += 1
 	// 	if center != nil do center.cx += 1
 	// 	// fmt.println(pos, center)
-		if !despawned && !ecs.is_static(entity) {
+		if !despawned {
 			ecs.despawn(world, entity)
 			despawned = true
 		}
@@ -355,7 +355,7 @@ main :: proc() {
 	
 	ecs.init()
 	
-	world : ^ecs.World = ecs.new_world(approach = .ARCHETYPE, observable = true)
+	world : ^ecs.World = ecs.world(approach = .ARCHETYPE, observable = true)
 
 	ecs.register(world, .COMPONENT, Position)
 	ecs.register(world, .COMPONENT, Center)
@@ -475,11 +475,11 @@ main :: proc() {
 	// resource1.enabled = true
 
 	// _time = time.now()
-	// fmt.println("-- spawning dynamics (100000 iterations by 500 entities) --")
+	// fmt.println("-- spawning (100000 iterations by 500 entities) --")
 
 	// for i in 0..<100000 {
 	// 	for i in 0..<500 {
-	// 		ecs.add(ecs.spawn(world, .DYNAMIC),
+	// 		ecs.add(ecs.spawn(world),
 	// 			Position, &Position { x = f64(i) + 10, y = f64(i) + 10 },
 	// 			Center, &Center { cx = i + 20, cy = i + 20 },
 	// 			Health, &Health { hp = 30 },
@@ -487,7 +487,7 @@ main :: proc() {
 	// 			Velocity, &Velocity { 50 })
 	// 	}
 
-	// 	ecs.each(world, { .DYNAMIC }, callback = proc(entity: ^ecs.Entity, lifetime: ecs.Lifetime, world: ^ecs.World) {
+	// 	ecs.each(world, callback = proc(entity: ^ecs.Entity, world: ^ecs.World) {
 	// 		ecs.despawn(world, entity)
 	// 	})
 
@@ -499,14 +499,14 @@ main :: proc() {
 
 	// _duration = time.diff(_time, time.now())
 	// fmt.printfln("-- elapsed: %v", _duration)
-	// fmt.printfln("-- dynamic blocks count: %v", len(world.dynamics))
+	// fmt.printfln("-- blocks count: %v", len(world.blocks))
 
 	// _time = time.now()
-	// fmt.println("-- spawning statics (1000 iterations by 500 entities) --")
+	// fmt.println("-- spawning (1000 iterations by 500 entities) --")
 
 	// for i in 0..<1000 {
 	// 	for i in 0..<500 {
-	// 		ecs.add(ecs.spawn(world, .STATIC),
+	// 		ecs.add(ecs.spawn(world),
 	// 			Position, &Position { x = f64(i) + 10, y = f64(i) + 10 },
 	// 			Center, &Center { cx = i + 20, cy = i + 20 },
 	// 			Health, &Health { hp = 30 },
@@ -514,7 +514,7 @@ main :: proc() {
 	// 			Velocity, &Velocity { 50 })
 	// 	}
 
-	// 	// ecs.each(world, { .STATIC }, callback = proc(entity: ^ecs.Entity, lifetime: ecs.Lifetime, world: ^ecs.World) {
+	// 	// ecs.each(world, callback = proc(entity: ^ecs.Entity, world: ^ecs.World) {
 	// 	// 	ecs.despawn(world, entity)
 	// 	// })
 
@@ -523,7 +523,7 @@ main :: proc() {
 
 	// _duration = time.diff(_time, time.now())
 	// fmt.printfln("-- elapsed: %v", _duration)
-	// fmt.printfln("-- static blocks count: %v", len(world.statics))
+	// fmt.printfln("-- blocks count: %v", len(world.blocks))
 
 	ecs.set(world,
 		Resource1, &Resource1 { enabled = true },
@@ -548,8 +548,11 @@ main :: proc() {
 	fmt.println(r1)
 	fmt.println(r2)
 
+	_time = time.now()
+	fmt.printfln("-- spawning ( %v )", 100000 + 3)
+
 	for i in 0..<100000 + 3 {
-		ecs.add(ecs.spawn(world, .STATIC),
+		ecs.add(ecs.spawn(world),
 			Position, &Position { x = f64(i) + 10, y = f64(i) + 10 },
 			Center, &Center { cx = i + 20, cy = i + 20 },
 			Health, &Health { hp = 30 },
@@ -559,7 +562,10 @@ main :: proc() {
 			Mutation, &Mutation { skin = 11 })
 	}
 
-	ecs.each(world, callback = proc(entity: ^ecs.Entity, lifetime: ecs.Lifetime, world: ^ecs.World) {
+	_duration = time.diff(_time, time.now())
+	fmt.printfln("-- elapsed: %v", _duration)
+
+	ecs.each(world, callback = proc(entity: ^ecs.Entity, world: ^ecs.World) {
 		pos, center := ecs.get(entity, Position, Center)
 		// fmt.println(pos, center)
 
@@ -572,9 +578,9 @@ main :: proc() {
 		// }
 	})
 
-	e1 : ^ecs.Entity = ecs.spawn(world, .DYNAMIC)
-	e2 : ^ecs.Entity = ecs.spawn(world, .DYNAMIC)
-	e3 : ^ecs.Entity = ecs.spawn(world, .DYNAMIC)
+	e1 : ^ecs.Entity = ecs.spawn(world)
+	e2 : ^ecs.Entity = ecs.spawn(world)
+	e3 : ^ecs.Entity = ecs.spawn(world)
 
 	ecs.parent_of(e1, e2)
 	ecs.relate(e1, ecs.ParentOf { data = nil }, e3)
@@ -584,8 +590,8 @@ main :: proc() {
 	fmt.printfln("e1 is parent of e2: %v", ecs.is_parent_of(e1, e2))
 	fmt.printfln("e2 is child of e1: %v", ecs.is_child_of(e2, e1))
 	
-	e4 := ecs.spawn(world, .DYNAMIC)
-	e5 := ecs.spawn(world, .DYNAMIC)
+	e4 := ecs.spawn(world)
+	e5 := ecs.spawn(world)
 
 	ecs.parent_of(e1, ecs.ParentOf { data = nil }, e3, e4)
 
@@ -684,12 +690,12 @@ main :: proc() {
 	ecs.turn_off(world, .RELATED, Joint)
 	
 	_time = time.now()
-	fmt.printfln("-- spawning dynamics ( %v )", 100000 + 3)
+	fmt.printfln("-- spawning ( %v )", 100000 + 3)
 
 	sibling: ^ecs.Entity
 	
 	for i in 0..<100000 + 3 {
-		e := ecs.spawn(world, .DYNAMIC)
+		e := ecs.spawn(world)
 		ecs.add(e,
 			Position, &Position { x = 10, y = 10 },
 			Center, &Center { cx = 20, cy = 20 },
@@ -711,10 +717,10 @@ main :: proc() {
 	ecs.turn_on(world, .RELATED, Joint)
 
 	_time = time.now()
-	fmt.printfln("-- spawning dynamics ( %v )", 500000 + 3)
+	fmt.printfln("-- spawning ( %v )", 500000 + 3)
 
 	for i in 0..<500000 + 3 {
-		e := ecs.spawn(world, .DYNAMIC)
+		e := ecs.spawn(world)
 
 		ecs.add(e,
 			Position, &Position { x = 10, y = 10 },
@@ -728,17 +734,17 @@ main :: proc() {
 			ecs.add(e, Center, &Center { cx = i, cy = i + 1 })
 			ecs.tag(e, Tag2)
 		}
-		// ecs.spawn(world, .DYNAMIC)
+		// ecs.spawn(world)
 	}
 
 	_duration = time.diff(_time, time.now())
 	fmt.printfln("-- elapsed: %v", _duration)
 
 	_time = time.now()
-	fmt.printfln("-- spawning statics ( %v )", 300000 + 3)
+	fmt.printfln("-- spawning ( %v )", 300000 + 3)
 
 	for i in 0..<300000 + 3 {
-		ecs.add(ecs.spawn(world, .STATIC),
+		ecs.add(ecs.spawn(world),
 			Position, &Position { x = 10, y = 10 },
 			Center, &Center { cx = 20, cy = 20 },
 			Health, &Health { hp = 30 },
@@ -746,7 +752,7 @@ main :: proc() {
 			Velocity, &Velocity { 50 },
 			VecType, &VecType { 10, 20 },
 			Mutation, &Mutation { skin = 11 })
-		// ecs.spawn(world, .STATIC)
+		// ecs.spawn(world)
 	}
 
 	_duration = time.diff(_time, time.now())
@@ -758,7 +764,7 @@ main :: proc() {
 	_time = time.now()
 	fmt.println("--- iterating ---")
 
-	ecs.each(world, callback = proc(entity: ^ecs.Entity, lifetime: ecs.Lifetime, world: ^ecs.World) {
+	ecs.each(world, callback = proc(entity: ^ecs.Entity, world: ^ecs.World) {
 		pos, center := ecs.get_mut(entity, Position, Center)
 
 		if ecs.has(entity, Position) do pos.x += pos.y
@@ -791,7 +797,7 @@ main :: proc() {
 		
 		ecs.progress(world)
 		// fmt.println("step")
-		// fmt.println("step entities count: %v", ecount)
+		// fmt.printfln("step entities count: %v", ecount)
 	}
 
 	_duration = time.diff(_time, time.now())

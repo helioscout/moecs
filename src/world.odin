@@ -24,10 +24,8 @@ World :: struct {
 	schedule : Schedule,
 	/* Archetypes collection of the world. */
 	archetypes : [dynamic]^Archetype,
-	/* Blocks for entities with dynamic lifetime. */
-	dynamics : [dynamic]^Block,
-	/* Blocks for entities with static lifetime. */
-	statics : [dynamic]^Block,
+	/* Blocks for entities with components/relations. */
+	blocks : [dynamic]^Block,
 	/* Events observers for the world. */
 	observers : Observers,
 	/* Indicates that the world is running. */
@@ -132,12 +130,10 @@ register :: proc(world: ^World, element: Element, $Type: typeid) {
 				  will match entities only without them, even if these components, tags or relations were
 				  included into main query list.
    `phase`      : System running phase, order in the pipeline. By default equals UPDATE.
-   `lifetime`   : Entities lifetime flag to optimize queries and do not process lifetimes
-				  that you want to avoid for current system. Not used in ARCHETYPE approach.
    `callback`   : Callback function that will be invoked each step of the world progress. */
 mount :: proc(world: ^World, name: string = "", query: []typeid = nil, components: []typeid = nil,
 	tags: []typeid = nil, relations: []typeid = nil, without: []typeid = nil, phase: Phase = .UPDATE,
-	lifetime: bit_set[Lifetime; u8] = {}, callback: SystemCallback) {
+	callback: SystemCallback) {
 	named := len(name) > 0
 	
 	if named && has_system(world, name) do panic(ERR_SYSTEM_ALREADY_MOUNTED)
@@ -146,8 +142,7 @@ mount :: proc(world: ^World, name: string = "", query: []typeid = nil, component
 	if !world.running do panic(ERR_WORLD_IS_NOT_RUNNING)
 
 	system : ^System = new(System)
-	system^ = { name = name, state = { .ENABLED }, callback = callback,
-				lifetime = card(lifetime) == 0 ? { .DYNAMIC, .STATIC } : lifetime, phase = phase }
+	system^ = { name = name, state = { .ENABLED }, callback = callback, phase = phase }
 
 	_components := slice.clone_to_dynamic(components)
 	_tags       := slice.clone_to_dynamic(tags)
@@ -409,13 +404,12 @@ run :: proc(world: ^World) {
 
 /* Spawns new entity into the world.
    `world`    : Pointer to the world.
-   `lifetime` : Entity lifetime (default: Lifetime.DYNAMIC).
    `returns`  : Pointer to new entity.
 */
-spawn :: proc(world: ^World, lifetime: Lifetime = .DYNAMIC) -> ^Entity {
+spawn :: proc(world: ^World) -> ^Entity {
 	if !world.running do panic(ERR_WORLD_IS_NOT_RUNNING)
 
-	entity: ^Entity = block_insert(get_sparse_block(world, lifetime))
+	entity: ^Entity = block_insert(get_sparse_block(world))
 
 	if world.observable do spawned_event(world, entity)
 
@@ -509,22 +503,15 @@ despawn_many :: #force_inline proc(entities: ..^Entity) {
 
 /* Creates new empty block in the world.
    `world`    : Pointer to the world.
-   `lifetime` : Block lifetime.
    `returns`  : Pointer to newly created block. */
 @(private="file")
-new_block :: proc(world: ^World, lifetime: Lifetime) -> ^Block {
+new_block :: proc(world: ^World) -> ^Block {
 	block: ^Block = new(Block)
+	block^ = { world = world }
 	
-	switch lifetime {
-		case .DYNAMIC:
-			block^ = { lifetime = .DYNAMIC, world = world, size = DYNAMIC_CHUNK_SIZE }
-			append(&world.dynamics, block)
-		case .STATIC:
-			block^ = { lifetime = .STATIC, world = world, size = STATIC_CHUNK_SIZE }
-			append(&world.statics, block)
-	}
-
+	append(&world.blocks, block)
 	block_init(block)
+	
 	return block
 }
 
@@ -571,25 +558,12 @@ set_resource :: proc(world: ^World, $Type: typeid, resource: ^Type) #no_bounds_c
 }
 
 /* Step through each entity reference in the world.
-   `world`    : Pointer to the world.
-   `lifetime` : Entities lifetime flag.
-*/
-each :: proc(world: ^World, lifetime: bit_set[Lifetime; u8] = { .DYNAMIC, .STATIC },
-	callback: IteratorCallback) #no_bounds_check {
-	if .DYNAMIC in lifetime {
-		for block in world.dynamics {
-			for idx in 0..<block.idx {
-				if !slice.contains(block.deleted[:], idx) {
-					callback(&block.entities[idx], .DYNAMIC, world)
-				}
-			}
-		}
-	}
-
-	if .STATIC in lifetime {
-		for block in world.statics {
-			for idx in 0..<block.idx {
-				callback(&block.entities[idx], .STATIC, world)
+   `world` : Pointer to the world. */
+each :: proc(world: ^World, callback: IteratorCallback) #no_bounds_check {
+	for block in world.blocks {
+		for idx in 0..<block.idx {
+			if !slice.contains(block.deleted[:], idx) {
+				callback(&block.entities[idx], world)
 			}
 		}
 	}
@@ -645,9 +619,9 @@ progress :: proc(world: ^World) {
 			if !is_task(system) do clear(&system.entities)
 		}
 	
-		each(world, callback = proc(entity: ^Entity, lifetime: Lifetime, world: ^World) {
+		each(world, callback = proc(entity: ^Entity, world: ^World) {
 			for system in world.systems {
-				if system_enabled(system) && !is_task(system) && lifetime in system.lifetime {
+				if system_enabled(system) && !is_task(system) {
 					if (.HAS_TAGS not_in system.state ||
 					    marker_is_subset(MAX_TAGS_COUNT, TAGS_MARKER_SIZE, entity.tags, system.tags)) &&
 					   (.HAS_COMPONENTS not_in system.state ||
@@ -841,20 +815,14 @@ free_world :: proc(world: ^World) {
 		free(archetype)
 	}
 
-	for block in world.dynamics {
-		free_block(block)
-		free(block)
-	}
-	
-	for block in world.statics {
+	for block in world.blocks {
 		free_block(block)
 		free(block)
 	}
 
 	delete(world.systems)
 	delete(world.archetypes)
-	delete(world.dynamics)
-	delete(world.statics)
+	delete(world.blocks)
 	delete(world.schedule.start)
 	delete(world.schedule.pre_update)
 	delete(world.schedule.update)
@@ -921,48 +889,28 @@ delete_archetype :: proc(world: ^World, archetype: ^Archetype) {
 /* Gets the reference to block that is available to insert new entities,
    has free rows or newly created one.
    `world`    : Pointer to the world.
-   `lifetime` : Block lifetime.
    `returns`  : Pointer to available block. */
 @(private="file")
-get_sparse_block :: proc(world: ^World, lifetime: Lifetime) -> ^Block {
-	blocks := get_blocks(world, lifetime)
-	
+get_sparse_block :: proc(world: ^World) -> ^Block {
 	/* The newest block is normally the only partially filled one. Searching backward
 	   avoids walking every older full block for each spawned entity. */
-	for i := len(blocks) - 1; i >= 0; i -= 1 {
-		block := blocks[i]
+	for i := len(world.blocks) - 1; i >= 0; i -= 1 {
+		block := world.blocks[i]
 		if block_has_free_rows(block) do return block
 	}
 
-	return new_block(world, lifetime)
+	return new_block(world)
 }
 
 /* Gets the reference to block that is totally free.
    `world`    : Pointer to the world.
-   `lifetime` : Block lifetime.
    `returns`  : Pointer to free block. */
 @(private="file")
 @(cold)
-get_free_block :: proc(world: ^World, lifetime: Lifetime) -> ^Block {
-	blocks := get_blocks(world, lifetime)
-
-	for block in blocks^ {
+get_free_block :: proc(world: ^World) -> ^Block {
+	for block in world.blocks {
 		if block_is_free(block) do return block
 	}
 
-	return new_block(world, lifetime)
-}
-
-/* Gets blocks collection by its lifetime.
-   `world`    : Pointer to the world.
-   `lifetime` : Block lifetime.
-   `returns`  : Pointer to blocks collection. */
-@(private="file")
-get_blocks :: #force_inline proc(world: ^World, lifetime: Lifetime) -> ^[dynamic]^Block {
-	switch lifetime {
-		case .DYNAMIC: return &world.dynamics
-		case .STATIC:  return &world.statics
-	}
-
-	return nil
+	return new_block(world)
 }

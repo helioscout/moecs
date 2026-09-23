@@ -921,20 +921,6 @@ despawning :: #force_inline proc(entity: ^Entity) -> bool {
 	return .DESPAWNING in entity.state
 }
 
-/* Checks if the entity belongs to dynamic lifetime block.
-   `entity`  : Pointer to the entity.
-   `returns` : True if entity is dynamic, otherwise - false. */
-is_dynamic :: #force_inline proc(entity: ^Entity) -> bool {
-	return entity.block.lifetime == .DYNAMIC
-}
-
-/* Checks if the entity belongs to static lifetime block.
-   `entity`  : Pointer to the entity.
-   `returns` : True if entity is static, otherwise - false. */
-is_static :: #force_inline proc(entity: ^Entity) -> bool {
-	return entity.block.lifetime == .STATIC
-}
-
 /* Bind the entity to appropriate archetype.
    `entity` : Pointer to the entity. */
 @(private="package")

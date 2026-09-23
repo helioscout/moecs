@@ -40,7 +40,7 @@ main :: proc() {
   /* Initializes the space (ecs). */
   ecs.init()
   /* Creates new world. */
-  world : ^ecs.World = ecs.new_world()
+  world : ^ecs.World = ecs.world()
   /* Destroy all objects and free memory. */
   ecs.destroy()
 }
@@ -49,7 +49,7 @@ main :: proc() {
 |----------------|----------------------------------------------------------------------------------------------|
 | init()         | Initializes the ecs. Call it before all other actions with ecs.                              |
 | size()         | Gets worlds count.                                                                           |
-| new_world()    | Creates new world and returns a pointer to it.                                               |
+| world()        | Creates new world and returns a pointer to it.                                               |
 | destroy()      | Free all worlds of the space. Call it before app exit or when ecs is not need anymore.       |
 
 ### Elements
@@ -68,7 +68,7 @@ import ecs "moecs/src"
 
 main :: proc() {
   ecs.init()
-  world := ecs.new_world()
+  world := ecs.world()
 
   /* Register components */
   ecs.register(world, .COMPONENT, Position)
@@ -110,7 +110,7 @@ import b2 "vendor:box2d"
 
 main :: proc() {
   ecs.init()
-  world := ecs.new_world()
+  world := ecs.world()
 
   /* ...register resource types. */
 
@@ -150,20 +150,18 @@ main :: proc() {
 ### Entities
 Entities are the main elements of the world. It is the abstract data structure that can be specified by components and tags, and related each with others. Entity is not just an id and has some fields, but you should not care about them and use procedures to work with it. Internally there are bit-set fields which define what components and/or tags, and/or relations the entity has. Thus, when deleting a component/relation and adding/removing a tag, reading/writing to memory does not occur.\
 \
-When you `despawn` an entity this action is deferred to the end of the current progress step, so if you want to omit such entities in the current progress step (game frame) use `despawning` procedure to check that state. Also you may want to check that entity is really despawned if you have a pointer to it from previous progress steps, then use `deleted` procedure.\
-\
-All entities have a lifetime (`.DYNAMIC` or `.STATIC`). But you'll not find this data in the entity itself, it is only defined in the memory block the entity belongs to and once entity was spawned its lifetime can't be changed.
+When you `despawn` an entity this action is deferred to the end of the current progress step, so if you want to omit such entities in the current progress step (game frame) use `despawning` procedure to check that state. Also you may want to check that entity is really despawned if you have a pointer to it from previous progress steps, then use `deleted` procedure.
 ```odin
 import ecs "moecs/src"
 
 main :: proc() {
   ecs.init()
-  world := ecs.new_world()
+  world := ecs.world()
   ecs.run(world)
 
-  /* Spawns static entity. */
-  asteroid: ^ecs.Entity = ecs.spawn(world, .STATIC)
-  /* Spawns dynamic entity (.DYNAMIC lifetime is default). */
+  /* Spawns entity. */
+  asteroid: ^ecs.Entity = ecs.spawn(world)
+  /* Spawns another entity. */
   ship := ecs.spawn(world)
 
   ecs.destroy()
@@ -177,11 +175,9 @@ main :: proc() {
 | despawn()          | Overloaded procedure for despawning one or several entities (*recommended*).             |
 | despawning()       | Checks if the entity is deferred for despawning at the perform stage.                    |
 | deleted()          | Checks if the entity has been fully deleted (despawned).                                 |
-| is_dynamic()       | Checks if the entity belongs to dynamic lifetime block.                                  |
-| is_static()        | Checks if the entity belongs to static lifetime block.                                   |
 
 ### Components 
-Components are stored in the chunks of a block, internally it is continuous block of memory reading/writing to which is implemented with pointer math. We know entity index, components size and block size (`DYNAMIC_CHUNK_SIZE`, `STATIC_CHUNK_SIZE`), so access by pointer is pretty simple.\
+Components are stored in the chunks of a block, internally it is continuous block of memory reading/writing to which is implemented with pointer math. We know entity index, components size and block size (`CHUNK_SIZE`), so access by pointer is pretty simple.\
 \
 Entity may has a number of components that less or equals `MAX_COMPONENTS_COUNT` constant. By default it equals `128` and if you need more, please, change the value of this constant manually.\
 \
@@ -197,7 +193,7 @@ import ecs "moecs/src"
 
 main :: proc() {
   ecs.init()
-  world := ecs.new_world()
+  world := ecs.world()
   /* ...register component types here. */
   ecs.run(world)
 
@@ -264,7 +260,7 @@ import ecs "moecs/src"
 
 main :: proc() {
   ecs.init()
-  world := ecs.new_world()
+  world := ecs.world()
   /* ...register tags and components types here. */
   ecs.run(world)
 
@@ -277,7 +273,7 @@ main :: proc() {
   ecs.tag(entity, Ship, Sleep)
 
   /* Iterate through all the entities in the world. */
-	ecs.each(world, callback = proc(entity: ^ecs.Entity, lifetime: ecs.Lifetime, world: ^ecs.World) {
+	ecs.each(world, callback = proc(entity: ^ecs.Entity, world: ^ecs.World) {
     /* Checks if entity has Player tag. */
     if ecs.tagged(entity, Player) {
       ecs.add(entity, Actions, &Actions {})
@@ -335,7 +331,6 @@ When you mount a system only `callback` parameter is mandatory, in this case sys
 | relations          | Relations list that should match while the system query.                                 |
 | without            | Components, tags and relations list that should not be added to the entity, so system query will match entities only without them, even if these components, tags or relations were included into main query list.                                                                                                         |
 | phase              | System running phase, order in the pipeline. By default equals UPDATE.                   |
-| lifetime           | Entities lifetime flag to optimize queries and do not process lifetimes that you want to avoid for current system. Not used in ARCHETYPE approach.                                                     |
 | callback           | Callback function that will be invoked each step of the world progress.                  |
 
 You can mount systems *only when* the world is already running, because of necessary indexes sorting made in `run` procedure of the world.
@@ -346,7 +341,7 @@ import k2 "karl2d"
 main :: proc() {
   ecs.init()
   /* You can pass approach here, default is .ARCHETYPE, recommended. */
-  world := ecs.new_world(.ARCHETYPE)
+  world := ecs.world(.ARCHETYPE)
   /* We must mount systems after the world run. */
   ecs.run(world)
 
@@ -406,7 +401,7 @@ main :: proc() {
 | disable()          | Disables the system.                                                                     |
 
 ### Observers
-Observers are a mechanism that allows to subscribe on events of structural, relational and data changes in the world. By default observers are disable for performance reasons, so you need to pass `true` for `observable` argument of `new_world` procedure when you create the world. You also can change `observable` property of the world to turn off/on observers globally.\
+Observers are a mechanism that allows to subscribe on events of structural, relational and data changes in the world. By default observers are disable for performance reasons, so you need to pass `true` for `observable` argument of `world` procedure when you create the world. You also can change `observable` property of the world to turn off/on observers globally.\
 \
 There are different event types that can be handled for entities, components, and tags.
 | Event              | Description                                                                              |
@@ -454,7 +449,7 @@ added :: proc(world: ^ecs.World, entity: ^ecs.Entity, event: ecs.Event, type: ty
 main :: proc() {
   ecs.init()
   /* Enable observers when create the world. */
-  world := ecs.new_world(observable = true)
+  world := ecs.world(observable = true)
   /* ...register tags and components types here. */
   ecs.run(world)
 
@@ -550,7 +545,7 @@ main :: proc() {
   arr := [3]int{ 3, 7, 14 }
   
   ecs.init()
-  world := ecs.new_world()
+  world := ecs.world()
   /* ...register tags and components types here. */
   /* You have to register relation type. */
   ecs.register(world, .RELATION, Joint)
@@ -562,9 +557,9 @@ main :: proc() {
   ecs.observe(world, event = .RELATED,   types = { ecs.ParentOf, ecs.ChildOf, Joint }, callback = related)
   ecs.observe(world, event = .UNRELATED, types = { ecs.ParentOf, ecs.ChildOf, Joint }, callback = unrelated)
 
-  e1 : ^ecs.Entity = ecs.spawn(world, .DYNAMIC)
-  e2 : ^ecs.Entity = ecs.spawn(world, .DYNAMIC)
-  e3 : ^ecs.Entity = ecs.spawn(world, .DYNAMIC)
+  e1 : ^ecs.Entity = ecs.spawn(world)
+  e2 : ^ecs.Entity = ecs.spawn(world)
+  e3 : ^ecs.Entity = ecs.spawn(world)
 
   /* Set e1 as parent of e2. */
   ecs.parent_of(e1, e2)
@@ -579,8 +574,8 @@ main :: proc() {
   fmt.printfln("e1 is parent of e2: %v", ecs.is_parent_of(e1, e2))
   fmt.printfln("e2 is child of e1: %v", ecs.is_child_of(e2, e1))
 
-  e4 := ecs.spawn(world, .DYNAMIC)
-  e5 := ecs.spawn(world, .DYNAMIC)
+  e4 := ecs.spawn(world)
+  e5 := ecs.spawn(world)
 
   /* Make e1 also parent of e4 (e3 is still a child), data replaced. */
   ecs.parent_of(e1, ecs.ParentOf { data = &arr }, e3, e4)
@@ -654,7 +649,7 @@ import ecs "moecs/src"
 
 main :: proc() {
   ecs.init()
-  world := ecs.new_world()
+  world := ecs.world()
   /* ...register resources, tags and components types here. */
   ecs.run(world)
   /* ...mount systems here.                                 */
@@ -674,17 +669,17 @@ main :: proc() {
 | perform()          | Perform deferred actions for the world.                                                  |
 
 ### Iterating entities
-Under certain conditions, you may need to iterate over all entities. You pass callback procedure that will be called for each entity that matched passed lifetime (all by default). This could be in a system or for testing purposes. However, don't overuse this procedure, as it's inefficient. It's *not recommended*.
+Under certain conditions, you may need to iterate over all entities. You pass callback procedure that will be called for each entity. This could be in a system or for testing purposes. However, don't overuse this procedure, as it's inefficient. It's *not recommended*.
 ```odin
 import ecs "moecs/src"
 
 main :: proc() {
   ecs.init()
-  world := ecs.new_world()
+  world := ecs.world()
   ecs.run(world)
 
   /* Iterate through all the entities in the world. */
-	ecs.each(world, callback = proc(entity: ^ecs.Entity, lifetime: ecs.Lifetime, world: ^ecs.World) {
+	ecs.each(world, callback = proc(entity: ^ecs.Entity, world: ^ecs.World) {
     pos, center := ecs.get(entity, Position, Center)
     fmt.println(pos, center)
   })
@@ -709,20 +704,13 @@ Use `-o:aggressive` Odin compiler flag, it can speed up operations in 30 times.
 | [mouniverse](https://github.com/helioscout/mouniverse) | Simple space game, I am making in my spare time for fun and learning.                                                                                                 |
 
 ### Memory concept
-The main idea is that memory for components and relations is divided into blocks, and entities belong to two lifetimes:
- * DYNAMIC: usual entities that are spawned and despawned while world exists.
- * STATIC: entities that lives forever (same as the world lifetime), like asteroids, planets, buildings.
+The main idea is that memory for components and relations is divided into blocks.
 
-For DYNAMIC lifetime blocks, components and relations chunks inserted at the end of the block if there are no free rows after previously deleted entities.\
+Components and relations chunks inserted at the end of the block if there are no free rows after previously deleted entities.\
 ![Design](docs/design.png)\
 \
-Because static lifetime entities lives while the world exists there are no deleting mechanism for them in its blocks, and components with relations are simply inserted to the next free row or new block will be inserted if current one is full.\
-\
-![Static](docs/static.png)\
-\
 There are main constants that you can change when copying ECS into your project if you want to experiment with performance:
- * DYNAMIC_CHUNK_SIZE: Dynamic lifetime chunk size.
- * STATIC_CHUNK_SIZE: Static lifetime chunk size.
+ * CHUNK_SIZE: Size (items count) of the one components chunk or entities collection for each block. Bigger chunk size increase productivity of entities adding, less chunk size can save a bit of memory.
 
 This constants defines a number of entity records (entity struct and its component and relations chunk) that will be stored in one memory block. When block is full the memory allocation occurs for the next block.\
 \

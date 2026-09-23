@@ -26,7 +26,7 @@ destroy :: proc() {
    `approach`   : Query match approach.
    `returns`    : Pointer to newly created world.
    `observable` : Use observers for the world. */
-new_world :: proc(approach: Approach = .ARCHETYPE, observable: bool = false) -> ^World {
+world :: proc(approach: Approach = .ARCHETYPE, observable: bool = false) -> ^World {
 	world : ^World = new(World)
 	world^ = { approach = approach, observable = observable }
 	

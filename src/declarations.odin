@@ -2,11 +2,7 @@ package moecs
 
 /* Size (items count) of the one components chunk or entities collection for each block.
    Bigger chunk size increase productivity of entities adding, less chunk size can save a bit of memory. */
-
-/* Dynamic lifetime chunk size. */
-DYNAMIC_CHUNK_SIZE : int : 500
-/* Static lifetime chunk size. */
-STATIC_CHUNK_SIZE  : int : 300
+CHUNK_SIZE : int : 500
 /* Bytes buffer size used for reading/writing components.
    Must be not less that total size of all registered components. */
 STACK_BUFFER_SIZE  : int : 16 * 1024
@@ -28,16 +24,6 @@ MAX_RELATIONS_COUNT  : int : 64
 @(private) TAGS_MARKER_SIZE : uint : (uint(MAX_TAGS_COUNT) + MARKER_BITS_COUNT - 1) / MARKER_BITS_COUNT
 /* Size of relations marker (array of bitset). */
 @(private) RELATIONS_MARKER_SIZE : uint : (uint(MAX_RELATIONS_COUNT) + MARKER_BITS_COUNT - 1) / MARKER_BITS_COUNT
-
-/* Entities/blocks lifetime. */
-Lifetime :: enum u8 {
-	/* Entities whose lifespan is not defined or determined in advance (from one frame to app exit).
-	   Such blocks will reuse freed after deletion rows to insert new entities. */
-	DYNAMIC = 0b00000001,
-	/* Immortal entities that will exist until the end of the application.
-	   Such blocks are simply created when necessary, since entities cannot be despawn. */
-	STATIC  = 0b00000010
-}
 
 /* Kinds of elements that the world can consist of. */
 Element :: enum {
@@ -176,10 +162,9 @@ Event :: enum u16 {
 }
 
 /* Callback procedure for entities iteration.
-   `entity`   : Pointer to the current entity.
-   `lifetime` : Current lifetime.
-   `world`    : Pointer to the world. */
-@(private) IteratorCallback :: proc(entity: ^Entity, lifetime: Lifetime, world: ^World)
+   `entity` : Pointer to the current entity.
+   `world`  : Pointer to the world. */
+@(private) IteratorCallback :: proc(entity: ^Entity, world: ^World)
 
 /* Callback procedure for the system.
    `entities` : Matched entities for the system.
@@ -216,7 +201,6 @@ ObserverCallback :: proc(world: ^World, entity: ^Entity, event: Event, type: typ
 @(private) ERR_RELATION_ALREADY_REGISTERED :: "Relation already registered."
 @(private) ERR_MAX_RELATIONS_COUNT :: "The maximum count of relations has been reached."
 @(private) ERR_OBSERVABLE_PROC_TYPE :: "Use procedure with type parameter for this event type."
-@(private) ERR_STATIC_ENTITY_DELETION :: "Static entities can't be deleted."
 
 add :: proc {
 	add_component,
