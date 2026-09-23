@@ -28,8 +28,6 @@ System :: struct {
 	without_relations : [RELATIONS_MARKER_SIZE]uint,
 	/* System running phase, order in the pipeline. By default equals UPDATE. */
 	phase : Phase,
-	/* Matched entities list (query result) for current system run. Not used in ARCHETYPE approach. */
-	entities : [dynamic]^Entity,
 	/* Callback function that will be invoked each step of the world progress.
 	   Disable system to pause invokation. */
 	callback : SystemCallback
@@ -63,11 +61,4 @@ disable_system :: #force_inline proc(system: ^System) {
 @(private="package")
 is_task :: #force_inline proc(system: ^System) -> bool {
 	return .IS_TASK in system.state
-}
-
-/* Free all system resources.
-   `system` : Pointer to the system. */
-@(private="package")
-free_system :: #force_inline proc(system: ^System) {
-	delete(system.entities)
 }

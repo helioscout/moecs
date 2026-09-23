@@ -355,7 +355,7 @@ main :: proc() {
 	
 	ecs.init()
 	
-	world : ^ecs.World = ecs.world(approach = .ARCHETYPE, observable = true)
+	world : ^ecs.World = ecs.world(observable = true)
 
 	ecs.register(world, .COMPONENT, Position)
 	ecs.register(world, .COMPONENT, Center)

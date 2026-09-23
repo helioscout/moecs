@@ -927,8 +927,6 @@ despawning :: #force_inline proc(entity: ^Entity) -> bool {
 archetyping :: proc(entity: ^Entity) {
 	world : = entity.block.world
 
-	if world.approach != .ARCHETYPE do return
-
 	if world.running && !world.performing {
 		if .ARCHETYPING not_in entity.state {
 			append(&world.deferred.archetyping, entity)

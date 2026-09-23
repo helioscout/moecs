@@ -312,12 +312,8 @@ Internally systems are represented by structs with all necessary configuration i
 \
 You pass a list of component types and/or tag types, and/or relation types when mounting a system and these set is a match query for selection of entities which will be passed to system callback. Entity *must have* all components, relations, and tags defined for the system to match its query condition (but it also may have more, it *hasn't to be exact match*). If you need to exclude entities without some components/tags/relations from the query result (entities *mustn't have them added*), you can use `without` condition when mount the system. If system has no specified components/tags/relations and `without` conditions it is considered as a task, no queries are executed for them at each progress step, and `nil` is passed as first argument of callback procedure (instead of matched entities array).\
 \
-There are two query match approaches of selection entities for the systems.
-| Approach           | Description                                                                              |
-|--------------------|------------------------------------------------------------------------------------------|
-| ITERATION          | Using this approach at each progress step all world entities will be iterated with applying match conditions to select them for each running system. First, iterates through all entities in the world for which the match condition is checked, and if the entity matches, it is added to the system's collection of entities. Then, all systems to which the generated collections are passed are executed in turn. At the beginning of progress each step, these collections are cleared. This is a very *inefficient* approach, but it does not involve deferred actions.                                                                                     |
-| ARCHETYPE          | Each entity belongs to some unique archetype that is combination of bit flags that represent entity's components/tags configuration. At each world progress step all archetypes will be iterated with applying match condition of each system. If an archetype matches the system query conditions, the system is launched with a list of entities of that archetype. This is an *efficient* approach, but it requires deferred actions. The system callback will be invoked for each matching archetype. *Recommended approach*.                                 |
-
+Each entity belongs to some unique archetype that is combination of bit flags that represent entity's components/tags/relations configuration. At each world progress step all archetypes will be iterated with applying match condition of each system. If an archetype matches the system query conditions, the system is launched with a list of entities of that archetype. The system callback will be invoked for each matching archetype.\
+\
 You can give the system a `name` to have ability to `get`/`execute`/`enable`/`disable` it manually, but name is just a property, systems with name run in pipeline exactly same way as without it. To exclude system from pipeline its `phase` must be set to `MANUAL`. Disabled systems are not called and no queries are executed for them at each progress step till they will be enabled again.\
 \
 When you mount a system only `callback` parameter is mandatory, in this case system will be a *task* and run in `UPDATE` phase. These are all parameters of `mount` procedure you can use when mounting a system.
@@ -340,8 +336,7 @@ import k2 "karl2d"
 
 main :: proc() {
   ecs.init()
-  /* You can pass approach here, default is .ARCHETYPE, recommended. */
-  world := ecs.world(.ARCHETYPE)
+  world := ecs.world()
   /* We must mount systems after the world run. */
   ecs.run(world)
 

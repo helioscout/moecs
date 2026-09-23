@@ -8,8 +8,6 @@ import "core:fmt"
 
 /* World type, main container of the sapce. The world is built of blocks. */
 World :: struct {
-	/* Query match approach. */
-	approach : Approach,
 	/* Registered component types. */
 	components : Components,
 	/* Registered tag types. */
@@ -238,7 +236,6 @@ unmount :: proc(world: ^World, name: string) {
 		remove_system(world, &world.schedule.update, name)
 		remove_system(world, &world.schedule.post_update, name)
 
-		free_system(system)
 		free(system)
 	}
 }
@@ -422,7 +419,7 @@ spawn :: proc(world: ^World) -> ^Entity {
 despawn_entity :: proc(world: ^World, entity: ^Entity) {
 	if deleted(entity) do return
 	
-	if world.approach == .ARCHETYPE && world.running && !world.performing {
+	if world.running && !world.performing {
 		append(&world.deferred.despawning, entity)
 		entity.state += { .DESPAWNING }
 	} else {
@@ -602,64 +599,24 @@ get_system :: #force_inline proc(world: ^World, name: string) -> (^System, bool)
 progress :: proc(world: ^World) {
 	if !world.running do panic(ERR_WORLD_IS_NOT_RUNNING)
 
-	if world.approach == .ARCHETYPE {
-		/* Run systems with START phase, we should do it only once. */
-		if !world.started {
-			step_archetype(world, &world.schedule.start)
-			world.started = true
-		}
-
-		step_archetype(world, &world.schedule.pre_update)
-		step_archetype(world, &world.schedule.update)
-		step_archetype(world, &world.schedule.post_update)
-
-		perform(world)
-	} else if world.approach == .ITERATION {
-		for system in world.systems {
-			if !is_task(system) do clear(&system.entities)
-		}
-	
-		each(world, callback = proc(entity: ^Entity, world: ^World) {
-			for system in world.systems {
-				if system_enabled(system) && !is_task(system) {
-					if (.HAS_TAGS not_in system.state ||
-					    marker_is_subset(MAX_TAGS_COUNT, TAGS_MARKER_SIZE, entity.tags, system.tags)) &&
-					   (.HAS_COMPONENTS not_in system.state ||
-					    marker_is_subset(MAX_COMPONENTS_COUNT, COMPONENTS_MARKER_SIZE, entity.components, system.components)) &&
-					   (.HAS_RELATIONS not_in system.state ||
-					    marker_is_subset(MAX_RELATIONS_COUNT, RELATIONS_MARKER_SIZE, entity.relations, system.relations)) &&
-					   (.HAS_WITHOUT_TAGS not_in system.state ||
-						marker_is_all_unset(MAX_TAGS_COUNT, TAGS_MARKER_SIZE,
-							marker_and(TAGS_MARKER_SIZE, entity.tags, system.without_tags))) &&
-					   (.HAS_WITHOUT_COMPONENTS not_in system.state ||
-						marker_is_all_unset(MAX_COMPONENTS_COUNT, COMPONENTS_MARKER_SIZE,
-							marker_and(COMPONENTS_MARKER_SIZE, entity.components, system.without_components))) &&
-					   (.HAS_WITHOUT_RELATIONS not_in system.state ||
-						marker_is_all_unset(MAX_RELATIONS_COUNT, RELATIONS_MARKER_SIZE,
-							marker_and(RELATIONS_MARKER_SIZE, entity.relations, system.without_relations))) {
-						/* Add pointer to entity into system collection of entities for current system call. */
-						append(&system.entities, entity)
-					}
-				}
-			}
-		})
-
-		if !world.started {
-			step_iteration(world, &world.schedule.start)
-			world.started = true
-		}
-
-		step_iteration(world, &world.schedule.pre_update)
-		step_iteration(world, &world.schedule.update)
-		step_iteration(world, &world.schedule.post_update)
+	/* Run systems with START phase, we should do it only once. */
+	if !world.started {
+		step(world, &world.schedule.start)
+		world.started = true
 	}
+
+	step(world, &world.schedule.pre_update)
+	step(world, &world.schedule.update)
+	step(world, &world.schedule.post_update)
+
+	perform(world)
 }
 
-/* Progress one step of the world life for one phase and ARCHETYPE approach.
+/* Progress one step of the world life for one phase.
    `world`   : Pointer to the world.
    `systems` : Collection of the systems of particular phase. */
 @(private="file")
-step_archetype :: #force_inline proc(world: ^World, systems: ^[dynamic]^System) {
+step :: #force_inline proc(world: ^World, systems: ^[dynamic]^System) {
 	for system in systems^ {
 		if system_enabled(system) {
 			if is_task(system) {
@@ -686,18 +643,6 @@ step_archetype :: #force_inline proc(world: ^World, systems: ^[dynamic]^System) 
 					}
 				}
 			}
-		}
-	}
-}
-
-/* Progress one step of the world life for one phase and ITERATION approach.
-   `world`   : Pointer to the world.
-   `systems` : Collection of the systems of particular phase. */
-@(private="file")
-step_iteration :: #force_inline proc(world: ^World, systems: ^[dynamic]^System) {
-	for system in systems^ {
-		if system_enabled(system) {
-			system.callback(is_task(system) ? nil : &system.entities, world)
 		}
 	}
 }
@@ -806,7 +751,6 @@ disable :: #force_inline proc(world: ^World, name: string) {
 @(private="package")
 free_world :: proc(world: ^World) {
 	for system in world.systems {
-		free_system(system)
 		free(system)
 	}
 	
