@@ -388,7 +388,7 @@ There are different event types that can be handled for entities, components, an
 | RELATED            | Entity has been related with a target one.                                               |
 | UNRELATED          | Entity has been unrelated with a target one, relationship removed.                       |
 
-Keep in mind that when you add/remove a component repeatedly or set/unset a tag repeatedly, the events will also be fired repeatedly for each operation even if you already made it before. It is safe for the data to call `add_component` (for example) procedure several times and pass the same component type to it, but your observers logic can be broken, so you need care about it yourself.\
+Keep in mind that when you add/remove a component repeatedly or set/unset a tag repeatedly, the events will also be fired repeatedly for each operation even if you already made it before. It is safe for the data to call `add` (for example) procedure several times and pass the same component type to it, but your observers logic can be broken, so you need care about it yourself.\
 \
 You can turn on/off observers for a specific component/tag/relation type or globally for an event type. You can also check whether an observer is set or turned on. Events are not supported for resources.\
 \
@@ -560,8 +560,8 @@ main :: proc() {
 
   /* Remove Joint relation between e1 and e3. */
   ecs.unrelate(e1, Joint, e3)
-  /* Remove relation ParentOf between e1 and e3 using specific proc. */
-  ecs.unrelate_with(e1, ecs.ParentOf, e3)
+  /* Remove relation ParentOf between e1 and e3. */
+  ecs.unrelate(e1, ecs.ParentOf, e3)
   /* Remove all parent relations with all e1 children. */
   ecs.unrelate(e1, ecs.ParentOf)
   
